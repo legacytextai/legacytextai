@@ -115,12 +115,13 @@ INSERT INTO entry_categories (name, description, color) VALUES
 **Status**: NOT STARTED
 
 #### Subtasks:
-- [ ] 4.1 Set up Twilio account and phone number
+- [ ] 4.1 Set up Twilio account and phone number (RECOMMENDED: Most scalable, reliable SMS provider)
 - [ ] 4.2 Create SMS webhook endpoint (Supabase Edge Function)
 - [ ] 4.3 Parse incoming SMS messages
 - [ ] 4.4 Save raw entries to database
-- [ ] 4.5 Implement SMS sending for prompts
+- [ ] 4.5 Implement SMS sending for prompts via Twilio
 - [ ] 4.6 Add phone number verification
+- [ ] 4.7 Integrate OpenAI GPT for intelligent prompt generation
 
 #### Supabase Edge Function:
 ```typescript
@@ -193,11 +194,13 @@ serve(async (req) => {
 **Status**: NOT STARTED
 
 #### Subtasks:
-- [ ] 5.1 Set up OpenAI API integration
-- [ ] 5.2 Create text cleaning/grammar correction
-- [ ] 5.3 Implement automatic categorization
+- [ ] 5.1 Set up OpenAI GPT integration (CONFIRMED: Primary AI provider)
+- [ ] 5.2 Create text cleaning/grammar correction using GPT-4
+- [ ] 5.3 Implement automatic categorization via GPT
 - [ ] 5.4 Add tone preservation logic
 - [ ] 5.5 Create batch processing for existing entries
+- [ ] 5.6 Build intelligent prompt generation system with GPT
+- [ ] 5.7 Add Claude integration framework (future-ready architecture)
 
 #### Supabase Edge Function:
 ```typescript
@@ -308,7 +311,7 @@ export const useJournalEntries = () => {
 - [ ] 7.2 Create basic journal template
 - [ ] 7.3 Implement free PDF generation
 - [ ] 7.4 Add dedication page functionality
-- [ ] 7.5 Store generated PDFs in Supabase Storage
+- [ ] 7.5 Store generated PDFs in Supabase Storage (CONFIRMED: Primary storage)
 
 #### PDF Generation:
 ```typescript
@@ -421,11 +424,12 @@ INSERT INTO prompts (text, category) VALUES
 **Status**: NOT STARTED
 
 #### Subtasks:
-- [ ] 10.1 Set up Stripe account and webhooks
+- [ ] 10.1 Set up Stripe account and payment processing (CONFIRMED: Primary payment provider)
 - [ ] 10.2 Create premium PDF template with enhanced styling
-- [ ] 10.3 Implement payment flow for $4.99 PDF
+- [ ] 10.3 Implement payment flow for $4.99 PDF using Stripe Checkout
 - [ ] 10.4 Add media integration to premium exports
-- [ ] 10.5 Create purchase history tracking
+- [ ] 10.5 Create purchase history tracking in Supabase
+- [ ] 10.6 Set up $199 physical journal payment flow (fulfillment TBD)
 
 #### Stripe Integration:
 ```typescript
@@ -552,8 +556,16 @@ CREATE POLICY "Users can upload own media" ON media FOR INSERT WITH CHECK (auth.
 ### Current Priority Queue:
 1. **Task 2**: Supabase Setup & Authentication
 2. **Task 3**: Journal Entry Data Model  
-3. **Task 4**: SMS Integration & Webhook Setup
-4. **Task 7**: Basic PDF Export Engine
+3. **Task 4**: SMS Integration (Twilio + OpenAI GPT prompts)
+4. **Task 5**: AI Processing Pipeline (OpenAI GPT)
+5. **Task 7**: PDF Export (Supabase Storage + Stripe payments)
+
+### Tech Stack Confirmed:
+- ✅ **SMS Provider**: Twilio (scalable, reliable)
+- ✅ **AI Processing**: OpenAI GPT (with Claude-ready architecture)  
+- ✅ **Payment Processing**: Stripe
+- ✅ **File Storage**: Supabase Storage
+- 🔲 **Physical Fulfillment**: TBD
 
 ---
 
