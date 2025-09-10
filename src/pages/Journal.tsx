@@ -77,7 +77,7 @@ export default function Journal() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-legacy-primary flex items-center gap-2">
                     <Star className="w-5 h-5 text-legacy-accent" />
-                    Premium Export - $1.99
+                    Premium Export - $4.99
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">

@@ -100,7 +100,7 @@ export default function Settings() {
                 Free Export
               </Button>
               <Button variant="accent" className="flex-1">
-                Premium Export - $1.99
+                Premium Export - $4.99
               </Button>
             </div>
           </CardContent>
