@@ -8,33 +8,53 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 98%;
+    --foreground: 210 54% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 210 54% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 210 54% 20%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 210 54% 20%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 20% 95%;
+    --secondary-foreground: 210 54% 20%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 20% 95%;
+    --muted-foreground: 210 16% 46%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 354 70% 54%;
+    --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 210 20% 90%;
+    --input: 210 20% 90%;
+    --ring: 210 54% 20%;
+
+    --radius: 0.75rem;
+
+    /* Legacy Journal specific colors */
+    --legacy-primary: 210 54% 20%;      /* #1D3557 deep navy */
+    --legacy-accent: 354 70% 54%;       /* #E63946 emotional red */
+    --legacy-warm: 30 50% 96%;          /* warm paper white */
+    --legacy-ink: 210 40% 25%;          /* ink blue-black */
+    --legacy-border: 210 20% 85%;       /* subtle borders */
+    --legacy-shadow: 210 54% 20%;       /* deep shadow */
+
+    /* Gradients */
+    --gradient-warm: linear-gradient(135deg, hsl(30 50% 98%) 0%, hsl(30 30% 96%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(var(--legacy-primary)) 0%, hsl(210 45% 15%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(var(--legacy-accent)) 0%, hsl(354 65% 45%) 100%);
+
+    /* Shadows */
+    --shadow-warm: 0 4px 20px -4px hsl(var(--legacy-primary) / 0.1);
+    --shadow-paper: 0 2px 12px -2px hsl(var(--legacy-primary) / 0.08);
+    --shadow-deep: 0 8px 30px -8px hsl(var(--legacy-primary) / 0.15);
 
     --radius: 0.5rem;
 
