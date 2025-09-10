@@ -151,7 +151,7 @@ export default function Dashboard() {
                 Free PDF Export
               </Button>
               <Button variant="accent">
-                Premium Journal Export - $1.99
+                Premium Journal Export - $4.99
               </Button>
             </div>
           </CardContent>
