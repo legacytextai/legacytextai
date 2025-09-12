@@ -17,12 +17,16 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <h1 className="text-2xl font-bold text-legacy-primary">LegacyText AI</h1>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm">
-                Login
-              </Button>
-              <Button variant="default" size="sm">
-                Sign Up
-              </Button>
+              <Link to="/auth">
+                <Button variant="ghost" size="sm">
+                  Login
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button variant="default" size="sm">
+                  Sign Up
+                </Button>
+              </Link>
             </div>
           </div>
         </header>
@@ -63,12 +67,16 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
             <div className="container mx-auto px-6 h-16 flex items-center justify-between">
               <h1 className="text-2xl font-bold text-legacy-primary">LegacyText AI</h1>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm">
-                  Login
-                </Button>
-                <Button variant="default" size="sm">
-                  Sign Up
-                </Button>
+                <Link to="/auth">
+                  <Button variant="ghost" size="sm">
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/auth">
+                  <Button variant="default" size="sm">
+                    Sign Up
+                  </Button>
+                </Link>
               </div>
             </div>
           </header>
