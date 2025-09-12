@@ -10,6 +10,8 @@ import Export from "./pages/Export";
 import Editor from "./pages/Editor";
 import MediaLibrary from "./pages/MediaLibrary";
 import Journal from "./pages/Journal";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
           <Route path="/media" element={<MediaLibrary />} />
           <Route path="/export" element={<Export />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

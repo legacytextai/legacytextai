@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Button } from "@/components/ui/button";
-import { User } from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -26,7 +26,30 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
             </div>
           </div>
         </header>
-        <main>{children}</main>
+        <main className="flex-1">{children}</main>
+        <footer className="border-t border-legacy-border bg-card/80 backdrop-blur-sm py-6">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-sm text-legacy-ink/60">
+                © 2025 LegacyText AI. All rights reserved.
+              </p>
+              <div className="flex items-center gap-6">
+                <Link 
+                  to="/privacy" 
+                  className="text-sm text-legacy-ink/60 hover:text-legacy-primary transition-colors"
+                >
+                  Privacy Policy
+                </Link>
+                <Link 
+                  to="/terms" 
+                  className="text-sm text-legacy-ink/60 hover:text-legacy-primary transition-colors"
+                >
+                  Terms of Service
+                </Link>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     );
   }
@@ -52,6 +75,29 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
           <div className="flex-1 p-6">
             {children}
           </div>
+          <footer className="border-t border-legacy-border bg-card/80 backdrop-blur-sm py-6">
+            <div className="container mx-auto px-6">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <p className="text-sm text-legacy-ink/60">
+                  © 2025 LegacyText AI. All rights reserved.
+                </p>
+                <div className="flex items-center gap-6">
+                  <Link 
+                    to="/privacy" 
+                    className="text-sm text-legacy-ink/60 hover:text-legacy-primary transition-colors"
+                  >
+                    Privacy Policy
+                  </Link>
+                  <Link 
+                    to="/terms" 
+                    className="text-sm text-legacy-ink/60 hover:text-legacy-primary transition-colors"
+                  >
+                    Terms of Service
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </footer>
         </main>
       </div>
     </SidebarProvider>
