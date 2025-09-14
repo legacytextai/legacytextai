@@ -2,10 +2,8 @@ import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-
 const Terms = () => {
-  return (
-    <Layout showSidebar={false}>
+  return <Layout showSidebar={false}>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-6">
           <Link to="/">
@@ -102,14 +100,10 @@ const Terms = () => {
 
           <section>
             <h2 className="text-2xl font-semibold text-legacy-primary mb-4">Contact Information</h2>
-            <p className="text-legacy-ink/80 leading-relaxed">
-              For questions about these Terms of Service, please contact us at legal@legacytext.ai
-            </p>
+            <p className="text-legacy-ink/80 leading-relaxed">For questions about these Terms of Service, please contact us at legacytextai@gmail.com</p>
           </section>
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Terms;
