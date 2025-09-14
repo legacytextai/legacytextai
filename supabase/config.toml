@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.send-daily-prompts]
 verify_jwt = false
+
+[functions.phone-change-initiate]
+verify_jwt = false
+
+[functions.phone-change-confirm]
+verify_jwt = false
