@@ -28,7 +28,7 @@ async function twilioSend(to: string, body: string) {
   return data; // includes data.sid
 }
 
-/** Small helpers */
+/** Helpers */
 function toHex(buf: ArrayBuffer) {
   const bytes = new Uint8Array(buf);
   return Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
@@ -43,6 +43,25 @@ function containsBanned(text: string, banned: string[]): boolean {
   if (!banned?.length) return false;
   const t = text.toLowerCase();
   return banned.some(k => k && t.includes(k.toLowerCase()));
+}
+
+/** Stable hash for weighted tone picking */
+function djb2(str: string) {
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h) + str.charCodeAt(i);
+  return (h >>> 0);
+}
+/** Stable weighted pick: same seed => same item */
+function pickWeightedStable<T extends { key: string; weight: number }>(rows: T[], seed: string): T {
+  const total = rows.reduce((acc, r) => acc + Math.max(1, r.weight || 1), 0);
+  if (total <= 0) throw new Error("No positive weights");
+  const r = djb2(seed) % total;
+  let acc = 0;
+  for (const row of rows) {
+    acc += Math.max(1, row.weight || 1);
+    if (r < acc) return row;
+  }
+  return rows[rows.length - 1];
 }
 
 /** OpenAI call */
@@ -63,12 +82,12 @@ async function openaiGenerate(input: any) {
 
 async function genPersonalizedPrompt(opts: {
   name: string | null;
-  language: string;            // ISO code
-  tone: string | null;
+  language: string;
+  tone: string | null;                    // global tone key (e.g., 'warm')
   interests: string[];
   children: Array<{ name?: string; age?: number }>;
-  recentThemes: string[];      // recent entry snippets
-  banned: string[];            // banned topics/keywords
+  recentThemes: string[];
+  banned: string[];
 }) {
   const { name, language, tone, interests, children, recentThemes, banned } = opts;
 
@@ -136,30 +155,42 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  // UTC day start for 1/day guard
+  // Start of UTC day for 1/day guard
   const startUTC = new Date(); startUTC.setUTCHours(0,0,0,0);
   const startISO = startUTC.toISOString();
 
-  // 1) Recipients (active only)
-  let users: Array<{
+  // 0) Load active tones ONCE
+  type ToneRow = { key: string; weight: number; active: boolean };
+  const { data: toneRows } = await supabase
+    .from("tones")
+    .select("key, weight, active")
+    .eq("active", true);
+  const activeTones = (toneRows ?? []) as ToneRow[];
+
+  // 1) Recipients
+  type U = {
     id: string; phone_e164: string; name: string | null;
-    preferred_language: string | null; tone: string | null;
-    interests: string[] | null; banned_topics: string[] | null;
+    preferred_language: string | null;
+    tone?: string | null;                 // legacy fallback only
+    interests: string[] | null;
+    banned_topics: string[] | null;
     children: Array<{ name?: string; age?: number }> | null;
-  }> = [];
+    status?: string;
+  };
+  let users: U[] = [];
 
   if (toFilter) {
     const { data } = await supabase
       .from("users_app")
       .select("id, phone_e164, name, preferred_language, tone, interests, banned_topics, children, status")
       .eq("phone_e164", toFilter).limit(1);
-    users = ((data ?? []) as any[]).filter(u => u.status === "active");
+    users = ((data ?? []) as U[]).filter(u => (u as any).status === "active");
   } else {
     const { data } = await supabase
       .from("users_app")
       .select("id, phone_e164, name, preferred_language, tone, interests, banned_topics, children")
       .eq("status", "active");
-    users = (data ?? []) as any[];
+    users = (data ?? []) as U[];
   }
 
   // 2) Curated fallback helper
@@ -186,8 +217,16 @@ serve(async (req) => {
         if (existing && existing.length) continue;
       }
 
+      // Pick tone: global tones (weighted + stable per user/day). Fallback to legacy tone or 'warm'.
+      const day = new Date().toISOString().slice(0, 10);
+      let selectedTone: string | null = null;
+      if (activeTones.length > 0) {
+        selectedTone = pickWeightedStable(activeTones, `${u.id}|${day}|tones`).key;
+      } else {
+        selectedTone = (u.tone && u.tone.trim()) || "warm";
+      }
+
       const language = (u.preferred_language || "en").toLowerCase();
-      const tone     = u.tone || "warm";
       const interests = (u.interests || []) as string[];
       const banned    = (u.banned_topics || []) as string[];
       const children  = (u.children || []) as Array<{ name?: string; age?: number }>;
@@ -210,7 +249,7 @@ serve(async (req) => {
           try {
             const text = await genPersonalizedPrompt({
               name: u.name ?? null,
-              language, tone, interests, children,
+              language, tone: selectedTone, interests, children,
               recentThemes, banned
             });
 
