@@ -14,6 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_prompts: {
+        Row: {
+          id: number
+          prompt_id: number | null
+          sent_at: string | null
+          sent_date: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: number
+          prompt_id?: number | null
+          sent_at?: string | null
+          sent_date?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: number
+          prompt_id?: number | null
+          sent_at?: string | null
+          sent_date?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_prompts_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "prompts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_prompts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_app"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entries: {
+        Row: {
+          content: string
+          id: number
+          message_sid: string | null
+          phone_e164: string
+          received_at: string | null
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          id?: number
+          message_sid?: string | null
+          phone_e164: string
+          received_at?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          id?: number
+          message_sid?: string | null
+          phone_e164?: string
+          received_at?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_app"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           created_at: string
@@ -29,6 +106,75 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          direction: string
+          id: number
+          phone_e164: string
+          sent_at: string | null
+          twilio_sid: string | null
+        }
+        Insert: {
+          body: string
+          direction: string
+          id?: number
+          phone_e164: string
+          sent_at?: string | null
+          twilio_sid?: string | null
+        }
+        Update: {
+          body?: string
+          direction?: string
+          id?: number
+          phone_e164?: string
+          sent_at?: string | null
+          twilio_sid?: string | null
+        }
+        Relationships: []
+      }
+      prompts: {
+        Row: {
+          active: boolean | null
+          id: number
+          text: string
+        }
+        Insert: {
+          active?: boolean | null
+          id?: number
+          text: string
+        }
+        Update: {
+          active?: boolean | null
+          id?: number
+          text?: string
+        }
+        Relationships: []
+      }
+      users_app: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string | null
+          phone_e164: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name?: string | null
+          phone_e164: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string | null
+          phone_e164?: string
+          status?: string | null
         }
         Relationships: []
       }
