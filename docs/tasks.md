@@ -525,6 +525,39 @@ serve(async (req) => {
 
 ---
 
+### ✅ Task 13: Auth/OTP Diagnostics & Debug System
+**Priority**: HIGH | **Estimated**: 1 day
+**Status**: COMPLETED ✅
+
+#### Subtasks:
+- [x] 13.1 Add debug environment flags (PUBLIC_DEBUG_AUTH, PUBLIC_ONBOARDING_AUTO_OTP, PUBLIC_DEBUG_LOG_NETWORK)
+- [x] 13.2 Enhanced AuthCallback page with debug information and stable session handling
+- [x] 13.3 Improved AuthGuard with loop detection and recovery
+- [x] 13.4 Debug overlay component for Settings page with auth state monitoring
+- [x] 13.5 Network request interception and logging for OTP functions
+- [x] 13.6 Created diagnostic edge function for JWT validation
+- [x] 13.7 Console logging throughout auth flow for comprehensive debugging
+
+#### Implementation Summary:
+**Completed**: Comprehensive auth/OTP diagnostics system:
+- AuthCallback page now shows detailed debug info when PUBLIC_DEBUG_AUTH=true or ?debug=1
+- AuthGuard detects and prevents infinite loops with user-friendly recovery options
+- DebugOverlay provides real-time auth state, user data, OTP status, and JWT validation
+- Network request interception logs all OTP function calls when enabled
+- Diagnostic edge function (/functions/v1/diag) validates JWT and auth headers
+- Enhanced console logging throughout afterLoginBootstrap and auth flows
+- Environment flags allow granular control over debug features and auto-OTP behavior
+
+#### Files Created/Updated:
+- `src/pages/AuthCallback.tsx` - Enhanced with comprehensive debug info
+- `src/components/AuthGuard.tsx` - Added loop detection and recovery
+- `src/components/DebugOverlay.tsx` - New debug overlay component
+- `src/hooks/useAuth.tsx` - Enhanced logging and debug controls
+- `src/pages/Settings.tsx` - Added debug overlay integration
+- `supabase/functions/diag/index.ts` - New diagnostic edge function
+
+---
+
 ### 🔲 Task 12: Media Library & Attachment Support
 **Priority**: LOW | **Estimated**: 4 days
 **Status**: NOT STARTED

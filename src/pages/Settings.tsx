@@ -17,6 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { DebugOverlay } from '@/components/DebugOverlay';
 
 // Types
 type Child = { name: string; dob: string };
@@ -434,6 +435,7 @@ const Settings = () => {
 
   return (
     <Layout>
+      <DebugOverlay />
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <SettingsIcon className="w-6 h-6 text-legacy-primary" />

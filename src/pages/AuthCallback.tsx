@@ -1,16 +1,45 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { afterLoginBootstrap } from '@/hooks/useAuth';
+
+const DEBUG_AUTH = import.meta.env.PUBLIC_DEBUG_AUTH === 'true';
+
+interface AuthState {
+  status: 'verifying' | 'success' | 'error';
+  handlerPath: string | null;
+  parsedUrl: {
+    token_hash?: string;
+    type?: string;
+    code?: string;
+    access_token?: string;
+    refresh_token?: string;
+  };
+  sessionSnapshot: {
+    userId?: string;
+    email?: string;
+  } | null;
+  error: string | null;
+}
 
 export default function AuthCallback() {
   const navigate = useNavigate();
-  const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
-  const [error, setError] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const [authState, setAuthState] = useState<AuthState>({
+    status: 'verifying',
+    handlerPath: null,
+    parsedUrl: {},
+    sessionSnapshot: null,
+    error: null,
+  });
+
+  const isDebugMode = DEBUG_AUTH || searchParams.get('debug') === '1';
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -19,63 +48,103 @@ export default function AuthCallback() {
         const searchParams = url.searchParams;
         const hashParams = new URLSearchParams(url.hash.substring(1));
 
+        // Parse URL parameters
+        const parsedUrl = {
+          token_hash: searchParams.get('token_hash') || undefined,
+          type: searchParams.get('type') || undefined,
+          code: searchParams.get('code') || undefined,
+          access_token: hashParams.get('access_token') || undefined,
+          refresh_token: hashParams.get('refresh_token') || undefined,
+        };
+
+        setAuthState(prev => ({ ...prev, parsedUrl }));
+
+        let handlerPath: string | null = null;
+        let sessionSet = false;
+
         // Try token_hash + type first (email confirmation)
-        const tokenHash = searchParams.get('token_hash');
-        const type = searchParams.get('type') as any;
-        
-        if (tokenHash && type) {
+        if (parsedUrl.token_hash && parsedUrl.type) {
+          handlerPath = 'verifyOtp';
+          console.log('[AuthCallback] Using verifyOtp handler', { type: parsedUrl.type });
+          
           const { error } = await supabase.auth.verifyOtp({
-            type,
-            token_hash: tokenHash,
+            type: parsedUrl.type as any,
+            token_hash: parsedUrl.token_hash,
           });
           
           if (error) throw error;
-          setStatus('success');
-          await afterLoginBootstrap(navigate);
-          return;
+          sessionSet = true;
         }
-
         // Try code (OAuth)
-        const code = searchParams.get('code');
-        if (code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(code);
+        else if (parsedUrl.code) {
+          handlerPath = 'exchangeCodeForSession';
+          console.log('[AuthCallback] Using exchangeCodeForSession handler');
+          
+          const { error } = await supabase.auth.exchangeCodeForSession(parsedUrl.code);
           
           if (error) throw error;
-          setStatus('success');
-          await afterLoginBootstrap(navigate);
-          return;
+          sessionSet = true;
         }
-
         // Try legacy hash tokens
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
-        
-        if (accessToken && refreshToken) {
+        else if (parsedUrl.access_token && parsedUrl.refresh_token) {
+          handlerPath = 'setSession (legacy hash)';
+          console.log('[AuthCallback] Using setSession handler (legacy)');
+          
           const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
+            access_token: parsedUrl.access_token,
+            refresh_token: parsedUrl.refresh_token,
           });
           
           if (error) throw error;
-          setStatus('success');
-          await afterLoginBootstrap(navigate);
-          return;
+          sessionSet = true;
+        }
+        
+        if (!sessionSet) {
+          throw new Error('No authentication parameters found');
         }
 
-        // No auth params found
-        throw new Error('No authentication parameters found');
+        console.log('[AuthCallback] Session set successfully');
+
+        // Get session snapshot
+        const { data: { session } } = await supabase.auth.getSession();
+        const sessionSnapshot = session ? {
+          userId: session.user.id,
+          email: session.user.email || 'No email',
+        } : null;
+
+        setAuthState({
+          status: 'success',
+          handlerPath,
+          parsedUrl,
+          sessionSnapshot,
+          error: null,
+        });
+
+        // If debug mode, stay on page. Otherwise bootstrap and navigate
+        if (!isDebugMode) {
+          await afterLoginBootstrap(navigate);
+        }
         
       } catch (err) {
-        console.error('Auth callback error:', err);
-        setError(err instanceof Error ? err.message : 'Authentication failed');
-        setStatus('error');
+        console.error('[AuthCallback] Auth callback error:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Authentication failed';
+        
+        setAuthState(prev => ({
+          ...prev,
+          status: 'error',
+          error: errorMessage,
+        }));
       }
     };
 
     handleAuthCallback();
-  }, [navigate]);
+  }, [navigate, isDebugMode]);
 
-  if (status === 'verifying') {
+  const handleManualNavigation = (path: string) => {
+    navigate(path);
+  };
+
+  if (authState.status === 'verifying') {
     return (
       <Layout showSidebar={false}>
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
@@ -84,20 +153,47 @@ export default function AuthCallback() {
           <p className="text-muted-foreground text-center max-w-md">
             Please wait while we confirm your email and set up your account.
           </p>
+          
+          {isDebugMode && (
+            <Card className="mt-8 w-full max-w-2xl">
+              <CardHeader>
+                <CardTitle className="text-sm font-mono">Debug Info</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm font-mono">
+                <div><strong>Parsed URL:</strong> {JSON.stringify(authState.parsedUrl, null, 2)}</div>
+                <div><strong>Handler Path:</strong> {authState.handlerPath || 'None detected'}</div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </Layout>
     );
   }
 
-  if (status === 'error') {
+  if (authState.status === 'error') {
     return (
       <Layout showSidebar={false}>
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+          <XCircle className="h-12 w-12 text-destructive" />
           <Alert className="max-w-md">
             <AlertDescription>
-              {error || 'Authentication failed. The link may have expired or already been used.'}
+              {authState.error || 'Authentication failed. The link may have expired or already been used.'}
             </AlertDescription>
           </Alert>
+          
+          {isDebugMode && (
+            <Card className="w-full max-w-2xl">
+              <CardHeader>
+                <CardTitle className="text-sm font-mono">Debug Info</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm font-mono">
+                <div><strong>Parsed URL:</strong> {JSON.stringify(authState.parsedUrl, null, 2)}</div>
+                <div><strong>Handler Path:</strong> {authState.handlerPath || 'None detected'}</div>
+                <div><strong>Error:</strong> {authState.error}</div>
+              </CardContent>
+            </Card>
+          )}
+          
           <Button onClick={() => navigate('/auth')} variant="outline">
             Go to Login
           </Button>
@@ -106,13 +202,52 @@ export default function AuthCallback() {
     );
   }
 
-  // Success state - should not render as we navigate away immediately
+  // Success state
   return (
     <Layout showSidebar={false}>
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="text-green-600">✓</div>
-        <h1 className="text-xl font-semibold">Success!</h1>
-        <p className="text-muted-foreground">Redirecting to your dashboard...</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+        <CheckCircle className="h-12 w-12 text-green-600" />
+        <h1 className="text-xl font-semibold">Authentication Successful!</h1>
+        
+        {authState.sessionSnapshot && (
+          <div className="text-center space-y-2">
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              Session OK
+            </Badge>
+            <p className="text-sm text-muted-foreground">
+              User ID: {authState.sessionSnapshot.userId}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Email: {authState.sessionSnapshot.email}
+            </p>
+          </div>
+        )}
+
+        {isDebugMode ? (
+          <div className="space-y-4 w-full max-w-2xl">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-mono">Debug Info</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm font-mono">
+                <div><strong>Handler Path:</strong> {authState.handlerPath}</div>
+                <div><strong>Parsed URL:</strong> {JSON.stringify(authState.parsedUrl, null, 2)}</div>
+                <div><strong>Session:</strong> {JSON.stringify(authState.sessionSnapshot, null, 2)}</div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex gap-4 justify-center">
+              <Button onClick={() => handleManualNavigation('/settings')}>
+                Go to Settings
+              </Button>
+              <Button onClick={() => handleManualNavigation('/dashboard')} variant="outline">
+                Go to Dashboard
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-muted-foreground">Redirecting to your dashboard...</p>
+        )}
       </div>
     </Layout>
   );

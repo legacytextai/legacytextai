@@ -27,35 +27,69 @@ export const useAuth = () => {
 
 let __didAutoKickoff = false;
 
+const ONBOARDING_AUTO_OTP = import.meta.env.PUBLIC_ONBOARDING_AUTO_OTP !== 'false';
+const DEBUG_LOG_NETWORK = import.meta.env.PUBLIC_DEBUG_LOG_NETWORK === 'true';
+
 export async function afterLoginBootstrap(navigate: (path: string) => void) {
+  console.log('[afterLoginBootstrap] Starting bootstrap process');
+  
   const { data: { session } } = await supabase.auth.getSession();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
+    console.log('[afterLoginBootstrap] No user found, redirecting to auth');
     navigate('/auth');
     return;
   }
 
+  console.log('[afterLoginBootstrap] User found:', user.id);
+
   try {
     // 1) Ensure users_app row exists/updated with email
-    await supabase.rpc('ensure_user_self', { p_email: user.email ?? null });
+    console.log('[afterLoginBootstrap] Ensuring user_self with email:', user.email);
+    const ensureResult = await supabase.rpc('ensure_user_self', { p_email: user.email ?? null });
+    console.log('[afterLoginBootstrap] ensure_user_self result:', ensureResult);
 
     // 2) Check if user is active / has phone
-    const { data: userData } = await supabase
+    const { data: userData, error: userDataError } = await supabase
       .from('users_app')
       .select('status, phone_e164')
       .limit(1);
 
+    if (userDataError) {
+      console.error('[afterLoginBootstrap] Error fetching user data:', userDataError);
+    } else {
+      console.log('[afterLoginBootstrap] User data:', userData?.[0]);
+    }
+
     const pendingPhone = user.user_metadata?.pending_phone_e164 || null;
     const needVerify = (!userData?.[0]?.phone_e164 || userData[0].phone_e164 === '') && pendingPhone;
+    
+    console.log('[afterLoginBootstrap] Phone verification check:', {
+      currentPhone: userData?.[0]?.phone_e164,
+      pendingPhone,
+      needVerify,
+      autoOtpEnabled: ONBOARDING_AUTO_OTP,
+    });
 
     // 3) If no phone on record, but we have a pending phone from sign-up, auto-send OTP once
-    if (needVerify && !__didAutoKickoff) {
+    if (needVerify && ONBOARDING_AUTO_OTP && !__didAutoKickoff) {
       __didAutoKickoff = true; // in-memory guard
       const guardKey = `otpKickoff:${user.id}:${pendingPhone}`;
+      
       if (!localStorage.getItem(guardKey)) {
-        // Fire and forget; ignore failures (resend available on settings page)
+        console.log('[afterLoginBootstrap] Attempting auto OTP send for:', pendingPhone);
+        
         try {
           const token = (await supabase.auth.getSession()).data.session?.access_token;
+          
+          if (DEBUG_LOG_NETWORK) {
+            console.log('[afterLoginBootstrap] OTP Request details:', {
+              url: 'https://toxadhuqzdydliplhrws.supabase.co/functions/v1/phone-change-initiate',
+              headers: { 'Authorization': `Bearer ${token?.substring(0, 20)}...` },
+              body: { new_phone_e164: pendingPhone, auto: true },
+            });
+          }
+          
           const response = await fetch(`https://toxadhuqzdydliplhrws.supabase.co/functions/v1/phone-change-initiate`, {
             method: 'POST',
             headers: {
@@ -64,22 +98,41 @@ export async function afterLoginBootstrap(navigate: (path: string) => void) {
             },
             body: JSON.stringify({ new_phone_e164: pendingPhone, auto: true })
           });
-          console.log('Auto-sent OTP for pending phone:', response.status);
+          
+          const responseData = await response.json().catch(() => ({}));
+          console.log('[afterLoginBootstrap] Auto OTP response:', {
+            status: response.status,
+            data: responseData,
+          });
+          
         } catch (error) {
-          console.log('Failed to auto-send OTP:', error);
+          console.error('[afterLoginBootstrap] Failed to auto-send OTP:', error);
         }
+        
         localStorage.setItem(guardKey, String(Date.now()));
+      } else {
+        console.log('[afterLoginBootstrap] Auto OTP already sent (localStorage guard)');
       }
       
       // Route user to settings to enter the code (prefill phone input with pendingPhone)
+      console.log('[afterLoginBootstrap] Routing to settings for phone verification');
+      navigate('/settings?verifyPhone=1');
+      return;
+    }
+
+    if (needVerify && !ONBOARDING_AUTO_OTP) {
+      console.log('[afterLoginBootstrap] Phone verification needed but auto OTP disabled, routing to settings');
       navigate('/settings?verifyPhone=1');
       return;
     }
 
     // Otherwise route to dashboard normally
+    console.log('[afterLoginBootstrap] Routing to dashboard');
     navigate('/dashboard');
   } catch (error) {
-    console.error('Bootstrap error:', error);
+    console.error('[afterLoginBootstrap] Bootstrap error:', error);
+    // Still try to route somewhere on error
+    navigate('/dashboard');
   }
 }
 
