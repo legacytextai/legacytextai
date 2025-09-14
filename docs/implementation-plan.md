@@ -79,7 +79,7 @@
 | 4    | Dashboard + export UI           | View + download PDF                |
 | 5    | Prompt scheduler + SMS settings | Text prompt loop working           |
 | 6    | MVP polish + tests              | Private beta ready                 |
-| 7    | Premium export + Stripe         | $1.99 tier functional              |
+| 7    | Premium export + Stripe         | $9.99 tier functional              |
 | 8    | Physical journal ordering       | Order → confirmation working       |
 | 9    | Editor + polish                 | Self-editable journals live        |
 | 10   | Usability test + soft launch    | Ready for public release           |
