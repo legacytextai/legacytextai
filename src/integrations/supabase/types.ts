@@ -17,23 +17,44 @@ export type Database = {
       daily_prompts: {
         Row: {
           id: number
+          is_ai: boolean | null
+          is_forced: boolean | null
+          model: string | null
+          prompt_hash: string | null
           prompt_id: number | null
+          prompt_language: string | null
+          prompt_text: string | null
           sent_at: string | null
           sent_date: string | null
+          source: string | null
           user_id: string | null
         }
         Insert: {
           id?: number
+          is_ai?: boolean | null
+          is_forced?: boolean | null
+          model?: string | null
+          prompt_hash?: string | null
           prompt_id?: number | null
+          prompt_language?: string | null
+          prompt_text?: string | null
           sent_at?: string | null
           sent_date?: string | null
+          source?: string | null
           user_id?: string | null
         }
         Update: {
           id?: number
+          is_ai?: boolean | null
+          is_forced?: boolean | null
+          model?: string | null
+          prompt_hash?: string | null
           prompt_id?: number | null
+          prompt_language?: string | null
+          prompt_text?: string | null
           sent_at?: string | null
           sent_date?: string | null
+          source?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -156,25 +177,43 @@ export type Database = {
       }
       users_app: {
         Row: {
+          banned_topics: string[] | null
+          children: Json | null
           created_at: string | null
           id: string
+          interests: string[] | null
           name: string | null
           phone_e164: string
+          preferred_language: string | null
           status: string | null
+          timezone: string | null
+          tone: string | null
         }
         Insert: {
+          banned_topics?: string[] | null
+          children?: Json | null
           created_at?: string | null
           id?: string
+          interests?: string[] | null
           name?: string | null
           phone_e164: string
+          preferred_language?: string | null
           status?: string | null
+          timezone?: string | null
+          tone?: string | null
         }
         Update: {
+          banned_topics?: string[] | null
+          children?: Json | null
           created_at?: string | null
           id?: string
+          interests?: string[] | null
           name?: string | null
           phone_e164?: string
+          preferred_language?: string | null
           status?: string | null
+          timezone?: string | null
+          tone?: string | null
         }
         Relationships: []
       }
