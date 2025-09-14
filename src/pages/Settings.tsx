@@ -89,6 +89,14 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [newInterest, setNewInterest] = useState("");
   const [newBannedTopic, setNewBannedTopic] = useState("");
+  
+  // Phone change states
+  const [newPhone, setNewPhone] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [showVerificationInput, setShowVerificationInput] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [verifyingCode, setVerifyingCode] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const form = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
@@ -111,6 +119,36 @@ export default function Settings() {
   useEffect(() => {
     loadUserData();
   }, []);
+
+  // Link auth user to phone on mount
+  useEffect(() => {
+    const linkAuthUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const phone = user?.phone ?? user?.user_metadata?.phone ?? null;
+          if (phone) {
+            try {
+              await supabase.rpc('link_self_to_phone', { p_phone: phone });
+            } catch (error) {
+              // Ignore linking errors
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error linking auth user:', error);
+      }
+    };
+    linkAuthUser();
+  }, []);
+
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   const loadUserData = async () => {
     try {
@@ -271,6 +309,140 @@ export default function Settings() {
     }
   };
 
+  const sendPhoneChangeCode = async () => {
+    if (!newPhone.trim()) {
+      toast({
+        title: "Invalid Phone",
+        description: "Please enter a valid phone number in E.164 format (e.g., +1234567890)",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Basic E.164 validation
+    const e164Regex = /^\+[1-9]\d{7,14}$/;
+    if (!e164Regex.test(newPhone.trim())) {
+      toast({
+        title: "Invalid Format",
+        description: "Phone number must be in E.164 format (e.g., +1234567890)",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSendingCode(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in again to change your phone number.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const response = await supabase.functions.invoke('phone-change-initiate', {
+        body: { new_phone_e164: newPhone.trim() },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (!response.data?.ok) {
+        throw new Error(response.data?.error || 'Failed to send verification code');
+      }
+
+      setShowVerificationInput(true);
+      setResendCooldown(60);
+      toast({
+        title: "Code Sent",
+        description: `Verification code sent to ${newPhone.trim()}. Check your messages.`
+      });
+
+    } catch (error: any) {
+      console.error('Error sending phone change code:', error);
+      toast({
+        title: "Failed to Send Code",
+        description: error.message || "Could not send verification code. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const confirmPhoneChange = async () => {
+    if (!verificationCode.trim()) {
+      toast({
+        title: "Code Required",
+        description: "Please enter the verification code.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setVerifyingCode(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in again to verify your phone number.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const response = await supabase.functions.invoke('phone-change-confirm', {
+        body: { 
+          new_phone_e164: newPhone.trim(),
+          code: verificationCode.trim()
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (!response.data?.ok) {
+        throw new Error(response.data?.error || 'Failed to verify code');
+      }
+
+      // Success
+      toast({
+        title: "Phone Number Updated",
+        description: "Your phone number has been successfully changed."
+      });
+
+      // Reset form
+      setNewPhone("");
+      setVerificationCode("");
+      setShowVerificationInput(false);
+      setResendCooldown(0);
+
+      // Reload user data
+      await loadUserData();
+
+    } catch (error: any) {
+      console.error('Error confirming phone change:', error);
+      toast({
+        title: "Verification Failed",
+        description: error.message || "Invalid verification code. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setVerifyingCode(false);
+    }
+  };
+
   const removeInterest = (index: number) => {
     const currentInterests = form.getValues('interests');
     form.setValue('interests', currentInterests.filter((_, i) => i !== index));
@@ -416,6 +588,92 @@ export default function Settings() {
                   <Label className="text-sm text-legacy-ink/70">Status</Label>
                   <Input value={userRow.status} disabled className="bg-muted" />
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Phone Change Section */}
+            <Card className="shadow-paper">
+              <CardHeader>
+                <CardTitle className="text-legacy-primary flex items-center gap-2">
+                  <Phone className="w-5 h-5" />
+                  Change Phone Number
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm">Current Phone</Label>
+                  <Input value={userRow.phone_e164} disabled className="bg-muted" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>New Phone Number</Label>
+                  <Input 
+                    value={newPhone}
+                    onChange={(e) => setNewPhone(e.target.value)}
+                    placeholder="e.g., +1234567890"
+                    className="border-legacy-border focus:border-legacy-primary"
+                    disabled={showVerificationInput}
+                  />
+                  <p className="text-xs text-legacy-ink/60">
+                    Enter phone number in E.164 format (country code + number)
+                  </p>
+                </div>
+
+                {!showVerificationInput ? (
+                  <Button 
+                    type="button"
+                    onClick={sendPhoneChangeCode}
+                    disabled={sendingCode || !newPhone.trim() || resendCooldown > 0}
+                    className="w-full"
+                  >
+                    {sendingCode ? "Sending..." : resendCooldown > 0 ? `Wait ${resendCooldown}s` : "Send Verification Code"}
+                  </Button>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label>Verification Code</Label>
+                      <Input 
+                        value={verificationCode}
+                        onChange={(e) => setVerificationCode(e.target.value)}
+                        placeholder="Enter 6-digit code"
+                        maxLength={6}
+                        className="border-legacy-border focus:border-legacy-primary"
+                      />
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        type="button"
+                        onClick={confirmPhoneChange}
+                        disabled={verifyingCode || !verificationCode.trim()}
+                        className="flex-1"
+                      >
+                        {verifyingCode ? "Verifying..." : "Confirm"}
+                      </Button>
+                      
+                      <Button 
+                        type="button"
+                        variant="outline"
+                        onClick={sendPhoneChangeCode}
+                        disabled={sendingCode || resendCooldown > 0}
+                      >
+                        {resendCooldown > 0 ? `${resendCooldown}s` : "Resend"}
+                      </Button>
+                      
+                      <Button 
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowVerificationInput(false);
+                          setVerificationCode("");
+                          setResendCooldown(0);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
