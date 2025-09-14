@@ -344,16 +344,23 @@ const Settings = () => {
           'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ new_phone_e164: newPhone })
+        body: JSON.stringify({ new_phone_e164: newPhone, resend: true })
       });
 
-      if (!response.ok) {
+      if (response.ok) {
+        const result = await response.json();
+        if (result.sms) {
+          toast.success('Verification code sent!');
+          setResendCooldown(60);
+        } else {
+          toast.success('Code already sent - check your messages');
+        }
+      } else if (response.status === 429) {
+        toast.error('Please wait before requesting another code');
+      } else {
         const error = await response.text();
         throw new Error(error);
       }
-
-      toast.success('Verification code sent!');
-      setResendCooldown(60);
     } catch (error) {
       console.error('Error sending code:', error);
       toast.error('Failed to send verification code');

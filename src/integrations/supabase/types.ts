@@ -164,6 +164,7 @@ export type Database = {
           created_at: string
           expires_at: string
           id: number
+          last_sent_at: string | null
           new_phone_e164: string
           user_auth_id: string
         }
@@ -173,6 +174,7 @@ export type Database = {
           created_at?: string
           expires_at: string
           id?: number
+          last_sent_at?: string | null
           new_phone_e164: string
           user_auth_id: string
         }
@@ -182,6 +184,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: number
+          last_sent_at?: string | null
           new_phone_e164?: string
           user_auth_id?: string
         }

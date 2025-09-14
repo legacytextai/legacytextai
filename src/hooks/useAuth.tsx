@@ -42,19 +42,23 @@ async function afterLoginBootstrap(session: Session | null) {
 
     // 3) If no phone on record, but we have a pending phone from sign-up, auto-send OTP once
     if ((!userData?.phone_e164 || userData.phone_e164 === '') && pendingPhone) {
-      // Fire and forget; ignore failures (resend available on settings page)
-      try {
-        const response = await fetch(`https://toxadhuqzdydliplhrws.supabase.co/functions/v1/phone-change-initiate`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ new_phone_e164: pendingPhone })
-        });
-        console.log('Auto-sent OTP for pending phone:', response.status);
-      } catch (error) {
-        console.log('Failed to auto-send OTP:', error);
+      const guardKey = `otpKickoff:${session.user.id}:${pendingPhone}`;
+      if (!localStorage.getItem(guardKey)) {
+        // Fire and forget; ignore failures (resend available on settings page)
+        try {
+          const response = await fetch(`https://toxadhuqzdydliplhrws.supabase.co/functions/v1/phone-change-initiate`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ new_phone_e164: pendingPhone, auto: true })
+          });
+          console.log('Auto-sent OTP for pending phone:', response.status);
+        } catch (error) {
+          console.log('Failed to auto-send OTP:', error);
+        }
+        localStorage.setItem(guardKey, String(Date.now()));
       }
       
       // Route user to settings to enter the code (prefill phone input with pendingPhone)
