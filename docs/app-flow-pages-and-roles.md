@@ -73,7 +73,7 @@
 2. Click `Export`  
 3. Choose:
    - Free PDF  
-   - Premium PDF ($4.99)  
+   - Premium PDF ($9.99)  
    - Physical book ($199)
 
 ---
