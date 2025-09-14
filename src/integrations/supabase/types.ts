@@ -157,6 +157,36 @@ export type Database = {
         }
         Relationships: []
       }
+      otp_codes: {
+        Row: {
+          attempts: number
+          code_hash: string
+          created_at: string
+          expires_at: string
+          id: number
+          new_phone_e164: string
+          user_auth_id: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          created_at?: string
+          expires_at: string
+          id?: number
+          new_phone_e164: string
+          user_auth_id: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          created_at?: string
+          expires_at?: string
+          id?: number
+          new_phone_e164?: string
+          user_auth_id?: string
+        }
+        Relationships: []
+      }
       prompts: {
         Row: {
           active: boolean | null
@@ -204,6 +234,7 @@ export type Database = {
       }
       users_app: {
         Row: {
+          auth_user_id: string | null
           banned_topics: string[] | null
           children: Json | null
           created_at: string | null
@@ -217,6 +248,7 @@ export type Database = {
           tone: string | null
         }
         Insert: {
+          auth_user_id?: string | null
           banned_topics?: string[] | null
           children?: Json | null
           created_at?: string | null
@@ -230,6 +262,7 @@ export type Database = {
           tone?: string | null
         }
         Update: {
+          auth_user_id?: string | null
           banned_topics?: string[] | null
           children?: Json | null
           created_at?: string | null
@@ -252,6 +285,14 @@ export type Database = {
       get_user_id_from_phone: {
         Args: { phone: string }
         Returns: string
+      }
+      is_otp_active: {
+        Args: { expires_at: string }
+        Returns: boolean
+      }
+      link_self_to_phone: {
+        Args: { p_phone: string }
+        Returns: undefined
       }
     }
     Enums: {
