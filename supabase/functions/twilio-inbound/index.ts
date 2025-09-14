@@ -22,9 +22,10 @@ serve(async (req) => {
     
     // Twilio POSTS application/x-www-form-urlencoded
     const form = await req.formData();
-    const from = (form.get("From") as string) || "";
-    const body = (form.get("Body") as string) || "";
-    const sid = (form.get("MessageSid") as string) || "";
+    const from = ((form.get("From") as string) ?? "").trim();
+    const rawBody = (form.get("Body") as string) ?? "";
+    const body = rawBody.trim();
+    const sid = (form.get("MessageSid") as string) ?? "";
 
     console.log('Webhook data:', { from, body: body.substring(0, 100), sid });
 
@@ -33,7 +34,72 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // 1) Dedupe by MessageSid
+    // --- Compliance handling (STOP/START/HELP/INFO/CANCEL/END/QUIT) ---
+    const keyword = body.toUpperCase();
+
+    // STOP-like keywords: mark opted_out; don't save a journal entry; return empty TwiML (let carrier auto-reply stand)
+    if (["STOP","CANCEL","END","QUIT"].includes(keyword)) {
+      console.log('Processing STOP keyword:', keyword);
+      
+      // ensure user exists & update status
+      await supabase.from("users_app")
+        .upsert({ phone_e164: from, status: "opted_out" }, { onConflict: "phone_e164" });
+
+      // log inbound for audit
+      await supabase.from("messages").insert({
+        direction: "in", phone_e164: from, body, twilio_sid: sid,
+      });
+
+      console.log('User opted out, returning empty TwiML');
+      return new Response('<?xml version="1.0" encoding="UTF-8"?><Response/>', {
+        headers: { 
+          "Content-Type": "application/xml",
+          ...corsHeaders 
+        },
+      });
+    }
+
+    // START/UNSTOP: mark active; send a short confirmation
+    if (["START","UNSTOP"].includes(keyword)) {
+      console.log('Processing START keyword:', keyword);
+      
+      await supabase.from("users_app")
+        .upsert({ phone_e164: from, status: "active" }, { onConflict: "phone_e164" });
+
+      await supabase.from("messages").insert({
+        direction: "in", phone_e164: from, body, twilio_sid: sid,
+      });
+
+      console.log('User reactivated, sending confirmation');
+      return new Response(xml("You're back in. You'll receive prompts again."), {
+        headers: { 
+          "Content-Type": "application/xml",
+          ...corsHeaders 
+        },
+      });
+    }
+
+    // HELP/INFO: provide help copy; no journal entry
+    if (["HELP","INFO"].includes(keyword)) {
+      console.log('Processing HELP keyword:', keyword);
+      
+      await supabase.from("messages").insert({
+        direction: "in", phone_e164: from, body, twilio_sid: sid,
+      });
+
+      console.log('Sending help message');
+      return new Response(
+        xml("LegacyText AI: Reply STOP to unsubscribe. Reply START to re-subscribe. Msg&Data rates may apply."),
+        { 
+          headers: { 
+            "Content-Type": "application/xml",
+            ...corsHeaders 
+          } 
+        }
+      );
+    }
+
+    // --- Dedupe normal inbound by MessageSid ---
     const { data: exists } = await supabase
       .from("journal_entries")
       .select("id")
@@ -42,12 +108,11 @@ serve(async (req) => {
 
     if (!exists) {
       console.log('Processing new SMS entry');
-      const phone_e164 = from.trim();
-
-      // 2) Upsert user by phone
+      
+      // Ensure the user exists (do not override status here)
       const { data: user, error: userError } = await supabase
         .from("users_app")
-        .upsert({ phone_e164 }, { onConflict: "phone_e164" })
+        .upsert({ phone_e164: from }, { onConflict: "phone_e164" })
         .select("id")
         .single();
 
@@ -58,12 +123,12 @@ serve(async (req) => {
 
       console.log('User upserted:', user);
 
-      // 3) Log inbound message
+      // Log inbound message
       const { error: messageError } = await supabase
         .from("messages")
         .insert({
           direction: "in",
-          phone_e164,
+          phone_e164: from,
           body,
           twilio_sid: sid,
         });
@@ -72,12 +137,12 @@ serve(async (req) => {
         console.error('Error logging message:', messageError);
       }
 
-      // 4) Save journal entry
+      // Save journal entry
       const { error: entryError } = await supabase
         .from("journal_entries")
         .insert({
           user_id: user?.id,
-          phone_e164,
+          phone_e164: from,
           content: body,
           message_sid: sid,
           source: "sms",
@@ -93,11 +158,9 @@ serve(async (req) => {
       console.log('Duplicate message detected, skipping');
     }
 
-    // Instant auto-reply with TwiML
-    const replyMessage = "Thanks for your reply! Your journal entry has been saved. ✨";
-    console.log('Sending TwiML response');
-    
-    return new Response(xml(replyMessage), {
+    // Standard success reply
+    console.log('Sending standard success TwiML response');
+    return new Response(xml("Thanks for your reply! Your journal entry has been saved. ✨"), {
       headers: { 
         "Content-Type": "application/xml",
         ...corsHeaders 
