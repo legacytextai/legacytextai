@@ -498,6 +498,33 @@ serve(async (req) => {
 
 ---
 
+### ✅ Task 12: Auth Callback & Redirect Loop Fix
+**Priority**: HIGH | **Estimated**: 1 day
+**Status**: COMPLETED ✅
+
+#### Subtasks:
+- [x] 12.1 Create `/auth/callback` page for email confirmations
+- [x] 12.2 Implement auth guards to prevent redirect loops
+- [x] 12.3 Update auth flow to stop infinite redirects
+- [x] 12.4 Ensure single OTP auto-kickoff per user session
+- [x] 12.5 Handle various auth callback types (email, OAuth, etc.)
+
+#### Implementation Summary:
+**Completed**: Auth callback system with proper redirect handling:
+- `/auth/callback` page handles email confirmation links, OAuth codes, and legacy hash tokens
+- AuthGuard component prevents redirect loops on public pages
+- Updated afterLoginBootstrap to use navigate function properly
+- Single auto-kickoff for OTP ensures no spam during onboarding
+- Tolerant auth parameter parsing for different Supabase auth flows
+
+#### Files Created/Updated:
+- `src/pages/AuthCallback.tsx` - New auth callback page
+- `src/components/AuthGuard.tsx` - Auth protection wrapper
+- `src/hooks/useAuth.tsx` - Updated bootstrap function
+- `src/App.tsx` - Added auth guard and new route
+
+---
+
 ### 🔲 Task 12: Media Library & Attachment Support
 **Priority**: LOW | **Estimated**: 4 days
 **Status**: NOT STARTED
