@@ -17,6 +17,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -60,6 +61,11 @@ const Auth = () => {
     setLoading(false);
   };
 
+  const validateE164Phone = (phone: string): boolean => {
+    const e164Regex = /^\+[1-9]\d{7,14}$/;
+    return e164Regex.test(phone);
+  };
+
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -77,13 +83,20 @@ const Auth = () => {
       return;
     }
 
+    if (!phone || !validateE164Phone(phone)) {
+      setError("Please enter a valid phone number in E.164 format (e.g., +1234567890)");
+      setLoading(false);
+      return;
+    }
+
     const redirectUrl = `${window.location.origin}/`;
 
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl
+        emailRedirectTo: redirectUrl,
+        data: { pending_phone_e164: phone }
       }
     });
 
@@ -245,11 +258,32 @@ const Auth = () => {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                       />
-                    </div>
-                    <Button type="submit" disabled={loading} className="w-full">
-                      <Mail className="w-4 h-4 mr-2" />
-                      {loading ? "Creating account..." : "Create Account"}
-                    </Button>
+                     </div>
+                     <div className="space-y-2">
+                       <Label htmlFor="signup-phone">Phone Number</Label>
+                       <Input
+                         id="signup-phone"
+                         type="tel"
+                         placeholder="Enter phone number (e.g., +1234567890)"
+                         value={phone}
+                         onChange={(e) => setPhone(e.target.value)}
+                         required
+                         className={!validateE164Phone(phone) && phone ? "border-destructive" : ""}
+                       />
+                       {phone && !validateE164Phone(phone) && (
+                         <p className="text-sm text-destructive">
+                           Please enter a valid phone number in E.164 format (e.g., +1234567890)
+                         </p>
+                       )}
+                     </div>
+                     <Button 
+                       type="submit" 
+                       disabled={loading || !validateE164Phone(phone)} 
+                       className="w-full"
+                     >
+                       <Mail className="w-4 h-4 mr-2" />
+                       {loading ? "Creating account..." : "Create Account"}
+                     </Button>
                   </form>
                 </TabsContent>
               </Tabs>

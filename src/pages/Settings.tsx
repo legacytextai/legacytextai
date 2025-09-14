@@ -1,39 +1,41 @@
-import { Layout } from "@/components/Layout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Settings as SettingsIcon, Phone, MessageSquare, Download, User, Calendar as CalendarIcon, Plus, X, TestTube } from "lucide-react";
-import { useForm, useFieldArray } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from 'react';
+import { useForm, useFieldArray, FieldErrors } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { format } from 'date-fns';
+import { Layout } from '@/components/Layout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CalendarIcon, Plus, X, Phone, Settings as SettingsIcon, User, MessageSquare, Clock } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 // Types
 type Child = { name: string; dob: string };
-type UserRow = {
+
+interface UserAppData {
   id: string;
+  auth_user_id: string;
+  email: string | null;
   name: string | null;
-  phone_e164: string;
+  phone_e164: string | null;
   status: string;
-  preferred_language: string | null;
-  timezone: string | null;
+  preferred_language: string;
+  timezone: string;
   interests: string[] | null;
   banned_topics: string[] | null;
-  children: any; // JSON type from Supabase
-  auth_user_id: string | null;
-};
+  children: any;
+  created_at: string;
+  last_login_at: string | null;
+}
 
 // Validation schema
 const settingsSchema = z.object({
@@ -83,28 +85,30 @@ const commonTimezones = [
   'Australia/Sydney'
 ];
 
-export default function Settings() {
-  const { toast } = useToast();
-  const [userRow, setUserRow] = useState<UserRow | null>(null);
-  const [loading, setLoading] = useState(true);
+const Settings = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  const [userData, setUserData] = useState<UserAppData | null>(null);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [newInterest, setNewInterest] = useState("");
-  const [newBannedTopic, setNewBannedTopic] = useState("");
+  const [newInterest, setNewInterest] = useState('');
+  const [newBannedTopic, setNewBannedTopic] = useState('');
   
   // Phone change states
-  const [newPhone, setNewPhone] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [showVerificationInput, setShowVerificationInput] = useState(false);
-  const [sendingCode, setSendingCode] = useState(false);
-  const [verifyingCode, setVerifyingCode] = useState(false);
+  const [newPhone, setNewPhone] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isChangingPhone, setIsChangingPhone] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [showPhoneVerification, setShowPhoneVerification] = useState(false);
 
   const form = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
-      name: "",
-      preferred_language: "en",
-      timezone: "America/Los_Angeles",
+      name: '',
+      preferred_language: 'en',
+      timezone: 'America/Los_Angeles',
       interests: [],
       banned_topics: [],
       children: []
@@ -113,35 +117,49 @@ export default function Settings() {
 
   const { fields: childrenFields, append: addChild, remove: removeChild } = useFieldArray({
     control: form.control,
-    name: "children"
+    name: 'children'
   });
 
-  // Load user data
+  // Load user data on mount
   useEffect(() => {
-    loadUserData();
-  }, []);
+    if (user) {
+      loadUserData();
+    } else {
+      setUserData(null);
+    }
+  }, [user]);
 
-  // Link auth user to phone on mount
+  // Check if authenticated user is linked to this phone number
   useEffect(() => {
-    const linkAuthUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const phone = user?.phone ?? user?.user_metadata?.phone ?? null;
-          if (phone) {
-            try {
-              await supabase.rpc('link_self_to_phone', { p_phone: phone });
-            } catch (error) {
-              // Ignore linking errors
-            }
-          }
+    const linkUserToPhone = async () => {
+      if (user && userData?.phone_e164) {
+        try {
+          await supabase.rpc('link_self_to_phone', { p_phone: userData.phone_e164 });
+        } catch (error) {
+          console.error('Error linking user to phone:', error);
         }
-      } catch (error) {
-        console.error('Error linking auth user:', error);
       }
     };
-    linkAuthUser();
-  }, []);
+
+    linkUserToPhone();
+  }, [user, userData?.phone_e164]);
+
+  // Handle phone verification flow
+  useEffect(() => {
+    const shouldShowVerification = searchParams.get('verifyPhone') === '1';
+    const pendingPhone = user?.user_metadata?.pending_phone_e164;
+    
+    if (shouldShowVerification || (!userData?.phone_e164 || userData.phone_e164 === '' || userData.status !== 'active')) {
+      setShowPhoneVerification(true);
+      
+      // Prefill phone input with pending phone if available
+      if (pendingPhone && !newPhone) {
+        setNewPhone(pendingPhone);
+      }
+    } else {
+      setShowPhoneVerification(false);
+    }
+  }, [searchParams, user, userData, newPhone]);
 
   // Resend cooldown timer
   useEffect(() => {
@@ -152,88 +170,70 @@ export default function Settings() {
   }, [resendCooldown]);
 
   const loadUserData = async () => {
+    if (!user) return;
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to access your settings.",
-          variant: "destructive"
-        });
-        return;
-      }
+      setLoading(true);
 
-      const phone = user?.phone ?? user?.user_metadata?.phone ?? null;
-      if (!phone) {
-        toast({
-          title: "Phone Number Required",
-          description: "No phone number found. Please contact support.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const { data: userData, error } = await supabase
-        .from('users_app')
-        .select('id, name, phone_e164, status, preferred_language, timezone, interests, banned_topics, children, auth_user_id')
-        .eq('auth_user_id', user.id)
+      // Try to find an existing row
+      const { data: existing } = await supabase
+        .from("users_app")
+        .select("*")
+        .eq("auth_user_id", user.id)
         .limit(1)
         .maybeSingle();
 
-      if (error) {
-        toast({
-          title: "Error Loading Settings",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
+      // If none, use RPC to ensure a row exists
+      if (!existing) {
+        await supabase.rpc('ensure_user_self', { p_email: user.email ?? null });
+        
+        // Fetch again after ensuring row exists
+        const { data: newRow } = await supabase
+          .from("users_app")
+          .select("*")
+          .eq("auth_user_id", user.id)
+          .single();
+        
+        if (newRow) {
+          setUserData(newRow);
+        }
+      } else {
+        setUserData(existing);
       }
 
-      if (!userData) {
-        toast({
-          title: "User Not Found",
-          description: "No user profile found. This may happen after a phone change. Please contact support if this persists.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      setUserRow(userData);
-      
-      // Parse children data from JSON
-      const parsedChildren: Child[] = Array.isArray(userData.children) 
-        ? userData.children.filter((child: any) => 
-            child && typeof child === 'object' && child.name && child.dob
-          ).map((child: any) => ({
-            name: String(child.name || ''),
-            dob: String(child.dob || '')
-          }))
-        : [];
-      
       // Populate form with user data
-      form.reset({
-        name: userData.name || "",
-        preferred_language: userData.preferred_language || "en",
-        timezone: userData.timezone || "America/Los_Angeles",
-        interests: userData.interests || [],
-        banned_topics: userData.banned_topics || [],
-        children: parsedChildren
-      });
-
+      if (existing || userData) {
+        const data = existing || userData;
+        
+        // Parse children data from JSON
+        const parsedChildren: Child[] = Array.isArray(data.children) 
+          ? data.children.filter((child: any) => 
+              child && typeof child === 'object' && child.name && child.dob
+            ).map((child: any) => ({
+              name: String(child.name || ''),
+              dob: String(child.dob || '')
+            }))
+          : [];
+        
+        form.reset({
+          name: data.name || "",
+          preferred_language: data.preferred_language || "en",
+          timezone: data.timezone || "America/Los_Angeles",
+          interests: data.interests || [],
+          banned_topics: data.banned_topics || [],
+          children: parsedChildren
+        });
+      }
     } catch (error) {
-      console.error('Error loading user data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load user settings.",
-        variant: "destructive"
-      });
+      console.error('Error ensuring user app row:', error);
+      toast.error('Failed to load user profile');
     } finally {
       setLoading(false);
     }
   };
 
   const onSubmit = async (data: SettingsFormData) => {
-    if (!userRow) return;
+    if (!userData) return;
 
     setSaving(true);
     try {
@@ -247,55 +247,49 @@ export default function Settings() {
           banned_topics: data.banned_topics,
           children: data.children
         })
-        .eq('id', userRow.id);
+        .eq('id', userData.id);
 
       if (error) {
-        toast({
-          title: "Error Saving Settings",
-          description: error.message,
-          variant: "destructive"
-        });
+        console.error('Error saving settings:', error);
+        toast.error('Failed to save settings');
         return;
       }
 
-      toast({
-        title: "Settings Saved",
-        description: "Your preferences have been updated successfully."
-      });
-
-      // Reload user data
+      toast.success('Settings saved successfully!');
       await loadUserData();
-
     } catch (error) {
       console.error('Error saving settings:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save settings.",
-        variant: "destructive"
-      });
+      toast.error('Failed to save settings');
     } finally {
       setSaving(false);
     }
   };
 
   const sendTestPrompt = async () => {
-    if (!userRow) return;
+    if (!userData?.phone_e164) {
+      toast.error('Phone number required to send test prompt');
+      return;
+    }
 
     try {
-      const response = await fetch(`https://toxadhuqzdydliplhrws.functions.supabase.co/send-daily-prompts?to=${userRow.phone_e164}&force=true`);
-      const result = await response.json();
-      
-      toast({
-        title: "Test Prompt Result",
-        description: `${result.ok ? 'Success' : 'Failed'}: ${result.prompt || result.errors || 'Unknown result'}`,
-        variant: result.ok ? "default" : "destructive"
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch(`https://toxadhuqzdydliplhrws.supabase.co/functions/v1/send-daily-prompts`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ force: true, phone: userData.phone_e164 })
       });
+
+      if (response.ok) {
+        toast.success('Test prompt sent!');
+      } else {
+        toast.error('Failed to send test prompt');
+      }
     } catch (error) {
-      toast({
-        title: "Test Failed",
-        description: "Could not send test prompt.",
-        variant: "destructive"
-      });
+      console.error('Error sending test prompt:', error);
+      toast.error('Failed to send test prompt');
     }
   };
 
@@ -307,140 +301,6 @@ export default function Settings() {
         form.setValue('interests', [...currentInterests, trimmed]);
       }
       setNewInterest("");
-    }
-  };
-
-  const sendPhoneChangeCode = async () => {
-    if (!newPhone.trim()) {
-      toast({
-        title: "Invalid Phone",
-        description: "Please enter a valid phone number in E.164 format (e.g., +1234567890)",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Basic E.164 validation
-    const e164Regex = /^\+[1-9]\d{7,14}$/;
-    if (!e164Regex.test(newPhone.trim())) {
-      toast({
-        title: "Invalid Format",
-        description: "Phone number must be in E.164 format (e.g., +1234567890)",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setSendingCode(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in again to change your phone number.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const response = await supabase.functions.invoke('phone-change-initiate', {
-        body: { new_phone_e164: newPhone.trim() },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
-        }
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
-      if (!response.data?.ok) {
-        throw new Error(response.data?.error || 'Failed to send verification code');
-      }
-
-      setShowVerificationInput(true);
-      setResendCooldown(60);
-      toast({
-        title: "Code Sent",
-        description: `Verification code sent to ${newPhone.trim()}. Check your messages.`
-      });
-
-    } catch (error: any) {
-      console.error('Error sending phone change code:', error);
-      toast({
-        title: "Failed to Send Code",
-        description: error.message || "Could not send verification code. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setSendingCode(false);
-    }
-  };
-
-  const confirmPhoneChange = async () => {
-    if (!verificationCode.trim()) {
-      toast({
-        title: "Code Required",
-        description: "Please enter the verification code.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setVerifyingCode(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in again to verify your phone number.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const response = await supabase.functions.invoke('phone-change-confirm', {
-        body: { 
-          new_phone_e164: newPhone.trim(),
-          code: verificationCode.trim()
-        },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
-        }
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
-      if (!response.data?.ok) {
-        throw new Error(response.data?.error || 'Failed to verify code');
-      }
-
-      // Success
-      toast({
-        title: "Phone Number Updated",
-        description: "Your phone number has been successfully changed."
-      });
-
-      // Reset form
-      setNewPhone("");
-      setVerificationCode("");
-      setShowVerificationInput(false);
-      setResendCooldown(0);
-
-      // Reload user data
-      await loadUserData();
-
-    } catch (error: any) {
-      console.error('Error confirming phone change:', error);
-      toast({
-        title: "Verification Failed",
-        description: error.message || "Invalid verification code. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setVerifyingCode(false);
     }
   };
 
@@ -465,6 +325,93 @@ export default function Settings() {
     form.setValue('banned_topics', currentTopics.filter((_, i) => i !== index));
   };
 
+  const validateE164Phone = (phone: string): boolean => {
+    const e164Regex = /^\+[1-9]\d{7,14}$/;
+    return e164Regex.test(phone);
+  };
+
+  const sendPhoneChangeCode = async () => {
+    if (!newPhone || !validateE164Phone(newPhone)) {
+      toast.error('Please enter a valid phone number in E.164 format (e.g., +1234567890)');
+      return;
+    }
+
+    setIsChangingPhone(true);
+    try {
+      const response = await fetch(`https://toxadhuqzdydliplhrws.supabase.co/functions/v1/phone-change-initiate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ new_phone_e164: newPhone })
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+
+      toast.success('Verification code sent!');
+      setResendCooldown(60);
+    } catch (error) {
+      console.error('Error sending code:', error);
+      toast.error('Failed to send verification code');
+    } finally {
+      setIsChangingPhone(false);
+    }
+  };
+
+  const confirmPhoneChange = async () => {
+    if (!verificationCode || verificationCode.length !== 6) {
+      toast.error('Please enter a valid 6-digit verification code');
+      return;
+    }
+
+    setIsChangingPhone(true);
+    try {
+      const response = await fetch(`https://toxadhuqzdydliplhrws.supabase.co/functions/v1/phone-change-confirm`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ new_phone_e164: newPhone, code: verificationCode })
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+
+      toast.success('Phone verified—welcome SMS sent!');
+      setVerificationCode('');
+      setNewPhone('');
+      setIsChangingPhone(false);
+      setShowPhoneVerification(false);
+      
+      // Refresh user data
+      await loadUserData();
+    } catch (error) {
+      console.error('Error confirming phone:', error);
+      toast.error('Failed to verify phone number');
+    } finally {
+      setIsChangingPhone(false);
+    }
+  };
+
+  if (!user) {
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <h1 className="text-2xl font-bold text-legacy-primary mb-4">Authentication Required</h1>
+          <p className="text-legacy-ink/70 mb-6">Please sign in to access your settings.</p>
+          <Button onClick={() => navigate('/auth')}>Sign In</Button>
+        </div>
+      </Layout>
+    );
+  }
+
   if (loading) {
     return (
       <Layout>
@@ -478,390 +425,374 @@ export default function Settings() {
     );
   }
 
-  if (!userRow) {
-    return (
-      <Layout>
-        <div className="text-center py-12">
-          <h1 className="text-2xl font-bold text-legacy-primary mb-4">Settings Unavailable</h1>
-          <p className="text-legacy-ink/70 mb-6">Please sign in or contact support to access your settings.</p>
-          <Button onClick={() => window.location.href = '/auth'}>Sign In</Button>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
     <Layout>
-      <div className="space-y-6 max-w-2xl">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-legacy-primary flex items-center gap-3">
-            <SettingsIcon className="w-8 h-8" />
-            Settings & Personalization
-          </h1>
-          <p className="text-legacy-ink/70 mt-2">
-            Configure your profile and journaling preferences
-          </p>
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <SettingsIcon className="w-6 h-6 text-legacy-primary" />
+          <h1 className="text-3xl font-bold text-legacy-primary">Settings</h1>
         </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            
-            {/* Profile Section */}
-            <Card className="shadow-paper">
+        {/* Phone Verification Banner */}
+        {showPhoneVerification && (
+          <Alert className="border-amber-200 bg-amber-50">
+            <Phone className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Phone Verification Required</strong>
+              <br />
+              Please verify your phone number to activate your account and start receiving journal prompts.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Profile */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Profile
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  {...form.register('name')}
+                  placeholder="Enter your name"
+                />
+                {form.formState.errors.name && (
+                  <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="language">Preferred Language</Label>
+                <Select
+                  value={form.watch('preferred_language')}
+                  onValueChange={(value) => form.setValue('preferred_language', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languages.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="timezone">Timezone</Label>
+                <Select
+                  value={form.watch('timezone')}
+                  onValueChange={(value) => form.setValue('timezone', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {commonTimezones.map((tz) => (
+                      <SelectItem key={tz} value={tz}>
+                        {tz.replace(/_/g, ' ')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Phone Number</Label>
+                <Input 
+                  value={userData?.phone_e164 || 'Not verified'} 
+                  disabled 
+                  className="bg-muted" 
+                />
+                <p className="text-xs text-legacy-ink/60">
+                  Status: {userData?.status || 'pending'}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Phone Number Verification */}
+          {showPhoneVerification && (
+            <Card className="border-amber-200">
               <CardHeader>
-                <CardTitle className="text-legacy-primary flex items-center gap-2">
-                  <User className="w-5 h-5" />
-                  Profile
+                <CardTitle className="flex items-center gap-2 text-amber-700">
+                  <Phone className="w-5 h-5" />
+                  Verify Phone Number
                 </CardTitle>
+                <CardDescription>
+                  Enter your phone number and verification code to activate your account
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="border-legacy-border focus:border-legacy-primary" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="preferred_language"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Preferred Language</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="border-legacy-border focus:border-legacy-primary">
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-card">
-                          {languages.map((lang) => (
-                            <SelectItem key={lang.value} value={lang.value}>
-                              {lang.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="timezone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Timezone</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="border-legacy-border focus:border-legacy-primary">
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-card">
-                          {commonTimezones.map((tz) => (
-                            <SelectItem key={tz} value={tz}>
-                              {tz.replace(/_/g, ' ')}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <div className="space-y-2">
-                  <Label className="text-sm text-legacy-ink/70 flex items-center gap-2">
-                    Phone <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Protected</span>
-                  </Label>
-                  <Input value={userRow.phone_e164} disabled className="bg-muted" />
-                  <p className="text-xs text-legacy-ink/60">
-                    Phone changes require SMS verification for security
-                  </p>
+                  <Label htmlFor="verify-phone">Phone Number (E.164 format)</Label>
+                  <Input
+                    id="verify-phone"
+                    type="tel"
+                    placeholder="+1234567890"
+                    value={newPhone}
+                    onChange={(e) => setNewPhone(e.target.value)}
+                    disabled={isChangingPhone}
+                    className={!validateE164Phone(newPhone) && newPhone ? "border-destructive" : ""}
+                  />
+                  {newPhone && !validateE164Phone(newPhone) && (
+                    <p className="text-sm text-destructive">
+                      Please enter a valid phone number in E.164 format (e.g., +1234567890)
+                    </p>
+                  )}
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    onClick={sendPhoneChangeCode}
+                    disabled={!newPhone || !validateE164Phone(newPhone) || isChangingPhone || resendCooldown > 0}
+                    variant="outline"
+                  >
+                    {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Send Code'}
+                  </Button>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-sm text-legacy-ink/70">Status</Label>
-                  <Input value={userRow.status} disabled className="bg-muted" />
+                  <Label htmlFor="verify-code">Verification Code</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="verify-code"
+                      type="text"
+                      placeholder="Enter 6-digit code"
+                      value={verificationCode}
+                      onChange={(e) => setVerificationCode(e.target.value)}
+                      disabled={isChangingPhone}
+                      maxLength={6}
+                    />
+                    <Button
+                      type="button"
+                      onClick={confirmPhoneChange}
+                      disabled={!verificationCode || verificationCode.length !== 6 || isChangingPhone}
+                    >
+                      {isChangingPhone ? 'Verifying...' : 'Verify'}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
+          )}
 
-            {/* Phone Change Section */}
-            <Card className="shadow-paper">
+          {/* Change Phone Number (for users with verified phones) */}
+          {!showPhoneVerification && (
+            <Card>
               <CardHeader>
-                <CardTitle className="text-legacy-primary flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2">
                   <Phone className="w-5 h-5" />
                   Change Phone Number
                 </CardTitle>
+                <CardDescription>
+                  Update your phone number for SMS notifications
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-sm">Current Phone</Label>
-                  <Input value={userRow.phone_e164} disabled className="bg-muted" />
+                  <Label>Current Phone</Label>
+                  <Input value={userData?.phone_e164 || ''} disabled className="bg-muted" />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>New Phone Number</Label>
-                  <Input 
+                  <Label>New Phone Number (E.164 format)</Label>
+                  <Input
+                    type="tel"
+                    placeholder="+1234567890"
                     value={newPhone}
                     onChange={(e) => setNewPhone(e.target.value)}
-                    placeholder="e.g., +1234567890"
-                    className="border-legacy-border focus:border-legacy-primary"
-                    disabled={showVerificationInput}
+                    disabled={isChangingPhone}
                   />
-                  <p className="text-xs text-legacy-ink/60">
-                    Enter phone number in E.164 format (country code + number)
-                  </p>
                 </div>
 
-                {!showVerificationInput ? (
-                  <Button 
+                <div className="flex gap-2">
+                  <Button
                     type="button"
                     onClick={sendPhoneChangeCode}
-                    disabled={sendingCode || !newPhone.trim() || resendCooldown > 0}
-                    className="w-full"
+                    disabled={!newPhone || !validateE164Phone(newPhone) || isChangingPhone || resendCooldown > 0}
+                    variant="outline"
                   >
-                    {sendingCode ? "Sending..." : resendCooldown > 0 ? `Wait ${resendCooldown}s` : "Send Verification Code"}
+                    {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Send Code'}
                   </Button>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="space-y-2">
-                      <Label>Verification Code</Label>
-                      <Input 
-                        value={verificationCode}
-                        onChange={(e) => setVerificationCode(e.target.value)}
-                        placeholder="Enter 6-digit code"
-                        maxLength={6}
-                        className="border-legacy-border focus:border-legacy-primary"
-                      />
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button 
-                        type="button"
-                        onClick={confirmPhoneChange}
-                        disabled={verifyingCode || !verificationCode.trim()}
-                        className="flex-1"
-                      >
-                        {verifyingCode ? "Verifying..." : "Confirm"}
-                      </Button>
-                      
-                      <Button 
-                        type="button"
-                        variant="outline"
-                        onClick={sendPhoneChangeCode}
-                        disabled={sendingCode || resendCooldown > 0}
-                      >
-                        {resendCooldown > 0 ? `${resendCooldown}s` : "Resend"}
-                      </Button>
-                      
-                      <Button 
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          setShowVerificationInput(false);
-                          setVerificationCode("");
-                          setResendCooldown(0);
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Journaling Preferences */}
-            <Card className="shadow-paper">
-              <CardHeader>
-                <CardTitle className="text-legacy-primary flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5" />
-                  Journaling Preferences
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <Label>Interests</Label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {form.watch('interests').map((interest, index) => (
-                      <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                        {interest}
-                        <X className="w-3 h-3 cursor-pointer" onClick={() => removeInterest(index)} />
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      value={newInterest}
-                      onChange={(e) => setNewInterest(e.target.value)}
-                      placeholder="Add an interest..."
-                      className="border-legacy-border focus:border-legacy-primary"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addInterest())}
-                    />
-                    <Button type="button" onClick={addInterest} size="sm">
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
                 </div>
 
-                <div className="space-y-3">
-                  <Label>Topics to Avoid</Label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {form.watch('banned_topics').map((topic, index) => (
-                      <Badge key={index} variant="destructive" className="flex items-center gap-1">
-                        {topic}
-                        <X className="w-3 h-3 cursor-pointer" onClick={() => removeBannedTopic(index)} />
-                      </Badge>
-                    ))}
-                  </div>
+                <div className="space-y-2">
+                  <Label>Verification Code</Label>
                   <div className="flex gap-2">
                     <Input
-                      value={newBannedTopic}
-                      onChange={(e) => setNewBannedTopic(e.target.value)}
-                      placeholder="Add a topic to avoid..."
-                      className="border-legacy-border focus:border-legacy-primary"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addBannedTopic())}
+                      type="text"
+                      placeholder="Enter 6-digit code"
+                      value={verificationCode}
+                      onChange={(e) => setVerificationCode(e.target.value)}
+                      disabled={isChangingPhone}
+                      maxLength={6}
                     />
-                    <Button type="button" onClick={addBannedTopic} size="sm">
-                      <Plus className="w-4 h-4" />
+                    <Button
+                      type="button"
+                      onClick={confirmPhoneChange}
+                      disabled={!verificationCode || verificationCode.length !== 6 || isChangingPhone}
+                    >
+                      {isChangingPhone ? 'Verifying...' : 'Verify'}
                     </Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
+          )}
 
-            {/* Children Section */}
-            <Card className="shadow-paper">
-              <CardHeader>
-                <CardTitle className="text-legacy-primary flex items-center gap-2">
-                  <CalendarIcon className="w-5 h-5" />
-                  Children
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {childrenFields.map((field, index) => (
-                  <div key={field.id} className="flex gap-4 items-end p-4 border border-legacy-border rounded-lg">
-                    <FormField
-                      control={form.control}
-                      name={`children.${index}.name`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormLabel>Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} className="border-legacy-border focus:border-legacy-primary" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+          {/* Journaling Preferences */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5" />
+                Journaling Preferences
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-3">
+                <Label>Interests</Label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {form.watch('interests').map((interest, index) => (
+                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                      {interest}
+                      <X className="w-3 h-3 cursor-pointer" onClick={() => removeInterest(index)} />
+                    </Badge>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    value={newInterest}
+                    onChange={(e) => setNewInterest(e.target.value)}
+                    placeholder="Add an interest..."
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addInterest())}
+                  />
+                  <Button type="button" onClick={addInterest} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Label>Topics to Avoid</Label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {form.watch('banned_topics').map((topic, index) => (
+                    <Badge key={index} variant="destructive" className="flex items-center gap-1">
+                      {topic}
+                      <X className="w-3 h-3 cursor-pointer" onClick={() => removeBannedTopic(index)} />
+                    </Badge>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    value={newBannedTopic}
+                    onChange={(e) => setNewBannedTopic(e.target.value)}
+                    placeholder="Add a topic to avoid..."
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addBannedTopic())}
+                  />
+                  <Button type="button" onClick={addBannedTopic} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Children */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Children
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {childrenFields.map((field, index) => (
+                <div key={field.id} className="flex gap-4 items-end p-4 border border-legacy-border rounded-lg">
+                  <div className="flex-1 space-y-2">
+                    <Label>Name</Label>
+                    <Input
+                      {...form.register(`children.${index}.name` as const)}
+                      placeholder="Child's name"
                     />
-
-                    <FormField
-                      control={form.control}
-                      name={`children.${index}.dob`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormLabel>Date of Birth</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant="outline"
-                                  className={cn(
-                                    "w-full pl-3 text-left font-normal border-legacy-border focus:border-legacy-primary",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(new Date(field.value), "PPP")
-                                  ) : (
-                                    <span>Pick a date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value ? new Date(field.value) : undefined}
-                                onSelect={(date) => {
-                                  if (date) {
-                                    field.onChange(format(date, "yyyy-MM-dd"));
-                                  }
-                                }}
-                                disabled={(date) =>
-                                  date > new Date() || date < new Date("1900-01-01")
-                                }
-                                initialFocus
-                                className="p-3 pointer-events-auto"
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <Button type="button" variant="destructive" size="sm" onClick={() => removeChild(index)}>
-                      <X className="w-4 h-4" />
-                    </Button>
+                    {form.formState.errors.children?.[index]?.name && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.children[index]?.name?.message}
+                      </p>
+                    )}
                   </div>
-                ))}
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => addChild({ name: "", dob: "" })}
-                  className="w-full border-dashed"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Child
-                </Button>
-              </CardContent>
-            </Card>
+                  <div className="flex-1 space-y-2">
+                    <Label>Date of Birth</Label>
+                    <Input
+                      type="date"
+                      {...form.register(`children.${index}.dob` as const)}
+                      max={format(new Date(), 'yyyy-MM-dd')}
+                      min="1900-01-01"
+                    />
+                    {form.formState.errors.children?.[index]?.dob && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.children[index]?.dob?.message}
+                      </p>
+                    )}
+                  </div>
 
-            <Separator className="bg-legacy-border" />
+                  <Button type="button" variant="destructive" size="sm" onClick={() => removeChild(index)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
 
-            {/* Test Prompt Section */}
-            <Card className="shadow-paper bg-gradient-warm border-legacy-border">
-              <CardHeader>
-                <CardTitle className="text-legacy-primary flex items-center gap-2">
-                  <TestTube className="w-5 h-5" />
-                  Test Prompt System
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-legacy-ink/70">
-                  Send yourself a test prompt to see how personalized prompts work with your current settings.
-                </p>
-                <Button type="button" onClick={sendTestPrompt} variant="outline" className="w-full">
-                  <TestTube className="w-4 h-4 mr-2" />
-                  Send Test Prompt
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Save Settings */}
-            <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={saving}>
-                {saving ? "Saving..." : "Save Settings"}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => addChild({ name: "", dob: "" })}
+                className="w-full border-dashed"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Child
               </Button>
-            </div>
-          </form>
-        </Form>
+            </CardContent>
+          </Card>
+
+          {/* Test Prompt System */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5" />
+                Test Prompt System
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-legacy-ink/70">
+                Send yourself a test prompt to see how the system works with your current settings.
+              </p>
+              <Button type="button" onClick={sendTestPrompt} variant="outline" className="w-full">
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Send Test Prompt
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Save Settings */}
+          <div className="flex justify-end pt-4">
+            <Button type="submit" disabled={saving}>
+              {saving ? 'Saving...' : 'Save Settings'}
+            </Button>
+          </div>
+        </form>
       </div>
     </Layout>
   );
-}
+};
+
+export default Settings;

@@ -288,6 +288,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ensure_user_self: {
+        Args: { p_email?: string }
+        Returns: {
+          auth_user_id: string | null
+          banned_topics: string[] | null
+          children: Json | null
+          created_at: string | null
+          email: string | null
+          id: string
+          interests: string[] | null
+          last_login_at: string | null
+          name: string | null
+          phone_e164: string
+          preferred_language: string | null
+          status: string | null
+          timezone: string | null
+          tone: string | null
+        }
+      }
       get_user_id_from_phone: {
         Args: { phone: string }
         Returns: string

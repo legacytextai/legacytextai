@@ -16,7 +16,7 @@ interface LayoutProps {
 }
 
 export function Layout({ children, showSidebar = true }: LayoutProps) {
-  const { user, loading } = useAuth();
+  const { user, loading, authReady } = useAuth();
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -28,7 +28,7 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
   };
 
   const AuthButtons = () => {
-    if (loading) {
+    if (!authReady || loading) {
       return <div className="w-20 h-9 bg-muted animate-pulse rounded" />;
     }
 
