@@ -1,8 +1,15 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
-export function isE164(s: string): boolean {
+function isE164(s: string): boolean {
   return /^\+[1-9]\d{7,14}$/.test(s);
 }
+
+function getOrigin(): string {
+  if (typeof window !== 'undefined') return window.location.origin;
+  return process.env.NEXT_PUBLIC_SITE_URL || import.meta.env?.VITE_SITE_URL || 'https://legacytextai.lovable.app';
+}
+
+export { isE164 };
 
 export async function handleSignUp(
   supabase: SupabaseClient,
@@ -14,11 +21,7 @@ export async function handleSignUp(
     throw new Error('Enter phone in E.164 format, e.g. +13235551234');
   }
 
-  const origin =
-    (typeof window !== 'undefined' ? window.location.origin : '') ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    import.meta.env?.VITE_SITE_URL ||
-    '';
+  const origin = getOrigin();
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -36,11 +39,7 @@ export async function handleSignUp(
 }
 
 export async function resendConfirmationEmail(supabase: SupabaseClient, email: string) {
-  const origin =
-    (typeof window !== 'undefined' ? window.location.origin : '') ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    import.meta.env?.VITE_SITE_URL ||
-    '';
+  const origin = getOrigin();
 
   const { error } = await supabase.auth.resend({
     type: 'signup',
