@@ -25,6 +25,8 @@ export const useAuth = () => {
   return context;
 };
 
+let __didAutoKickoff = false;
+
 async function afterLoginBootstrap(session: Session | null) {
   if (!session?.user) return;
 
@@ -39,9 +41,11 @@ async function afterLoginBootstrap(session: Session | null) {
       .single();
 
     const pendingPhone = session.user.user_metadata?.pending_phone_e164 || null;
+    const needVerify = (!userData?.phone_e164 || userData.phone_e164 === '') && pendingPhone;
 
     // 3) If no phone on record, but we have a pending phone from sign-up, auto-send OTP once
-    if ((!userData?.phone_e164 || userData.phone_e164 === '') && pendingPhone) {
+    if (needVerify && !__didAutoKickoff) {
+      __didAutoKickoff = true; // in-memory guard
       const guardKey = `otpKickoff:${session.user.id}:${pendingPhone}`;
       if (!localStorage.getItem(guardKey)) {
         // Fire and forget; ignore failures (resend available on settings page)
