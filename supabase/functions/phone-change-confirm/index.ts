@@ -59,6 +59,14 @@ serve(async (req) => {
 
     const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
+    // BEFORE updating app row, fetch old phone to see if this is first-time verification
+    const { data: existingRows } = await admin
+      .from("users_app")
+      .select("phone_e164, status")
+      .eq("auth_user_id", user.id)
+      .limit(1);
+    const prevPhone = existingRows && existingRows[0]?.phone_e164;
+
     // Fetch OTP
     const { data: rows } = await admin.from("otp_codes")
       .select("id, code_hash, expires_at, attempts")
@@ -94,9 +102,12 @@ serve(async (req) => {
       return new Response("Auth update failed", { status: 500, headers: corsHeaders });
     }
 
-    // 2) Update application row
+    // 2) Update application row (also mark active on first verification)
     const { error: appErr } = await admin.from("users_app")
-      .update({ phone_e164: new_phone_e164 })
+      .update({
+        phone_e164: new_phone_e164,
+        status: existingRows && existingRows[0]?.status === 'active' ? 'active' : 'active' // ensure active
+      })
       .eq("auth_user_id", user.id);
     if (appErr) {
       console.error('App update error:', appErr);
@@ -108,6 +119,12 @@ serve(async (req) => {
 
     // 4) Confirm SMS
     await sendSMS(new_phone_e164, "Your phone number was updated for Legacy Journal. Reply STOP to unsubscribe, HELP for help.");
+
+    // 4b) Welcome SMS if first phone ever (prevPhone was null)
+    if (!prevPhone) {
+      await sendSMS(new_phone_e164,
+        "Welcome to Legacy Journal! You'll receive a daily prompt at 8am. Reply anytime to save an entry. Reply STOP to unsubscribe.");
+    }
 
     console.log(`Phone changed successfully to ${new_phone_e164} for user ${user.id}`);
 

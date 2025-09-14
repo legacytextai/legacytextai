@@ -3,6 +3,12 @@ import { Link } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { User, Settings, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,24 +16,80 @@ interface LayoutProps {
 }
 
 export function Layout({ children, showSidebar = true }: LayoutProps) {
+  const { user, loading } = useAuth();
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error('Failed to sign out');
+    } else {
+      toast.success('Signed out successfully');
+    }
+  };
+
+  const AuthButtons = () => {
+    if (loading) {
+      return <div className="w-20 h-9 bg-muted animate-pulse rounded" />;
+    }
+
+    if (user) {
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+              <Avatar className="h-9 w-9">
+                <AvatarFallback className="bg-legacy-primary text-white">
+                  {user.email?.charAt(0).toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuItem asChild>
+              <Link to="/dashboard" className="flex items-center">
+                <User className="mr-2 h-4 w-4" />
+                Dashboard
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/settings" className="flex items-center">
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSignOut}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-2">
+        <Link to="/auth">
+          <Button variant="ghost" size="sm">
+            Login
+          </Button>
+        </Link>
+        <Link to="/auth">
+          <Button variant="default" size="sm">
+            Sign Up
+          </Button>
+        </Link>
+      </div>
+    );
+  };
+
   if (!showSidebar) {
     return (
       <div className="min-h-screen bg-gradient-warm">
         <header className="border-b border-legacy-border bg-card/80 backdrop-blur-sm">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <h1 className="text-2xl font-bold text-legacy-primary">LegacyText AI</h1>
-            <div className="flex items-center gap-2">
-              <Link to="/auth">
-                <Button variant="ghost" size="sm">
-                  Login
-                </Button>
-              </Link>
-              <Link to="/auth">
-                <Button variant="default" size="sm">
-                  Sign Up
-                </Button>
-              </Link>
-            </div>
+            <AuthButtons />
           </div>
         </header>
         <main className="flex-1">{children}</main>
@@ -66,18 +128,7 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
           <header className="border-b border-legacy-border bg-card/80 backdrop-blur-sm">
             <div className="container mx-auto px-6 h-16 flex items-center justify-between">
               <h1 className="text-2xl font-bold text-legacy-primary">LegacyText AI</h1>
-              <div className="flex items-center gap-2">
-                <Link to="/auth">
-                  <Button variant="ghost" size="sm">
-                    Login
-                  </Button>
-                </Link>
-                <Link to="/auth">
-                  <Button variant="default" size="sm">
-                    Sign Up
-                  </Button>
-                </Link>
-              </div>
+              <AuthButtons />
             </div>
           </header>
           <div className="flex-1 p-6">
