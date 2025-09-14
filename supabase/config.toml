@@ -7,7 +7,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.phone-change-initiate]
-verify_jwt = false
+verify_jwt = true
 
 [functions.phone-change-confirm]
-verify_jwt = false
+verify_jwt = true

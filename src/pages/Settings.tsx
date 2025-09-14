@@ -32,6 +32,7 @@ type UserRow = {
   interests: string[] | null;
   banned_topics: string[] | null;
   children: any; // JSON type from Supabase
+  auth_user_id: string | null;
 };
 
 // Validation schema
@@ -174,8 +175,8 @@ export default function Settings() {
 
       const { data: userData, error } = await supabase
         .from('users_app')
-        .select('id, name, phone_e164, status, preferred_language, timezone, interests, banned_topics, children')
-        .eq('phone_e164', phone)
+        .select('id, name, phone_e164, status, preferred_language, timezone, interests, banned_topics, children, auth_user_id')
+        .eq('auth_user_id', user.id)
         .limit(1)
         .maybeSingle();
 
@@ -191,7 +192,7 @@ export default function Settings() {
       if (!userData) {
         toast({
           title: "User Not Found",
-          description: "No user profile found. Please contact support.",
+          description: "No user profile found. This may happen after a phone change. Please contact support if this persists.",
           variant: "destructive"
         });
         return;
@@ -580,8 +581,13 @@ export default function Settings() {
                 />
 
                 <div className="space-y-2">
-                  <Label className="text-sm text-legacy-ink/70">Phone</Label>
+                  <Label className="text-sm text-legacy-ink/70 flex items-center gap-2">
+                    Phone <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Protected</span>
+                  </Label>
                   <Input value={userRow.phone_e164} disabled className="bg-muted" />
+                  <p className="text-xs text-legacy-ink/60">
+                    Phone changes require SMS verification for security
+                  </p>
                 </div>
 
                 <div className="space-y-2">
