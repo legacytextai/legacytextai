@@ -1,1 +1,7 @@
 project_id = "toxadhuqzdydliplhrws"
+
+[functions.twilio-inbound]
+verify_jwt = false
+
+[functions.send-daily-prompts]
+verify_jwt = false
