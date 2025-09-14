@@ -45,7 +45,7 @@ function containsBanned(text: string, banned: string[]): boolean {
   return banned.some(k => k && t.includes(k.toLowerCase()));
 }
 
-/** OpenAI call (Chat Completions API) */
+/** OpenAI call */
 async function openaiGenerate(input: any) {
   const apiKey = Deno.env.get("OPENAI_API_KEY");
   if (!apiKey) throw new Error("Missing OPENAI_API_KEY");
