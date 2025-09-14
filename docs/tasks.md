@@ -590,6 +590,36 @@ CREATE POLICY "Users can upload own media" ON media FOR INSERT WITH CHECK (auth.
 
 ---
 
+### ✅ Task 14: In-App Debug Toggles (No Environment Variables)
+**Priority**: HIGH | **Estimated**: 4 hours
+**Status**: COMPLETED ✅
+
+#### Subtasks:
+- [x] 14.1 Create `utils/debugConfig.ts` with URL params → localStorage → defaults priority
+- [x] 14.2 Add floating DebugControls widget (only visible when debug enabled)
+- [x] 14.3 Replace all environment variable usage with toggle functions
+- [x] 14.4 Force signUp emailRedirectTo: `/auth/callback` for proper redirects
+- [x] 14.5 Update all debug overlays and auth components to use new config system
+
+#### Implementation Summary:
+**Completed**: Full debug system overhaul replacing environment variables with in-app toggles:
+- Created URL parameter and localStorage-based debug configuration
+- Added floating debug controls widget for real-time toggle management
+- Updated auth callback, bootstrap, and debug overlay to use new config
+- Ensured all sign-up flows redirect to `/auth/callback`
+- Removed dependency on build-time environment variables for debug features
+
+#### Files Created/Updated:
+- `src/utils/debugConfig.ts` - New debug configuration utility
+- `src/components/DebugControls.tsx` - New floating debug controls widget
+- `src/pages/AuthCallback.tsx` - Updated to use new debug config
+- `src/hooks/useAuth.tsx` - Updated bootstrap to use toggle functions
+- `src/pages/Auth.tsx` - Fixed email redirect to `/auth/callback`
+- `src/components/DebugOverlay.tsx` - Updated to use new config system
+- `src/App.tsx` - Added DebugControls component
+
+---
+
 ## 🧪 Phase 3: Polish & Launch (Weeks 9-10)
 
 ### 🔲 Task 13: Testing & Quality Assurance

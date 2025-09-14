@@ -8,8 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { afterLoginBootstrap } from '@/hooks/useAuth';
-
-const DEBUG_AUTH = import.meta.env.PUBLIC_DEBUG_AUTH === 'true';
+import { getDebugAuth } from '@/utils/debugConfig';
 
 interface AuthState {
   status: 'verifying' | 'success' | 'error';
@@ -39,7 +38,7 @@ export default function AuthCallback() {
     error: null,
   });
 
-  const isDebugMode = DEBUG_AUTH || searchParams.get('debug') === '1';
+  const isDebugMode = getDebugAuth() || searchParams.get('debug') === '1';
 
   useEffect(() => {
     const handleAuthCallback = async () => {

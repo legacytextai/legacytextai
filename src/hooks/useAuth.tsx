@@ -2,6 +2,7 @@ import { useState, useEffect, createContext, useContext, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { getAutoOtp } from '@/utils/debugConfig';
 
 interface AuthContextType {
   user: User | null;
@@ -26,9 +27,6 @@ export const useAuth = () => {
 };
 
 let __didAutoKickoff = false;
-
-const ONBOARDING_AUTO_OTP = import.meta.env.PUBLIC_ONBOARDING_AUTO_OTP !== 'false';
-const DEBUG_LOG_NETWORK = import.meta.env.PUBLIC_DEBUG_LOG_NETWORK === 'true';
 
 export async function afterLoginBootstrap(navigate: (path: string) => void) {
   console.log('[afterLoginBootstrap] Starting bootstrap process');
@@ -68,11 +66,12 @@ export async function afterLoginBootstrap(navigate: (path: string) => void) {
       currentPhone: userData?.[0]?.phone_e164,
       pendingPhone,
       needVerify,
-      autoOtpEnabled: ONBOARDING_AUTO_OTP,
+      autoOtpEnabled: getAutoOtp(),
     });
 
     // 3) If no phone on record, but we have a pending phone from sign-up, auto-send OTP once
-    if (needVerify && ONBOARDING_AUTO_OTP && !__didAutoKickoff) {
+    const autoEnabled = getAutoOtp();
+    if (needVerify && autoEnabled && !__didAutoKickoff) {
       __didAutoKickoff = true; // in-memory guard
       const guardKey = `otpKickoff:${user.id}:${pendingPhone}`;
       
@@ -82,13 +81,11 @@ export async function afterLoginBootstrap(navigate: (path: string) => void) {
         try {
           const token = (await supabase.auth.getSession()).data.session?.access_token;
           
-          if (DEBUG_LOG_NETWORK) {
-            console.log('[afterLoginBootstrap] OTP Request details:', {
-              url: 'https://toxadhuqzdydliplhrws.supabase.co/functions/v1/phone-change-initiate',
-              headers: { 'Authorization': `Bearer ${token?.substring(0, 20)}...` },
-              body: { new_phone_e164: pendingPhone, auto: true },
-            });
-          }
+          console.log('[afterLoginBootstrap] OTP Request details:', {
+            url: 'https://toxadhuqzdydliplhrws.supabase.co/functions/v1/phone-change-initiate',
+            headers: { 'Authorization': `Bearer ${token?.substring(0, 20)}...` },
+            body: { new_phone_e164: pendingPhone, auto: true },
+          });
           
           const response = await fetch(`https://toxadhuqzdydliplhrws.supabase.co/functions/v1/phone-change-initiate`, {
             method: 'POST',
@@ -120,7 +117,7 @@ export async function afterLoginBootstrap(navigate: (path: string) => void) {
       return;
     }
 
-    if (needVerify && !ONBOARDING_AUTO_OTP) {
+    if (needVerify && !autoEnabled) {
       console.log('[afterLoginBootstrap] Phone verification needed but auto OTP disabled, routing to settings');
       navigate('/settings?verifyPhone=1');
       return;

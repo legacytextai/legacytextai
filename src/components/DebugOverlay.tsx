@@ -7,8 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { X, Bug, Loader2 } from 'lucide-react';
 
-const DEBUG_AUTH = import.meta.env.PUBLIC_DEBUG_AUTH === 'true';
-const DEBUG_LOG_NETWORK = import.meta.env.PUBLIC_DEBUG_LOG_NETWORK === 'true';
+import { getDebugAuth } from '@/utils/debugConfig';
 
 interface UserAppData {
   status: string;
@@ -42,7 +41,7 @@ export function DebugOverlay() {
   const [otpStatus, setOTPStatus] = useState<OTPStatus>({});
 
   // Don't render if debug is disabled
-  if (!DEBUG_AUTH) return null;
+  if (!getDebugAuth()) return null;
 
   // Load user app data
   useEffect(() => {
@@ -64,7 +63,9 @@ export function DebugOverlay() {
 
   // Intercept fetch calls to OTP functions if network debugging is enabled
   useEffect(() => {
-    if (!DEBUG_LOG_NETWORK) return;
+    // Always enable network debugging in the debug overlay
+    const debugNetworkEnabled = true;
+    if (!debugNetworkEnabled) return;
 
     const originalFetch = window.fetch;
     window.fetch = async (...args) => {
@@ -241,7 +242,7 @@ export function DebugOverlay() {
           {/* Debug Controls */}
           <div className="pt-2 border-t border-yellow-200">
             <div className="text-xs text-yellow-700">
-              DEBUG_AUTH: {String(DEBUG_AUTH)} | NETWORK: {String(DEBUG_LOG_NETWORK)}
+              DEBUG_AUTH: {String(getDebugAuth())}
             </div>
           </div>
         </CardContent>

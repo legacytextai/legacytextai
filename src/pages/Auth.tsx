@@ -89,13 +89,11 @@ const Auth = () => {
       return;
     }
 
-    const redirectUrl = `${window.location.origin}/`;
-
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         data: { pending_phone_e164: phone }
       }
     });
@@ -122,7 +120,7 @@ const Auth = () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`
+        redirectTo: `${window.location.origin}/auth/callback`
       }
     });
 
