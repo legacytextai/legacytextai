@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail, Chrome } from "lucide-react";
+import { ArrowLeft, Mail, Chrome, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { handleSignUp, resendConfirmationEmail, isE164 } from "@/utils/auth";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -19,6 +20,9 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
+  const [showResend, setShowResend] = useState(false);
+  const [lastEmail, setLastEmail] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
   const navigate = useNavigate();
 
   // Check if user is already authenticated
@@ -61,11 +65,6 @@ const Auth = () => {
     setLoading(false);
   };
 
-  const validateE164Phone = (phone: string): boolean => {
-    const e164Regex = /^\+[1-9]\d{7,14}$/;
-    return e164Regex.test(phone);
-  };
-
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -83,34 +82,40 @@ const Auth = () => {
       return;
     }
 
-    if (!phone || !validateE164Phone(phone)) {
-      setError("Please enter a valid phone number in E.164 format (e.g., +1234567890)");
-      setLoading(false);
-      return;
-    }
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-        data: { pending_phone_e164: phone }
-      }
-    });
-
-    if (error) {
+    try {
+      await handleSignUp(supabase, { 
+        email, 
+        password, 
+        phoneE164: phone 
+      });
+      
+      toast.success("Check your email for a confirmation link!");
+      setError("");
+      setLastEmail(email);
+      setShowResend(true);
+    } catch (error: any) {
       if (error.message.includes("already registered")) {
         setError("This email is already registered. Please sign in instead.");
       } else {
         setError(error.message);
       }
       toast.error("Sign up failed: " + error.message);
-    } else {
-      toast.success("Check your email for a confirmation link!");
-      setError("");
     }
 
     setLoading(false);
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!lastEmail) return;
+    
+    setResendLoading(true);
+    try {
+      await resendConfirmationEmail(supabase, lastEmail);
+      toast.success("Confirmation email re-sent!");
+    } catch (error: any) {
+      toast.error("Failed to resend: " + error.message);
+    }
+    setResendLoading(false);
   };
 
   const handleGoogleSignIn = async () => {
@@ -259,32 +264,50 @@ const Auth = () => {
                      </div>
                      <div className="space-y-2">
                        <Label htmlFor="signup-phone">Phone Number</Label>
-                       <Input
-                         id="signup-phone"
-                         type="tel"
-                         placeholder="Enter phone number (e.g., +1234567890)"
-                         value={phone}
-                         onChange={(e) => setPhone(e.target.value)}
-                         required
-                         className={!validateE164Phone(phone) && phone ? "border-destructive" : ""}
-                       />
-                       {phone && !validateE164Phone(phone) && (
-                         <p className="text-sm text-destructive">
-                           Please enter a valid phone number in E.164 format (e.g., +1234567890)
-                         </p>
-                       )}
+                        <Input
+                          id="signup-phone"
+                          type="tel"
+                          placeholder="Enter phone number (e.g., +1234567890)"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          required
+                          className={!isE164(phone) && phone ? "border-destructive" : ""}
+                        />
+                        {phone && !isE164(phone) && (
+                          <p className="text-sm text-destructive">
+                            Please enter a valid phone number in E.164 format (e.g., +1234567890)
+                          </p>
+                        )}
                      </div>
-                     <Button 
-                       type="submit" 
-                       disabled={loading || !validateE164Phone(phone)} 
-                       className="w-full"
-                     >
-                       <Mail className="w-4 h-4 mr-2" />
-                       {loading ? "Creating account..." : "Create Account"}
-                     </Button>
+                      <Button 
+                        type="submit" 
+                        disabled={loading || !isE164(phone)} 
+                        className="w-full"
+                      >
+                        <Mail className="w-4 h-4 mr-2" />
+                        {loading ? "Creating account..." : "Create Account"}
+                      </Button>
                   </form>
                 </TabsContent>
               </Tabs>
+
+              {showResend && (
+                <div className="mt-4 p-3 bg-legacy-ink/5 rounded-lg border border-legacy-border">
+                  <p className="text-sm text-legacy-ink/70 mb-2">
+                    Didn't receive the confirmation email?
+                  </p>
+                  <Button 
+                    onClick={handleResendConfirmation}
+                    disabled={resendLoading}
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    {resendLoading ? "Sending..." : "Resend confirmation email"}
+                  </Button>
+                </div>
+              )}
 
               <p className="text-center text-sm text-legacy-ink/60 mt-4">
                 By signing up, you agree to our{" "}
