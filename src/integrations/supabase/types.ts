@@ -175,6 +175,33 @@ export type Database = {
         }
         Relationships: []
       }
+      tones: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: number
+          key: string
+          label: string
+          weight: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: number
+          key: string
+          label: string
+          weight?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: number
+          key?: string
+          label?: string
+          weight?: number
+        }
+        Relationships: []
+      }
       users_app: {
         Row: {
           banned_topics: string[] | null
