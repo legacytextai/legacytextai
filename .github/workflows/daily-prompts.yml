@@ -1,14 +1,27 @@
 name: Send Daily Prompts (8am PT)
 
 on:
-  # GitHub Actions cron runs in UTC. Two entries cover DST:
-  # - 15:00 UTC ≈ 8:00 AM during PDT
-  # - 16:00 UTC ≈ 8:00 AM during PST
+  # Scheduled 8:00 AM Pacific (covers DST)
   schedule:
-    - cron: "0 15 * * *"
-    - cron: "0 16 * * *"
-  # Allow manual runs from the Actions tab
-  workflow_dispatch: {}
+    - cron: "0 15 * * *"  # 08:00 during PDT
+    - cron: "0 16 * * *"  # 08:00 during PST
+  # Manual runs with optional inputs
+  workflow_dispatch:
+    inputs:
+      to:
+        description: "Send only to this E.164 phone (e.g., +13235550123)"
+        required: false
+        type: string
+      force:
+        description: "Bypass the one-send-per-day guard"
+        required: false
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+      prompt:
+        description: "Override prompt text (optional)"
+        required: false
+        type: string
 
 jobs:
   call-function:
@@ -18,19 +31,40 @@ jobs:
       group: daily-prompts
       cancel-in-progress: false
     steps:
-      - name: Call Supabase Edge Function
+      - name: Build URL with query params (for manual test mode)
+        id: vars
         env:
-          SEND_DAILY_URL: ${{ secrets.SEND_DAILY_URL }}
+          BASE:   ${{ secrets.SEND_DAILY_URL }}
+          TO:     ${{ github.event.inputs.to }}
+          FORCE:  ${{ github.event.inputs.force }}
+          PROMPT: ${{ github.event.inputs.prompt }}
         run: |
-          # retry up to 3 times (10s apart)
+          if [ -z "$BASE" ]; then
+            echo "ERROR: SEND_DAILY_URL secret is not set"; exit 1
+          fi
+          url="$BASE"
+          q=""
+          if [ -n "$TO" ]; then
+            # encode leading + as %2B
+            enc_to="$(printf %s "$TO" | sed 's/+/%2B/g')"
+            q="to=$enc_to"
+          fi
+          if [ "$FORCE" = "true" ]; then
+            q="${q}${q:+&}force=true"
+          fi
+          if [ -n "$PROMPT" ]; then
+            enc_prompt="$(printf %s "$PROMPT" | jq -sRr @uri)"
+            q="${q}${q:+&}prompt=$enc_prompt"
+          fi
+          if [ -n "$q" ]; then url="${url}?${q}"; fi
+          echo "url=$url" >> $GITHUB_OUTPUT
+      - name: Call Supabase Edge Function
+        run: |
           for i in 1 2 3; do
-            http_code=$(curl -sS -o response.json -w "%{http_code}" -X POST "$SEND_DAILY_URL")
+            http_code=$(curl -sS -o response.json -w "%{http_code}" -X POST "${{ steps.vars.outputs.url }}")
             echo "HTTP $http_code"
             cat response.json || true
-            if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
-              exit 0
-            fi
+            if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then exit 0; fi
             sleep 10
           done
-          echo "Failed after 3 attempts"
-          exit 1
+          echo "Failed after 3 attempts"; exit 1
