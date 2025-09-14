@@ -1,0 +1,36 @@
+name: Send Daily Prompts (8am PT)
+
+on:
+  # GitHub Actions cron runs in UTC. Two entries cover DST:
+  # - 15:00 UTC ≈ 8:00 AM during PDT
+  # - 16:00 UTC ≈ 8:00 AM during PST
+  schedule:
+    - cron: "0 15 * * *"
+    - cron: "0 16 * * *"
+  # Allow manual runs from the Actions tab
+  workflow_dispatch: {}
+
+jobs:
+  call-function:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: daily-prompts
+      cancel-in-progress: false
+    steps:
+      - name: Call Supabase Edge Function
+        env:
+          SEND_DAILY_URL: ${{ secrets.SEND_DAILY_URL }}
+        run: |
+          # retry up to 3 times (10s apart)
+          for i in 1 2 3; do
+            http_code=$(curl -sS -o response.json -w "%{http_code}" -X POST "$SEND_DAILY_URL")
+            echo "HTTP $http_code"
+            cat response.json || true
+            if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Failed after 3 attempts"
+          exit 1
