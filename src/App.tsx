@@ -45,8 +45,12 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthGuard>
-      <DebugControls />
-      <DebugOverlay />
+      {import.meta.env.DEV && (
+        <>
+          <DebugControls />
+          <DebugOverlay />
+        </>
+      )}
     </TooltipProvider>
   </QueryClientProvider>
 );
