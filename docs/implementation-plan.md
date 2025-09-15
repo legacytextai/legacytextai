@@ -56,7 +56,7 @@
 11. **Premium Export Engine**
     - Advanced formatting
     - Optional media section
-    - Stripe integration for $1.99 PDF
+    - Stripe integration for $9.99 PDF
 
 12. **Physical Journal Workflow**
     - Export file to print-ready layout
