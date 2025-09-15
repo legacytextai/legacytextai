@@ -128,16 +128,18 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
         <AppSidebar />
         <main className="flex-1 flex flex-col">
           <header className="border-b border-legacy-border bg-card/80 backdrop-blur-sm">
-            <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                {isMobile && (
+            <div className="container mx-auto px-6 py-3 flex flex-col">
+              <div className="flex items-center justify-between h-10">
+                <h1 className="text-2xl font-bold text-legacy-primary">LegacyText AI</h1>
+                <AuthButtons />
+              </div>
+              {isMobile && (
+                <div className="flex justify-start mt-2">
                   <SidebarTrigger className="lg:hidden p-2">
                     <Menu className="h-5 w-5" />
                   </SidebarTrigger>
-                )}
-                <h1 className="text-2xl font-bold text-legacy-primary">LegacyText AI</h1>
-              </div>
-              <AuthButtons />
+                </div>
+              )}
             </div>
           </header>
           <div className="flex-1 p-6">
