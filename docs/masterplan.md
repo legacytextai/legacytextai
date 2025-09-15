@@ -29,7 +29,7 @@ Many dads want to pass on wisdom but struggle to find time or the right medium. 
 - Live preview of your legacy journal  
 - Export options:  
   - Free basic PDF  
-  - Premium formatted PDF ($1.99)  
+  - Premium formatted PDF ($9.99)  
   - Leatherbound keepsake ($199)  
 - WYSIWYG editor for refining entries  
 - Messaging preferences: frequency, phone number, etc.  
