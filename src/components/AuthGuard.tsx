@@ -30,8 +30,11 @@ export function AuthGuard({ children }: AuthGuardProps) {
     const isPhoneVerification = location.pathname === '/settings' && 
       new URLSearchParams(location.search).get('verifyPhone') === '1';
     
+    // Also don't count Settings page internal navigation as loops
+    const isSettingsPageNavigation = location.pathname === '/settings';
+    
     // Reset if more than 10 seconds have passed or if this is a phone verification redirect
-    if (now - storedTime > 10000 || isPhoneVerification) {
+    if (now - storedTime > 10000 || isPhoneVerification || (isSettingsPageNavigation && storedCount <= 2)) {
       localStorage.setItem(loopKey, '1');
       localStorage.setItem(timeKey, String(now));
       setLoopCount(1);

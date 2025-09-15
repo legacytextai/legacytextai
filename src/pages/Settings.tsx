@@ -151,17 +151,33 @@ const Settings = () => {
     const shouldShowVerification = searchParams.get('verifyPhone') === '1';
     const pendingPhone = user?.user_metadata?.pending_phone_e164;
     
-    if (shouldShowVerification || (!userData?.phone_e164 || userData.phone_e164 === '' || userData.status !== 'active')) {
+    console.log('Settings verification check:', {
+      shouldShowVerification,
+      userDataPhone: userData?.phone_e164,
+      userDataStatus: userData?.status,
+      pendingPhone,
+      loading
+    });
+    
+    // Only show verification if explicitly requested AND user needs it
+    // Don't show if already loading or if user already has verified phone
+    if (!loading && shouldShowVerification && (!userData?.phone_e164 || userData.phone_e164 === '' || userData.status !== 'active')) {
       setShowPhoneVerification(true);
       
       // Prefill phone input with pending phone if available
       if (pendingPhone && !newPhone) {
         setNewPhone(pendingPhone);
       }
-    } else {
+      
+      // Clear the URL parameter to prevent re-triggering
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('verifyPhone');
+      const newUrl = `${window.location.pathname}${newSearchParams.toString() ? '?' + newSearchParams.toString() : ''}`;
+      window.history.replaceState({}, '', newUrl);
+    } else if (!shouldShowVerification) {
       setShowPhoneVerification(false);
     }
-  }, [searchParams, user, userData, newPhone]);
+  }, [searchParams, user, userData, newPhone, loading]);
 
   // Resend cooldown timer
   useEffect(() => {
