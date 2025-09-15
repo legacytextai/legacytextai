@@ -144,7 +144,16 @@ async function translateIfNeeded(text: string, toLang: string) {
   }
 }
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
   const url = new URL(req.url);
   const toFilter = url.searchParams.get("to");        // E.164 phone (test mode)
   const force     = url.searchParams.get("force") === "true";
@@ -325,6 +334,6 @@ Reply STOP to unsubscribe.`;
 
   return new Response(
     JSON.stringify({ ok: true, sent, errors, prompt: usedPrompt }),
-    { headers: { "Content-Type": "application/json" } }
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 });

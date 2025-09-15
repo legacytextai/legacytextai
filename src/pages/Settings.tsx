@@ -299,14 +299,20 @@ const Settings = () => {
         }
       });
 
+      console.log('Test prompt response status:', response.status);
+      
       if (response.ok) {
+        const result = await response.json();
+        console.log('Test prompt result:', result);
         toast.success('Test prompt sent!');
       } else {
-        toast.error('Failed to send test prompt');
+        const errorText = await response.text();
+        console.error('Test prompt error response:', response.status, errorText);
+        toast.error(`Failed to send test prompt: ${response.status}`);
       }
     } catch (error) {
       console.error('Error sending test prompt:', error);
-      toast.error('Failed to send test prompt');
+      toast.error('Failed to send test prompt: Network error');
     }
   };
 
