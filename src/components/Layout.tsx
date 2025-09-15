@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Button } from "@/components/ui/button";
@@ -134,6 +134,7 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
 function SidebarLayout({ children }: { children: ReactNode }) {
   const { user, loading, authReady } = useAuth();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const { toggleSidebar } = useSidebar();
 
   const handleSignOut = async () => {
@@ -208,7 +209,12 @@ function SidebarLayout({ children }: { children: ReactNode }) {
         <header className="border-b border-legacy-border bg-card/80 backdrop-blur-sm">
           <div className="container mx-auto px-6 py-3 flex flex-col">
             <div className="flex items-center justify-between h-10">
-              <h1 className="text-2xl font-bold text-legacy-primary">LegacyText AI</h1>
+            <button 
+              onClick={() => navigate("/dashboard")}
+              className="text-2xl font-bold text-legacy-primary hover:text-legacy-accent transition-colors cursor-pointer"
+            >
+              LegacyText AI
+            </button>
               <AuthButtons />
             </div>
             {isMobile && (
