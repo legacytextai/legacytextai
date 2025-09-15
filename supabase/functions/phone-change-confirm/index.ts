@@ -60,11 +60,33 @@ serve(async (req) => {
     const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     // BEFORE updating app row, fetch old phone to see if this is first-time verification
-    const { data: existingRows } = await admin
+    let { data: existingRows } = await admin
       .from("users_app")
       .select("phone_e164, status")
       .eq("auth_user_id", user.id)
       .limit(1);
+    
+    // If no profile linked to this user, check for orphaned profile with this phone
+    if (!existingRows || !existingRows.length) {
+      const { data: orphanedProfile } = await admin
+        .from("users_app")
+        .select("phone_e164, status")
+        .eq("phone_e164", new_phone_e164)
+        .is("auth_user_id", null)
+        .limit(1);
+      
+      if (orphanedProfile && orphanedProfile.length) {
+        // Link the orphaned profile to this user
+        await admin
+          .from("users_app")
+          .update({ auth_user_id: user.id })
+          .eq("phone_e164", new_phone_e164)
+          .is("auth_user_id", null);
+        
+        existingRows = orphanedProfile;
+      }
+    }
+    
     const prevPhone = existingRows && existingRows[0]?.phone_e164;
 
     // Fetch OTP
@@ -102,11 +124,11 @@ serve(async (req) => {
       return new Response("Auth update failed", { status: 500, headers: corsHeaders });
     }
 
-    // 2) Update application row (also mark active on first verification)
+    // 2) Update application row (ensure active status on successful verification)
     const { error: appErr } = await admin.from("users_app")
       .update({
         phone_e164: new_phone_e164,
-        status: existingRows && existingRows[0]?.status === 'active' ? 'active' : 'active' // ensure active
+        status: 'active' // Phone verified, user is now active
       })
       .eq("auth_user_id", user.id);
     if (appErr) {
