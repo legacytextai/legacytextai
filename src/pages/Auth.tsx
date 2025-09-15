@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { handleSignUp, resendConfirmationEmail, isE164 } from "@/utils/auth";
+import { handleSignUp, resendConfirmationEmail, isE164, formatPhoneDisplay, normalizePhoneToE164, isValidPhone } from "@/utils/auth";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -19,6 +19,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneDisplay, setPhoneDisplay] = useState("");
   const [error, setError] = useState("");
   const [showResend, setShowResend] = useState(false);
   const [lastEmail, setLastEmail] = useState("");
@@ -100,10 +101,11 @@ const Auth = () => {
     }
 
     try {
+      const normalizedPhone = normalizePhoneToE164(phoneDisplay);
       await handleSignUp(supabase, { 
         email, 
         password, 
-        phoneE164: phone 
+        phoneE164: normalizedPhone 
       });
       
       toast.success("Check your email for a confirmation link!");
@@ -292,21 +294,25 @@ const Auth = () => {
                         <Input
                           id="signup-phone"
                           type="tel"
-                          placeholder="Enter phone number (e.g., +1234567890)"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="(123) 456-7890"
+                          value={phoneDisplay}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setPhoneDisplay(formatPhoneDisplay(value));
+                            setPhone(normalizePhoneToE164(value));
+                          }}
                           required
-                          className={!isE164(phone) && phone ? "border-destructive" : ""}
+                          className={phoneDisplay && !isValidPhone(phoneDisplay) ? "border-destructive" : ""}
                         />
-                        {phone && !isE164(phone) && (
+                        {phoneDisplay && !isValidPhone(phoneDisplay) && (
                           <p className="text-sm text-destructive">
-                            Please enter a valid phone number in E.164 format (e.g., +1234567890)
+                            Please enter a valid US phone number (10 digits)
                           </p>
                         )}
                      </div>
                       <Button 
                         type="submit" 
-                        disabled={loading || !isE164(phone)} 
+                        disabled={loading || !isValidPhone(phoneDisplay)} 
                         className="w-full"
                       >
                         <Mail className="w-4 h-4 mr-2" />
