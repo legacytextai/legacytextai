@@ -1,12 +1,13 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, Settings, LogOut } from "lucide-react";
+import { User, Settings, LogOut, Menu } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -17,6 +18,7 @@ interface LayoutProps {
 
 export function Layout({ children, showSidebar = true }: LayoutProps) {
   const { user, loading, authReady } = useAuth();
+  const isMobile = useIsMobile();
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -127,7 +129,14 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
         <main className="flex-1 flex flex-col">
           <header className="border-b border-legacy-border bg-card/80 backdrop-blur-sm">
             <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-legacy-primary">LegacyText AI</h1>
+              <div className="flex items-center gap-3">
+                {isMobile && (
+                  <SidebarTrigger className="lg:hidden">
+                    <Menu className="h-5 w-5" />
+                  </SidebarTrigger>
+                )}
+                <h1 className="text-2xl font-bold text-legacy-primary">LegacyText AI</h1>
+              </div>
               <AuthButtons />
             </div>
           </header>
