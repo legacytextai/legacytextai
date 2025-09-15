@@ -23,7 +23,24 @@ const Auth = () => {
   const [showResend, setShowResend] = useState(false);
   const [lastEmail, setLastEmail] = useState("");
   const [resendLoading, setResendLoading] = useState(false);
+  const [emailConfirmed, setEmailConfirmed] = useState(false);
   const navigate = useNavigate();
+
+  // Check URL parameters for confirmation status
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const confirmed = urlParams.get('confirmed');
+    const urlEmail = urlParams.get('email');
+    
+    if (confirmed === '1') {
+      setEmailConfirmed(true);
+      if (urlEmail) {
+        setEmail(decodeURIComponent(urlEmail));
+      }
+      // Clean up URL
+      window.history.replaceState({}, '', '/auth');
+    }
+  }, []);
 
   // Check if user is already authenticated
   useEffect(() => {
@@ -160,6 +177,14 @@ const Auth = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {emailConfirmed && (
+                <Alert className="mb-4 border-green-500/50 bg-green-50/50">
+                  <AlertDescription className="text-green-700">
+                    ✓ Email confirmed successfully! Please sign in below to continue.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               {error && (
                 <Alert className="mb-4 border-destructive/50">
                   <AlertDescription className="text-destructive">

@@ -117,6 +117,13 @@ export default function AuthCallback() {
         }
         
         if (!sessionSet) {
+          // Check if this might be a confirmation-only redirect (no auth params but clean URL)
+          if (!parsedUrl.error && !parsedUrl.token_hash && !parsedUrl.code && !parsedUrl.access_token) {
+            // This is likely a successful email confirmation that doesn't log the user in
+            console.log('[AuthCallback] Detected confirmation-only redirect, redirecting to auth page');
+            window.location.href = '/auth?confirmed=1&email=' + encodeURIComponent(searchParams.get('email') || '');
+            return;
+          }
           throw new Error('No authentication parameters found. This may be a confirmation-only link that requires you to log in separately.');
         }
 
