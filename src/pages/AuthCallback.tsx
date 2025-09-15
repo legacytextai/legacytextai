@@ -159,8 +159,12 @@ export default function AuthCallback() {
                 <CardTitle className="text-sm font-mono">Debug Info</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm font-mono">
-                <div><strong>Parsed URL:</strong> {JSON.stringify(authState.parsedUrl, null, 2)}</div>
+                <div><strong>Current URL:</strong> {window.location.href}</div>
+                <div><strong>Origin:</strong> {window.location.origin}</div>
+                <div><strong>Supabase URL:</strong> https://toxadhuqzdydliplhrws.supabase.co</div>
+                <div><strong>Parsed URL:</strong> <pre className="whitespace-pre-wrap">{JSON.stringify(authState.parsedUrl, null, 2)}</pre></div>
                 <div><strong>Handler Path:</strong> {authState.handlerPath || 'None detected'}</div>
+                <div><strong>Domain Match:</strong> {window.location.origin.includes('toxadhuqzdydliplhrws') || window.location.origin.includes('localhost') || window.location.origin.includes('lovable.app') ? '✅ Yes' : '❌ No'}</div>
               </CardContent>
             </Card>
           )}
@@ -186,9 +190,13 @@ export default function AuthCallback() {
                 <CardTitle className="text-sm font-mono">Debug Info</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm font-mono">
-                <div><strong>Parsed URL:</strong> {JSON.stringify(authState.parsedUrl, null, 2)}</div>
+                <div><strong>Current URL:</strong> {window.location.href}</div>
+                <div><strong>Origin:</strong> {window.location.origin}</div>
+                <div><strong>Supabase URL:</strong> https://toxadhuqzdydliplhrws.supabase.co</div>
+                <div><strong>Parsed URL:</strong> <pre className="whitespace-pre-wrap">{JSON.stringify(authState.parsedUrl, null, 2)}</pre></div>
                 <div><strong>Handler Path:</strong> {authState.handlerPath || 'None detected'}</div>
                 <div><strong>Error:</strong> {authState.error}</div>
+                <div><strong>Domain Match:</strong> {window.location.origin.includes('toxadhuqzdydliplhrws') || window.location.origin.includes('localhost') || window.location.origin.includes('lovable.app') ? '✅ Yes' : '❌ No'}</div>
               </CardContent>
             </Card>
           )}
@@ -229,9 +237,13 @@ export default function AuthCallback() {
                 <CardTitle className="text-sm font-mono">Debug Info</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm font-mono">
+                <div><strong>Current URL:</strong> {window.location.href}</div>
+                <div><strong>Origin:</strong> {window.location.origin}</div>
+                <div><strong>Supabase URL:</strong> https://toxadhuqzdydliplhrws.supabase.co</div>
                 <div><strong>Handler Path:</strong> {authState.handlerPath}</div>
-                <div><strong>Parsed URL:</strong> {JSON.stringify(authState.parsedUrl, null, 2)}</div>
-                <div><strong>Session:</strong> {JSON.stringify(authState.sessionSnapshot, null, 2)}</div>
+                <div><strong>Parsed URL:</strong> <pre className="whitespace-pre-wrap">{JSON.stringify(authState.parsedUrl, null, 2)}</pre></div>
+                <div><strong>Session:</strong> <pre className="whitespace-pre-wrap">{JSON.stringify(authState.sessionSnapshot, null, 2)}</pre></div>
+                <div><strong>Domain Match:</strong> {window.location.origin.includes('toxadhuqzdydliplhrws') || window.location.origin.includes('localhost') || window.location.origin.includes('lovable.app') ? '✅ Yes' : '❌ No'}</div>
               </CardContent>
             </Card>
             

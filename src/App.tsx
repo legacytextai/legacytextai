@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import DebugControls from "@/components/DebugControls";
+import { DebugOverlay } from "@/components/DebugOverlay";
 import Homepage from "./pages/Homepage";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
@@ -15,6 +16,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
+import DiagAuth from "./pages/DiagAuth";
 import NotFound from "./pages/NotFound";
 import { AuthGuard } from "./components/AuthGuard";
 
@@ -39,11 +41,13 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/diag/auth" element={<DiagAuth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthGuard>
         <DebugControls />
+        <DebugOverlay />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

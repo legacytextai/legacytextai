@@ -18,6 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DebugOverlay } from '@/components/DebugOverlay';
+import { getDebugAuth } from '@/utils/debugConfig';
 
 // Types
 type Child = { name: string; dob: string };
@@ -791,6 +792,60 @@ const Settings = () => {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Debug Information */}
+          {(getDebugAuth() || searchParams.get('debug') === '1') && (
+            <Card className="border-yellow-300 bg-yellow-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-yellow-800">
+                  🐛 Debug Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm font-mono">
+                <div>
+                  <div className="font-semibold mb-2">Session Status</div>
+                  <div className="space-y-1 text-xs">
+                    <div>User ID: {user?.id || 'None'}</div>
+                    <div>Email: {user?.email || 'None'}</div>
+                    <div>Phone (metadata): {user?.user_metadata?.pending_phone_e164 || 'None'}</div>
+                  </div>
+                </div>
+                
+                {userData && (
+                  <div>
+                    <div className="font-semibold mb-2">User App Data</div>
+                    <div className="space-y-1 text-xs">
+                      <div>Status: <Badge variant="outline">{userData.status}</Badge></div>
+                      <div>Phone E164: {userData.phone_e164 || 'Not set'}</div>
+                      <div>Timezone: {userData.timezone}</div>
+                      <div>Last Login: {userData.last_login_at ? new Date(userData.last_login_at).toLocaleString() : 'Never'}</div>
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <div className="font-semibold mb-2">Environment Check</div>
+                  <div className="space-y-1 text-xs">
+                    <div>Origin: {window.location.origin}</div>
+                    <div>Supabase URL: https://toxadhuqzdydliplhrws.supabase.co</div>
+                    <div>Domain Match: {window.location.origin.includes('toxadhuqzdydliplhrws') || window.location.origin.includes('localhost') || window.location.origin.includes('lovable.app') ? '✅ Yes' : '❌ No'}</div>
+                    <div>Email Redirect To: {window.location.origin}/auth/callback</div>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-yellow-200">
+                  <Button
+                    onClick={() => window.open('/diag/auth', '_blank')}
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                  >
+                    Open Full Diagnosis Report
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Save Settings */}
           <div className="flex justify-end pt-4">

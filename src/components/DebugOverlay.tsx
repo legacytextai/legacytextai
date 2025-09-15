@@ -24,12 +24,10 @@ interface DiagResult {
 }
 
 interface OTPStatus {
-  lastCall?: {
-    url: string;
-    status: number;
-    response: any;
-    timestamp: number;
-  };
+  url: string;
+  status: number;
+  response: any;
+  timestamp: number;
 }
 
 export function DebugOverlay() {
@@ -38,7 +36,7 @@ export function DebugOverlay() {
   const [userAppData, setUserAppData] = useState<UserAppData | null>(null);
   const [diagResult, setDiagResult] = useState<DiagResult | null>(null);
   const [diagLoading, setDiagLoading] = useState(false);
-  const [otpStatus, setOTPStatus] = useState<OTPStatus>({});
+  const [otpStatus, setOTPStatus] = useState<OTPStatus | null>(null);
 
   // Don't render if debug is disabled
   if (!getDebugAuth()) return null;
@@ -93,12 +91,10 @@ export function DebugOverlay() {
 
           // Store for overlay display
           setOTPStatus({
-            lastCall: {
-              url: urlString,
-              status: response.status,
-              response: responseData,
-              timestamp: Date.now(),
-            },
+            url: urlString,
+            status: response.status,
+            response: responseData,
+            timestamp: Date.now(),
           });
 
           return response;
@@ -204,14 +200,14 @@ export function DebugOverlay() {
           </div>
 
           {/* OTP Status */}
-          {otpStatus.lastCall && (
+          {otpStatus && (
             <div>
               <strong>Last OTP Call:</strong>
               <div className="mt-1 space-y-1">
-                <div>URL: {new URL(otpStatus.lastCall.url).pathname}</div>
-                <div>Status: <Badge variant={otpStatus.lastCall.status === 200 ? "default" : "destructive"}>{otpStatus.lastCall.status}</Badge></div>
-                <div>Response: {JSON.stringify(otpStatus.lastCall.response, null, 2)}</div>
-                <div>Age: {Math.round((Date.now() - otpStatus.lastCall.timestamp) / 1000)}s ago</div>
+                <div>URL: {new URL(otpStatus.url).pathname}</div>
+                <div>Status: <Badge variant={otpStatus.status === 200 ? "default" : "destructive"}>{otpStatus.status}</Badge></div>
+                <div>Response: {JSON.stringify(otpStatus.response, null, 2)}</div>
+                <div>Age: {Math.round((Date.now() - otpStatus.timestamp) / 1000)}s ago</div>
               </div>
             </div>
           )}
