@@ -290,13 +290,13 @@ const Settings = () => {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const response = await fetch(`https://toxadhuqzdydliplhrws.supabase.co/functions/v1/send-daily-prompts`, {
+      const url = `https://toxadhuqzdydliplhrws.supabase.co/functions/v1/send-daily-prompts?force=true&to=${encodeURIComponent(userData.phone_e164)}`;
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ force: true, phone: userData.phone_e164 })
+        }
       });
 
       if (response.ok) {
