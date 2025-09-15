@@ -137,7 +137,7 @@ export default function MediaLibrary() {
                   <Download className="w-4 h-4 text-legacy-accent" />
                 </div>
                 <div>
-                  <p className="font-medium text-legacy-primary">Premium Export ($4.99)</p>
+                  <p className="font-medium text-legacy-primary">Premium Export ($9.99)</p>
                   <p className="text-sm text-legacy-ink/70">High-quality photo integration</p>
                 </div>
               </div>
