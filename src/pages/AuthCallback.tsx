@@ -47,19 +47,37 @@ export default function AuthCallback() {
         const searchParams = url.searchParams;
         const hashParams = new URLSearchParams(url.hash.substring(1));
 
-        // Parse URL parameters
+        // Parse URL parameters (success and error cases)
         const parsedUrl = {
           token_hash: searchParams.get('token_hash') || undefined,
           type: searchParams.get('type') || undefined,
           code: searchParams.get('code') || undefined,
           access_token: hashParams.get('access_token') || undefined,
           refresh_token: hashParams.get('refresh_token') || undefined,
+          // Error parameters (can be in query or hash)
+          error: searchParams.get('error') || hashParams.get('error') || undefined,
+          error_code: searchParams.get('error_code') || hashParams.get('error_code') || undefined,
+          error_description: searchParams.get('error_description') || hashParams.get('error_description') || undefined,
         };
 
         setAuthState(prev => ({ ...prev, parsedUrl }));
 
         let handlerPath: string | null = null;
         let sessionSet = false;
+
+        // Check for error parameters first
+        if (parsedUrl.error) {
+          const errorMsg = parsedUrl.error_description 
+            ? decodeURIComponent(parsedUrl.error_description.replace(/\+/g, ' '))
+            : `Authentication error: ${parsedUrl.error}`;
+          
+          // Handle specific error cases
+          if (parsedUrl.error_code === 'otp_expired' || parsedUrl.error === 'access_denied') {
+            throw new Error(`Email verification link has expired. Please request a new confirmation email.`);
+          } else {
+            throw new Error(errorMsg);
+          }
+        }
 
         // Try token_hash + type first (email confirmation)
         if (parsedUrl.token_hash && parsedUrl.type) {
@@ -99,7 +117,7 @@ export default function AuthCallback() {
         }
         
         if (!sessionSet) {
-          throw new Error('No authentication parameters found');
+          throw new Error('No authentication parameters found. This may be a confirmation-only link that requires you to log in separately.');
         }
 
         console.log('[AuthCallback] Session set successfully');
