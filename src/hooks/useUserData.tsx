@@ -145,7 +145,7 @@ export function useUserData() {
             auth_user_id: user.id,
             email: user.email ?? null,
             phone_e164: tempPhone,
-            status: "pending" // Phone not verified yet
+            status: "paused" // Valid status: user needs to verify phone
           })
           .select("*")
           .single();
@@ -162,7 +162,7 @@ export function useUserData() {
           return;
         }
 
-        console.log('Successfully created pending profile for Google OAuth user:', newRow);
+        console.log('Successfully created profile for Google OAuth user:', newRow);
         setUserData(newRow);
       }
     } catch (error) {
