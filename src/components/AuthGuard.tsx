@@ -26,8 +26,12 @@ export function AuthGuard({ children }: AuthGuardProps) {
     const storedCount = parseInt(localStorage.getItem(loopKey) || '0');
     const storedTime = parseInt(localStorage.getItem(timeKey) || '0');
     
-    // Reset if more than 10 seconds have passed
-    if (now - storedTime > 10000) {
+    // Don't count phone verification redirects as loops
+    const isPhoneVerification = location.pathname === '/settings' && 
+      new URLSearchParams(location.search).get('verifyPhone') === '1';
+    
+    // Reset if more than 10 seconds have passed or if this is a phone verification redirect
+    if (now - storedTime > 10000 || isPhoneVerification) {
       localStorage.setItem(loopKey, '1');
       localStorage.setItem(timeKey, String(now));
       setLoopCount(1);
@@ -41,7 +45,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
         setShowLoopError(true);
       }
     }
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   const clearLoopSentinel = () => {
     localStorage.removeItem('authLoopCount');
