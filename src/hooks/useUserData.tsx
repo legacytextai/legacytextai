@@ -125,12 +125,29 @@ export function useUserData() {
         console.log('Successfully created new profile:', newRow);
         setUserData(newRow);
       } else {
-        console.log('User has no phone, creating pending profile');
+        console.log('User has no phone, creating pending profile with temporary phone');
         
-        // User doesn't have verified phone yet - this should be rare with our flow
-        // Just set user data to null and let the UI handle phone verification
-        setUserData(null);
-        toast.error('Phone verification required');
+        // User doesn't have verified phone yet - create a pending profile with temp phone
+        const tempPhone = `temp_${user.id}`;
+        const { data: newRow, error: insertError } = await supabase
+          .from("users_app")
+          .insert({
+            auth_user_id: user.id,
+            email: user.email ?? null,
+            phone_e164: tempPhone,
+            status: "pending" // Phone not verified yet
+          })
+          .select("*")
+          .single();
+
+        if (insertError) {
+          console.error('Error creating pending user app row:', insertError);
+          toast.error('Failed to create user profile');
+          return;
+        }
+
+        console.log('Successfully created pending profile:', newRow);
+        setUserData(newRow);
       }
     } catch (error) {
       console.error('Error ensuring user app row:', error);
