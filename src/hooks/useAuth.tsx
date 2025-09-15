@@ -138,6 +138,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [authReady, setAuthReady] = useState(false);
+  const [bootstrapInProgress, setBootstrapInProgress] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
@@ -155,9 +157,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Bootstrap after state change (defer to avoid deadlocks)
         if (session && event === 'SIGNED_IN') {
           // Don't auto-redirect from auth callback page
-          if (window.location.pathname !== '/auth/callback') {
+          if (window.location.pathname !== '/auth/callback' && !bootstrapInProgress) {
+            setBootstrapInProgress(true);
             setTimeout(() => {
-              if (mounted) afterLoginBootstrap((path) => window.location.href = path);
+              if (mounted) {
+                afterLoginBootstrap(navigate).finally(() => {
+                  if (mounted) setBootstrapInProgress(false);
+                });
+              }
             }, 0);
           }
         }
@@ -174,9 +181,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAuthReady(true);
       
       // Bootstrap on initial load if session exists
-      if (session && window.location.pathname !== '/auth/callback') {
+      if (session && window.location.pathname !== '/auth/callback' && !bootstrapInProgress) {
+        setBootstrapInProgress(true);
         setTimeout(() => {
-          if (mounted) afterLoginBootstrap((path) => window.location.href = path);
+          if (mounted) {
+            afterLoginBootstrap(navigate).finally(() => {
+              if (mounted) setBootstrapInProgress(false);
+            });
+          }
         }, 0);
       }
     });
