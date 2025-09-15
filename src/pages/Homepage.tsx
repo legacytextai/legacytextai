@@ -95,7 +95,7 @@ export default function Homepage() {
                     variant="hero" 
                     size="lg" 
                     className="text-lg px-8 py-6"
-                    onClick={() => setShowSignup(true)}
+                    onClick={() => navigate('/auth')}
                   >
                     <MessageSquare className="w-5 h-5 mr-2" />
                     Start Your Free Legacy Journal
@@ -282,7 +282,7 @@ export default function Homepage() {
                 variant="accent" 
                 size="lg" 
                 className="text-lg px-8 py-6"
-                onClick={() => setShowSignup(true)}
+                onClick={() => navigate('/auth')}
               >
                 <MessageSquare className="w-5 h-5 mr-2" />
                 Begin Your Legacy Journal
