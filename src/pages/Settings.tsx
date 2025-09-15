@@ -807,8 +807,8 @@ const Settings = () => {
             </CardContent>
           </Card>
 
-          {/* Debug Information */}
-          {(getDebugAuth() || searchParams.get('debug') === '1') && (
+          {/* Debug Information - Only show in development */}
+          {process.env.NODE_ENV === 'development' && (getDebugAuth() || searchParams.get('debug') === '1') && (
             <Card className="border-yellow-300 bg-yellow-50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-yellow-800">
