@@ -322,6 +322,10 @@ export type Database = {
         Args: { p_phone: string }
         Returns: undefined
       }
+      normalize_phone_e164: {
+        Args: { phone_input: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
