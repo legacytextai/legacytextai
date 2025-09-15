@@ -43,23 +43,45 @@ export function useUserData() {
         return;
       }
 
-      // 2) Check if there's an orphaned profile with the user's phone number
+      // 2) Check for orphaned profiles using normalized phone matching
       if (user.phone) {
-        const { data: orphanedProfile } = await supabase
-          .from("users_app")
-          .select("*")
-          .eq("phone_e164", `+${user.phone}`)
-          .is("auth_user_id", null)
-          .limit(1)
-          .maybeSingle();
+        // Normalize both the auth phone and search for potential matches
+        const normalizedAuthPhone = `+${user.phone}`;
+        
+        // Try different phone number formats for matching
+        const phoneVariations = [
+          normalizedAuthPhone,
+          user.phone.startsWith('+') ? user.phone : `+${user.phone}`,
+          user.phone.startsWith('+1') ? user.phone : `+1${user.phone.replace(/^\+/, '')}`,
+        ];
+
+        let orphanedProfile = null;
+        
+        for (const phoneVariation of phoneVariations) {
+          const { data: foundProfile } = await supabase
+            .from("users_app")
+            .select("*")
+            .eq("phone_e164", phoneVariation)
+            .is("auth_user_id", null)
+            .limit(1)
+            .maybeSingle();
+
+          if (foundProfile) {
+            orphanedProfile = foundProfile;
+            break;
+          }
+        }
 
         if (orphanedProfile) {
+          console.log('Found orphaned profile, linking to user:', orphanedProfile.id);
+          
           // Link the orphaned profile to this user
           const { data: linkedProfile, error: linkError } = await supabase
             .from("users_app")
             .update({
               auth_user_id: user.id,
               email: user.email ?? null,
+              phone_e164: normalizedAuthPhone,
               status: "active" // User already verified phone
             })
             .eq("id", orphanedProfile.id)
@@ -72,6 +94,7 @@ export function useUserData() {
             return;
           }
 
+          console.log('Successfully linked profile:', linkedProfile);
           setUserData(linkedProfile);
           return;
         }
@@ -79,12 +102,15 @@ export function useUserData() {
 
       // 3) Create new profile - only if user has a verified phone
       if (user.phone) {
+        const normalizedPhone = `+${user.phone}`;
+        console.log('Creating new profile for phone:', normalizedPhone);
+        
         const { data: newRow, error: insertError } = await supabase
           .from("users_app")
           .insert({
             auth_user_id: user.id,
             email: user.email ?? null,
-            phone_e164: `+${user.phone}`,
+            phone_e164: normalizedPhone,
             status: "active" // Phone already verified in auth.users
           })
           .select("*")
@@ -96,30 +122,19 @@ export function useUserData() {
           return;
         }
 
+        console.log('Successfully created new profile:', newRow);
         setUserData(newRow);
       } else {
-        // User doesn't have verified phone yet - create pending profile
-        const { data: newRow, error: insertError } = await supabase
-          .from("users_app")
-          .insert({
-            auth_user_id: user.id,
-            email: user.email ?? null,
-            phone_e164: "pending", // Placeholder until phone verified
-            status: "pending"
-          })
-          .select("*")
-          .single();
-
-        if (insertError) {
-          console.error('Error creating pending user app row:', insertError);
-          toast.error('Failed to create user profile');
-          return;
-        }
-
-        setUserData(newRow);
+        console.log('User has no phone, creating pending profile');
+        
+        // User doesn't have verified phone yet - this should be rare with our flow
+        // Just set user data to null and let the UI handle phone verification
+        setUserData(null);
+        toast.error('Phone verification required');
       }
     } catch (error) {
       console.error('Error ensuring user app row:', error);
+      toast.error('Failed to create user profile');
     } finally {
       setLoading(false);
     }

@@ -68,22 +68,37 @@ serve(async (req) => {
     
     // If no profile linked to this user, check for orphaned profile with this phone
     if (!existingRows || !existingRows.length) {
+      console.log('No existing profile found for user, checking for orphaned profile...');
+      
       const { data: orphanedProfile } = await admin
         .from("users_app")
-        .select("phone_e164, status")
+        .select("*")
         .eq("phone_e164", new_phone_e164)
         .is("auth_user_id", null)
         .limit(1);
       
       if (orphanedProfile && orphanedProfile.length) {
-        // Link the orphaned profile to this user
-        await admin
-          .from("users_app")
-          .update({ auth_user_id: user.id })
-          .eq("phone_e164", new_phone_e164)
-          .is("auth_user_id", null);
+        console.log('Found orphaned profile, linking to user:', orphanedProfile[0].id);
         
+        // Link the orphaned profile to this user
+        const { error: linkError } = await admin
+          .from("users_app")
+          .update({ 
+            auth_user_id: user.id,
+            status: 'active',
+            email: user.email 
+          })
+          .eq("id", orphanedProfile[0].id);
+        
+        if (linkError) {
+          console.error('Error linking orphaned profile:', linkError);
+          return new Response("Failed to link profile", { status: 500, headers: corsHeaders });
+        }
+        
+        // Set existing rows to the orphaned profile for later processing
         existingRows = orphanedProfile;
+      } else {
+        console.log('No orphaned profile found, will create new one later');
       }
     }
     
@@ -124,16 +139,34 @@ serve(async (req) => {
       return new Response("Auth update failed", { status: 500, headers: corsHeaders });
     }
 
-    // 2) Update application row (ensure active status on successful verification)
-    const { error: appErr } = await admin.from("users_app")
-      .update({
-        phone_e164: new_phone_e164,
-        status: 'active' // Phone verified, user is now active
-      })
-      .eq("auth_user_id", user.id);
-    if (appErr) {
-      console.error('App update error:', appErr);
-      return new Response("App update failed", { status: 500, headers: corsHeaders });
+    // 2) Update or create application row (ensure active status on successful verification)
+    if (existingRows && existingRows.length) {
+      // Update existing profile
+      const { error: appErr } = await admin.from("users_app")
+        .update({
+          phone_e164: new_phone_e164,
+          status: 'active', // Phone verified, user is now active
+          email: user.email
+        })
+        .eq("auth_user_id", user.id);
+      if (appErr) {
+        console.error('App update error:', appErr);
+        return new Response("App update failed", { status: 500, headers: corsHeaders });
+      }
+    } else {
+      // Create new profile
+      console.log('Creating new user profile...');
+      const { error: createErr } = await admin.from("users_app")
+        .insert({
+          auth_user_id: user.id,
+          phone_e164: new_phone_e164,
+          status: 'active',
+          email: user.email
+        });
+      if (createErr) {
+        console.error('App create error:', createErr);
+        return new Response("Failed to create profile", { status: 500, headers: corsHeaders });
+      }
     }
 
     // 3) Delete OTP row
