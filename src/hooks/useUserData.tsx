@@ -104,8 +104,12 @@ export function useUserData() {
 
       // 3) Create new profile - handle both phone and non-phone users
       console.log('Creating new user profile. Has phone:', !!user.phone, 'Provider:', user.app_metadata?.provider);
+      console.log('User phone value:', user.phone, 'User factors:', user.factors);
       
-      if (user.phone) {
+      // Check if user has phone from phone auth or MFA factors
+      const hasPhoneAuth = user.phone || user.factors?.some(f => f.factor_type === 'phone');
+      
+      if (user.phone || hasPhoneAuth) {
         const normalizedPhone = `+${user.phone}`;
         console.log('Creating new profile for phone:', normalizedPhone);
         
