@@ -459,7 +459,7 @@ INSERT INTO prompts (text, category) VALUES
 #### Subtasks:
 - [ ] 10.1 Set up Stripe account and payment processing (CONFIRMED: Primary payment provider)
 - [ ] 10.2 Create premium PDF template with enhanced styling
-- [ ] 10.3 Implement payment flow for $4.99 PDF using Stripe Checkout
+- [ ] 10.3 Implement payment flow for $9.99 PDF using Stripe Checkout
 - [ ] 10.4 Add media integration to premium exports
 - [ ] 10.5 Create purchase history tracking in Supabase
 - [ ] 10.6 Set up $199 physical journal payment flow (fulfillment TBD)
@@ -482,7 +482,7 @@ serve(async (req) => {
         product_data: {
           name: exportType === 'premium' ? 'Premium Legacy Journal PDF' : 'Leatherbound Legacy Journal',
         },
-        unit_amount: exportType === 'premium' ? 499 : 19900, // $4.99 or $199.00
+        unit_amount: exportType === 'premium' ? 999 : 19900, // $9.99 or $199.00
       },
       quantity: 1,
     }],
