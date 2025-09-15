@@ -29,6 +29,7 @@ export function useUserData() {
 
     try {
       setLoading(true);
+      console.log('Creating user profile for:', user.email, 'Auth method:', user.app_metadata?.provider);
 
       // 1) Try to find an existing row by auth_user_id
       const { data: existing } = await supabase
@@ -39,6 +40,7 @@ export function useUserData() {
         .maybeSingle();
 
       if (existing) {
+        console.log('Found existing user profile:', existing.id);
         setUserData(existing);
         return;
       }
@@ -100,7 +102,9 @@ export function useUserData() {
         }
       }
 
-      // 3) Create new profile - only if user has a verified phone
+      // 3) Create new profile - handle both phone and non-phone users
+      console.log('Creating new user profile. Has phone:', !!user.phone, 'Provider:', user.app_metadata?.provider);
+      
       if (user.phone) {
         const normalizedPhone = `+${user.phone}`;
         console.log('Creating new profile for phone:', normalizedPhone);
@@ -118,17 +122,23 @@ export function useUserData() {
 
         if (insertError) {
           console.error('Error creating user app row:', insertError);
-          toast.error('Failed to create user profile');
+          console.error('Insert error details:', {
+            code: insertError.code,
+            message: insertError.message,
+            details: insertError.details,
+            hint: insertError.hint
+          });
+          toast.error(`Failed to create user profile: ${insertError.message}`);
           return;
         }
 
         console.log('Successfully created new profile:', newRow);
         setUserData(newRow);
       } else {
-        console.log('User has no phone, creating pending profile with temporary phone');
+        // Google OAuth or other users without phone - create with placeholder phone
+        console.log('Creating profile for user without phone (likely Google OAuth)');
+        const tempPhone = `temp_${user.id.replace(/-/g, '').substring(0, 15)}`;
         
-        // User doesn't have verified phone yet - create a pending profile with temp phone
-        const tempPhone = `temp_${user.id}`;
         const { data: newRow, error: insertError } = await supabase
           .from("users_app")
           .insert({
@@ -142,16 +152,27 @@ export function useUserData() {
 
         if (insertError) {
           console.error('Error creating pending user app row:', insertError);
-          toast.error('Failed to create user profile');
+          console.error('Insert error details:', {
+            code: insertError.code,
+            message: insertError.message,
+            details: insertError.details,
+            hint: insertError.hint
+          });
+          toast.error(`Failed to create user profile: ${insertError.message}`);
           return;
         }
 
-        console.log('Successfully created pending profile:', newRow);
+        console.log('Successfully created pending profile for Google OAuth user:', newRow);
         setUserData(newRow);
       }
     } catch (error) {
       console.error('Error ensuring user app row:', error);
-      toast.error('Failed to create user profile');
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        user: { id: user?.id, email: user?.email, phone: user?.phone }
+      });
+      toast.error(`Failed to create user profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
