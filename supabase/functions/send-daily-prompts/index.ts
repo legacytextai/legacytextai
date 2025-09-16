@@ -215,16 +215,17 @@ serve(async (req) => {
   // 3) Loop recipients
   for (const u of users) {
     try {
-      // One-per-day (unless forced)
-      if (!force) {
-        const { data: existing } = await supabase
-          .from("daily_prompts")
-          .select("id")
-          .eq("user_id", u.id)
-          .gte("sent_at", startISO)
-          .limit(1);
-        if (existing && existing.length) continue;
-      }
+       // One-per-day (unless forced) - check for scheduled prompts only
+       if (!force) {
+         const { data: existing } = await supabase
+           .from("daily_prompts")
+           .select("id, source")
+           .eq("user_id", u.id)
+           .gte("sent_at", startISO)
+           .eq("source", "schedule")
+           .limit(1);
+         if (existing && existing.length) continue;
+       }
 
       // Pick tone: global tones (weighted + stable per user/day). Fallback to legacy tone or 'warm'.
       const day = new Date().toISOString().slice(0, 10);
