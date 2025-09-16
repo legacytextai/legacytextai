@@ -13,10 +13,34 @@ serve(async (req) => {
   }
 
   try {
+    // SECURITY: Verify user is authenticated before exposing sensitive data
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Authentication required' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
+
+    // Verify the user session
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Invalid authentication' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
 
     console.log('🧪 Starting phone verification system test...');
 
@@ -53,10 +77,10 @@ serve(async (req) => {
     }
 
     // Test 3: Check orphaned auth users
-    const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers();
+    const { data: authUsers, error: authError2 } = await supabaseAdmin.auth.admin.listUsers();
     
-    if (authError) {
-      console.error('❌ Error listing auth users:', authError);
+    if (authError2) {
+      console.error('❌ Error listing auth users:', authError2);
     } else {
       const orphanedUsers = [];
       for (const authUser of authUsers.users) {
