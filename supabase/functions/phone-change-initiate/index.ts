@@ -70,7 +70,14 @@ serve(async (req) => {
 
     const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-    // Unique phone enforcement
+    // Clean up any orphaned records with this phone number before checking uniqueness
+    console.log('Cleaning up any orphaned records for phone:', newPhone);
+    await admin.from("users_app")
+      .delete()
+      .eq("phone_e164", newPhone)
+      .is("auth_user_id", null);
+
+    // Unique phone enforcement (check for records linked to other users)
     const { data: exists } = await admin.from("users_app")
       .select("auth_user_id").eq("phone_e164", newPhone).limit(1);
     if (exists && exists.length && exists[0].auth_user_id !== user.id) {
