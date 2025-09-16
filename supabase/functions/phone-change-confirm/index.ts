@@ -130,9 +130,15 @@ serve(async (req) => {
       return new Response("Invalid code", { status: 401, headers: corsHeaders });
     }
 
-    // 1) Update Supabase Auth user phone (admin API)
+    // 1) Update Supabase Auth user phone (admin API) with confirmation
     const { error: updErr } = await admin.auth.admin.updateUserById(user.id, {
-      phone: new_phone_e164,
+      phone: new_phone_e164.replace('+', ''),
+      phone_confirmed_at: new Date().toISOString(), // CRITICAL: Mark phone as confirmed
+      user_metadata: {
+        ...user.user_metadata,
+        phone_verified: true,
+        pending_phone_e164: null
+      }
     });
     if (updErr) {
       console.error('Auth update error:', updErr);
