@@ -8,15 +8,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CalendarDays, BookOpen, Users, Clock, Phone, Shield, MessageSquare } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserData } from "@/hooks/useUserData";
-import { supabase } from "@/integrations/supabase/client";
+import { useJournalEntries } from "@/hooks/useJournalEntries";
+import { EntryCard } from "@/components/EntryCard";
 import { toast } from "sonner";
 
-interface JournalEntry {
-  id: number;
-  content: string;
-  received_at: string;
-  user_id: string;
-}
 
 // Helper function to get category colors
 function getCategoryColor(category: string): string {
@@ -34,8 +29,7 @@ function Dashboard() {
   const { user } = useAuth();
   const { userData, loading: userLoading } = useUserData();
   const navigate = useNavigate();
-  const [entries, setEntries] = useState<JournalEntry[]>([]);
-  const [entriesLoading, setEntriesLoading] = useState(true);
+  const { data: entries = [], isLoading: entriesLoading } = useJournalEntries();
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -44,37 +38,6 @@ function Dashboard() {
     }
   }, [user, userLoading, navigate]);
 
-  // Load user's journal entries
-  useEffect(() => {
-    const loadEntries = async () => {
-      if (!userData?.id) return;
-
-      try {
-        const { data, error } = await supabase
-          .from("journal_entries")
-          .select("id, content, received_at, user_id")
-          .eq("user_id", userData.id)
-          .order("received_at", { ascending: false })
-          .limit(50);
-
-        if (error) {
-          console.error('Error loading entries:', error);
-          toast.error('Failed to load journal entries');
-          return;
-        }
-
-        setEntries(data || []);
-      } catch (error) {
-        console.error('Error loading entries:', error);
-      } finally {
-        setEntriesLoading(false);
-      }
-    };
-
-    if (userData?.id) {
-      loadEntries();
-    }
-  }, [userData?.id]);
 
   // Check for pending phone from localStorage (from homepage signup)
   useEffect(() => {
@@ -188,35 +151,14 @@ function Dashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
+            <div className="space-y-6 max-h-96 overflow-y-auto">
               {entriesLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-legacy-primary"></div>
                 </div>
               ) : entries.length > 0 ? (
                 entries.map((entry) => (
-                  <Card key={entry.id} className="shadow-paper">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex items-center space-x-4">
-                          <CalendarDays className="w-5 h-5 text-legacy-ink/50" />
-                          <span className="text-sm font-medium text-legacy-ink/70">
-                            {new Date(entry.received_at).toLocaleDateString()}
-                          </span>
-                          <Clock className="w-4 h-4 text-legacy-ink/50" />
-                          <span className="text-sm text-legacy-ink/70">
-                            {new Date(entry.received_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
-                        <Badge className={getCategoryColor("Daily Life")}>
-                          Entry
-                        </Badge>
-                      </div>
-                      <p className="text-legacy-ink leading-relaxed">
-                        {entry.content}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  <EntryCard key={entry.id} entry={entry} />
                 ))
               ) : (
                 <Card className="shadow-paper">
