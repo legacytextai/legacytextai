@@ -178,7 +178,7 @@ serve(async (req) => {
     // 4b) Welcome SMS if first phone ever (prevPhone was null)
     if (!prevPhone) {
       await sendSMS(new_phone_e164,
-        "Welcome to Legacy Journal! You'll receive journaling prompts to help capture your thoughts and memories. You can reply to any prompt, or simply text us anytime you have something to share. Reply STOP to unsubscribe.");
+        "Welcome to LegacyTextAI ✨! \n\nThink of this as your own pocket journal. \n\nYou'll receive journaling prompts to help capture your thoughts and memories. You can reply to any prompt, or just simply text us anytime you have something to share. \n\nEvery text you send will be saved as a journal entry. \n\nNow let's build your legacy, one text at a time! ✨\n\nReply STOP to unsubscribe.");
     }
 
     console.log(`Phone changed successfully to ${new_phone_e164} for user ${user.id}`);
