@@ -20,6 +20,7 @@ export type Database = {
           is_ai: boolean | null
           is_forced: boolean | null
           model: string | null
+          name: string | null
           prompt_hash: string | null
           prompt_id: number | null
           prompt_language: string | null
@@ -34,6 +35,7 @@ export type Database = {
           is_ai?: boolean | null
           is_forced?: boolean | null
           model?: string | null
+          name?: string | null
           prompt_hash?: string | null
           prompt_id?: number | null
           prompt_language?: string | null
@@ -48,6 +50,7 @@ export type Database = {
           is_ai?: boolean | null
           is_forced?: boolean | null
           model?: string | null
+          name?: string | null
           prompt_hash?: string | null
           prompt_id?: number | null
           prompt_language?: string | null
@@ -79,6 +82,7 @@ export type Database = {
           content: string
           id: number
           message_sid: string | null
+          name: string | null
           phone_e164: string
           received_at: string | null
           source: string | null
@@ -88,6 +92,7 @@ export type Database = {
           content: string
           id?: number
           message_sid?: string | null
+          name?: string | null
           phone_e164: string
           received_at?: string | null
           source?: string | null
@@ -97,6 +102,7 @@ export type Database = {
           content?: string
           id?: number
           message_sid?: string | null
+          name?: string | null
           phone_e164?: string
           received_at?: string | null
           source?: string | null
@@ -312,6 +318,10 @@ export type Database = {
       }
       get_user_id_from_phone: {
         Args: { phone: string }
+        Returns: string
+      }
+      get_user_name_from_id: {
+        Args: { p_user_id: string }
         Returns: string
       }
       is_otp_active: {
