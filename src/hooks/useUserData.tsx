@@ -77,14 +77,13 @@ export function useUserData() {
         if (orphanedProfile) {
           console.log('Found orphaned profile, linking to user:', orphanedProfile.id);
           
-          // Link the orphaned profile to this user
+          // Link the orphaned profile to this user (only update allowed fields)
           const { data: linkedProfile, error: linkError } = await supabase
             .from("users_app")
             .update({
               auth_user_id: user.id,
-              email: user.email ?? null,
-              phone_e164: normalizedAuthPhone,
-              status: "active" // User already verified phone
+              email: user.email ?? null
+              // Don't update phone_e164 or status from client - let edge functions handle that
             })
             .eq("id", orphanedProfile.id)
             .select("*")
@@ -110,64 +109,65 @@ export function useUserData() {
       const hasPhoneAuth = user.phone || user.factors?.some(f => f.factor_type === 'phone');
       
       if (user.phone || hasPhoneAuth) {
-        const normalizedPhone = `+${user.phone}`;
-        console.log('Creating new profile for phone:', normalizedPhone);
+        // For phone users, we still shouldn't insert phone_e164 from client
+        // Let the ensure_user_self function handle it properly
+        console.log('User with phone detected, using ensure_user_self');
         
-        const { data: newRow, error: insertError } = await supabase
-          .from("users_app")
-          .insert({
-            auth_user_id: user.id,
-            email: user.email ?? null,
-            phone_e164: normalizedPhone,
-            status: "active" // Phone already verified in auth.users
-          })
-          .select("*")
-          .single();
-
-        if (insertError) {
-          console.error('Error creating user app row:', insertError);
-          console.error('Insert error details:', {
-            code: insertError.code,
-            message: insertError.message,
-            details: insertError.details,
-            hint: insertError.hint
-          });
-          toast.error(`Failed to create user profile: ${insertError.message}`);
+        // Call ensure_user_self which will create the user properly
+        const { data: ensureResult, error: ensureError } = await supabase
+          .rpc('ensure_user_self', { p_email: user.email ?? null });
+          
+        if (ensureError) {
+          console.error('Error calling ensure_user_self:', ensureError);
+          toast.error(`Failed to create user profile: ${ensureError.message}`);
           return;
         }
-
-        console.log('Successfully created new profile:', newRow);
-        setUserData(newRow);
+        
+        // Fetch the created user data
+        const { data: freshUserData, error: fetchError } = await supabase
+          .from("users_app")
+          .select("*")
+          .eq("auth_user_id", user.id)
+          .single();
+          
+        if (fetchError) {
+          console.error('Error fetching created user data:', fetchError);
+          toast.error('Failed to fetch user profile');
+          return;
+        }
+        
+        console.log('Successfully created/fetched profile for phone user:', freshUserData);
+        setUserData(freshUserData);
       } else {
-        // Google OAuth or other users without phone - create with placeholder phone
-        console.log('Creating profile for user without phone (likely Google OAuth)');
-        const tempPhone = `temp_${user.id.replace(/-/g, '').substring(0, 15)}`;
+        // Google OAuth or other users without phone - can't create with temp phone directly
+        // The ensure_user_self function should handle this case properly
+        console.log('User without phone detected, letting ensure_user_self handle it');
         
-        const { data: newRow, error: insertError } = await supabase
-          .from("users_app")
-          .insert({
-            auth_user_id: user.id,
-            email: user.email ?? null,
-            phone_e164: tempPhone,
-            status: "paused" // Valid status: user needs to verify phone
-          })
-          .select("*")
-          .single();
-
-        if (insertError) {
-          console.error('Error creating pending user app row:', insertError);
-          console.error('Insert error details:', {
-            code: insertError.code,
-            message: insertError.message,
-            details: insertError.details,
-            hint: insertError.hint
-          });
-          toast.error(`Failed to create user profile: ${insertError.message}`);
+        // Call ensure_user_self which will create the user properly
+        const { data: ensureResult, error: ensureError } = await supabase
+          .rpc('ensure_user_self', { p_email: user.email ?? null });
+          
+        if (ensureError) {
+          console.error('Error calling ensure_user_self:', ensureError);
+          toast.error(`Failed to create user profile: ${ensureError.message}`);
           return;
         }
-
-        console.log('Successfully created profile for Google OAuth user:', newRow);
-        setUserData(newRow);
+        
+        // Fetch the created user data
+        const { data: freshUserData, error: fetchError } = await supabase
+          .from("users_app")
+          .select("*")
+          .eq("auth_user_id", user.id)
+          .single();
+          
+        if (fetchError) {
+          console.error('Error fetching created user data:', fetchError);
+          toast.error('Failed to fetch user profile');
+          return;
+        }
+        
+        console.log('Successfully created/fetched profile for OAuth user:', freshUserData);
+        setUserData(freshUserData);
       }
     } catch (error) {
       console.error('Error ensuring user app row:', error);

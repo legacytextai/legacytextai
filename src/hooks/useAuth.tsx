@@ -102,46 +102,17 @@ export async function afterLoginBootstrap(navigate: (path: string) => void) {
             data: responseData,
           });
 
-          // If auto OTP fails, update user status to prevent infinite stuck state
+          // If auto OTP fails, just log it - don't try to update database from client
           if (!response.ok || !responseData.ok) {
-            console.warn('[afterLoginBootstrap] Auto OTP failed, updating user status to prevent stuck state');
-            
-            // Update user to 'pending' status instead of keeping temp phone
-            const { error: updateError } = await supabase
-              .from('users_app')
-              .update({ 
-                status: 'pending',
-                phone_e164: '' // Clear temp phone 
-              })
-              .eq('auth_user_id', user.id);
-              
-            if (updateError) {
-              console.error('[afterLoginBootstrap] Failed to update user status:', updateError);
-            } else {
-              console.log('[afterLoginBootstrap] User status updated to pending, cleared temp phone');
-            }
+            console.warn('[afterLoginBootstrap] Auto OTP failed:', {
+              status: response.status,
+              data: responseData,
+              error: responseData.error || 'Unknown error'
+            });
           }
           
         } catch (error) {
           console.error('[afterLoginBootstrap] Failed to auto-send OTP:', error);
-          
-          // Also handle network/other errors by clearing temp state
-          try {
-            console.warn('[afterLoginBootstrap] Clearing temp phone due to auto OTP error');
-            const { error: updateError } = await supabase
-              .from('users_app')
-              .update({ 
-                status: 'pending',
-                phone_e164: '' 
-              })
-              .eq('auth_user_id', user.id);
-              
-            if (updateError) {
-              console.error('[afterLoginBootstrap] Failed to clear temp state:', updateError);
-            }
-          } catch (updateError) {
-            console.error('[afterLoginBootstrap] Error in cleanup after OTP failure:', updateError);
-          }
         }
         
         localStorage.setItem(guardKey, String(Date.now()));
