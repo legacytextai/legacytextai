@@ -47,10 +47,11 @@ export async function afterLoginBootstrap(navigate: (path: string) => void) {
     const ensureResult = await supabase.rpc('ensure_user_self', { p_email: user.email ?? null });
     console.log('[afterLoginBootstrap] ensure_user_self result:', ensureResult);
 
-    // 2) Check if user is active / has phone
+    // 2) Check if user is active / has phone (get current user's record only)
     const { data: userData, error: userDataError } = await supabase
       .from('users_app')
       .select('status, phone_e164')
+      .eq('auth_user_id', user.id)
       .limit(1);
 
     if (userDataError) {

@@ -145,9 +145,23 @@ serve(async (req) => {
       return new Response("Auth update failed", { status: 500, headers: corsHeaders });
     }
 
-    // 2) Update or create application row (ensure active status on successful verification)
+    // 2) Clean up any orphaned temp records BEFORE updating
+    console.log('Cleaning up orphaned temp records for phone:', new_phone_e164);
+    await admin.from("users_app")
+      .delete()
+      .eq("phone_e164", new_phone_e164)
+      .is("auth_user_id", null);
+    
+    // Also clean up any temp records for this user that might be stuck
+    await admin.from("users_app")
+      .delete()
+      .eq("auth_user_id", user.id)
+      .like("phone_e164", "temp_%");
+
+    // 3) Update or create application row (ensure active status on successful verification)
     if (existingRows && existingRows.length) {
-      // Update existing profile
+      // Update existing profile using service role (bypasses RLS trigger)
+      console.log('Updating existing profile for user:', user.id);
       const { error: appErr } = await admin.from("users_app")
         .update({
           phone_e164: new_phone_e164,
@@ -160,8 +174,8 @@ serve(async (req) => {
         return new Response("App update failed", { status: 500, headers: corsHeaders });
       }
     } else {
-      // Create new profile
-      console.log('Creating new user profile...');
+      // Create new profile using service role
+      console.log('Creating new user profile for user:', user.id);
       const { error: createErr } = await admin.from("users_app")
         .insert({
           auth_user_id: user.id,
@@ -175,13 +189,13 @@ serve(async (req) => {
       }
     }
 
-    // 3) Delete OTP row
+    // 4) Delete OTP row
     await admin.from("otp_codes").delete().eq("id", row.id);
 
-    // 4) Confirm SMS
+    // 5) Confirm SMS
     await sendSMS(new_phone_e164, "Your phone number was updated for Legacy Journal. Reply STOP to unsubscribe, HELP for help.");
 
-    // 4b) Welcome SMS if first phone ever (prevPhone was null)
+    // 6) Welcome SMS if first phone ever (prevPhone was null)
     if (!prevPhone) {
       await sendSMS(new_phone_e164,
         "Welcome to LegacyTextAI ✨! \n\nThink of this as your own pocket journal. \n\nYou'll receive journaling prompts to help capture your thoughts and memories. You can reply to any prompt, or just simply text us anytime you have something to share. \n\nEvery text you send will be saved as a journal entry. \n\nNow let's build your legacy, one text at a time! ✨\n\nReply STOP to unsubscribe.");
