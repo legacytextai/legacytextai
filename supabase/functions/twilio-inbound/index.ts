@@ -109,19 +109,37 @@ serve(async (req) => {
     if (!exists) {
       console.log('Processing new SMS entry');
       
-      // Ensure the user exists (do not override status here)
-      const { data: user, error: userError } = await supabase
-        .from("users_app")
-        .upsert({ phone_e164: from }, { onConflict: "phone_e164" })
-        .select("id")
-        .single();
+      // Get user ID using secure function (minimal data exposure)
+      const { data: userId, error: userError } = await supabase.rpc('get_user_id_by_phone_secure', {
+        p_phone_e164: from
+      });
 
       if (userError) {
-        console.error('Error upserting user:', userError);
+        console.error('Error getting user by phone:', userError);
         throw userError;
       }
 
-      console.log('User upserted:', user);
+      // If no user found, we need to handle this as an unknown number
+      if (!userId) {
+        console.log('Unknown phone number, creating minimal record for SMS compliance');
+        
+        // Create minimal record for compliance purposes only
+        const { data: newUserId, error: createError } = await supabase.rpc('create_user_profile_secure', {
+          p_auth_user_id: null, // No auth user linked yet
+          p_email: '', // No email for SMS-only users
+          p_phone_e164: from,
+          p_status: 'sms_only'
+        });
+        
+        if (createError) {
+          console.error('Error creating SMS-only user:', createError);
+          throw createError;
+        }
+        
+        userId = newUserId;
+      }
+
+      console.log('User ID resolved:', userId);
 
       // Log inbound message
       const { error: messageError } = await supabase
@@ -141,7 +159,7 @@ serve(async (req) => {
       const { error: entryError } = await supabase
         .from("journal_entries")
         .insert({
-          user_id: user?.id,
+          user_id: userId,
           phone_e164: from,
           content: body,
           message_sid: sid,
@@ -154,6 +172,14 @@ serve(async (req) => {
       }
 
       console.log('Journal entry saved successfully');
+      
+      // Log this security-sensitive operation
+      await supabase.rpc('log_service_access', {
+        p_table_name: 'journal_entries',
+        p_operation: 'INSERT',
+        p_user_id: userId,
+        p_function_name: 'twilio-inbound'
+      });
     } else {
       console.log('Duplicate message detected, skipping');
     }

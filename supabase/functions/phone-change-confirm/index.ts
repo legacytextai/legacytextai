@@ -145,7 +145,7 @@ serve(async (req) => {
       return new Response("Auth update failed", { status: 500, headers: corsHeaders });
     }
 
-    // 2) Clean up any orphaned temp records BEFORE updating
+    // 2) Clean up any orphaned temp records BEFORE updating (using secure function)
     console.log('Cleaning up orphaned temp records for phone:', new_phone_e164);
     await admin.from("users_app")
       .delete()
@@ -158,36 +158,42 @@ serve(async (req) => {
       .eq("auth_user_id", user.id)
       .like("phone_e164", "temp_%");
 
-    // 3) Update or create application row (ensure active status on successful verification)
-    if (existingRows && existingRows.length) {
-      // Update existing profile using service role (bypasses RLS trigger)
-      console.log('Updating existing profile for user:', user.id);
-      const { error: appErr } = await admin.from("users_app")
-        .update({
-          phone_e164: new_phone_e164,
-          status: 'active', // Phone verified, user is now active
-          email: user.email
-        })
-        .eq("auth_user_id", user.id);
-      if (appErr) {
-        console.error('App update error:', appErr);
-        return new Response("App update failed", { status: 500, headers: corsHeaders });
-      }
-    } else {
-      // Create new profile using service role
-      console.log('Creating new user profile for user:', user.id);
-      const { error: createErr } = await admin.from("users_app")
-        .insert({
-          auth_user_id: user.id,
-          phone_e164: new_phone_e164,
-          status: 'active',
-          email: user.email
-        });
-      if (createErr) {
-        console.error('App create error:', createErr);
+    // 3) Update user phone using secure function (prevents direct table access)
+    console.log('Updating user phone via secure function for user:', user.id);
+    const { data: updateResult, error: updateError } = await admin.rpc('update_user_phone_secure', {
+      p_auth_user_id: user.id,
+      p_new_phone_e164: new_phone_e164,
+      p_new_status: 'active'
+    });
+
+    if (updateError) {
+      console.error('Secure phone update error:', updateError);
+      return new Response("Phone update failed", { status: 500, headers: corsHeaders });
+    }
+
+    // If no existing record was updated, create one using secure function
+    if (!updateResult) {
+      console.log('Creating new user profile via secure function');
+      const { error: createError } = await admin.rpc('create_user_profile_secure', {
+        p_auth_user_id: user.id,
+        p_email: user.email,
+        p_phone_e164: new_phone_e164,
+        p_status: 'active'
+      });
+      
+      if (createError) {
+        console.error('Secure profile creation error:', createError);
         return new Response("Failed to create profile", { status: 500, headers: corsHeaders });
       }
     }
+
+    // Log this security-sensitive operation
+    await admin.rpc('log_service_access', {
+      p_table_name: 'users_app',
+      p_operation: 'UPDATE_PHONE',
+      p_user_id: user.id,
+      p_function_name: 'phone-change-confirm'
+    });
 
     // 4) Delete OTP row
     await admin.from("otp_codes").delete().eq("id", row.id);

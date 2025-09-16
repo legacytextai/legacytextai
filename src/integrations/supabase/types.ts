@@ -214,6 +214,33 @@ export type Database = {
         }
         Relationships: []
       }
+      service_access_log: {
+        Row: {
+          accessed_at: string | null
+          function_name: string | null
+          id: string
+          operation: string
+          table_name: string
+          user_id: string | null
+        }
+        Insert: {
+          accessed_at?: string | null
+          function_name?: string | null
+          id?: string
+          operation: string
+          table_name: string
+          user_id?: string | null
+        }
+        Update: {
+          accessed_at?: string | null
+          function_name?: string | null
+          id?: string
+          operation?: string
+          table_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       tones: {
         Row: {
           active: boolean
@@ -297,6 +324,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_user_profile_secure: {
+        Args: {
+          p_auth_user_id: string
+          p_email: string
+          p_phone_e164?: string
+          p_status?: string
+        }
+        Returns: string
+      }
       ensure_user_self: {
         Args: { p_email?: string }
         Returns: {
@@ -316,6 +352,18 @@ export type Database = {
           tone: string | null
         }
       }
+      get_user_basic_info: {
+        Args: { p_auth_user_id: string }
+        Returns: {
+          name: string
+          status: string
+          user_id: string
+        }[]
+      }
+      get_user_id_by_phone_secure: {
+        Args: { p_phone_e164: string }
+        Returns: string
+      }
       get_user_id_from_phone: {
         Args: { phone: string }
         Returns: string
@@ -332,6 +380,15 @@ export type Database = {
         Args: { p_phone: string }
         Returns: undefined
       }
+      log_service_access: {
+        Args: {
+          p_function_name?: string
+          p_operation: string
+          p_table_name: string
+          p_user_id?: string
+        }
+        Returns: undefined
+      }
       normalize_phone_e164: {
         Args: { phone_input: string }
         Returns: string
@@ -339,6 +396,14 @@ export type Database = {
       recover_stuck_user_account: {
         Args: { p_auth_user_id: string }
         Returns: Json
+      }
+      update_user_phone_secure: {
+        Args: {
+          p_auth_user_id: string
+          p_new_phone_e164: string
+          p_new_status?: string
+        }
+        Returns: boolean
       }
     }
     Enums: {
