@@ -41,6 +41,20 @@ serve(async (req) => {
       });
     }
 
+    // SECURITY: Only allow admin users to access this sensitive diagnostic endpoint
+    const { data: userApp, error: userError } = await admin
+      .from('users_app')
+      .select('email, status')
+      .eq('auth_user_id', user.id)
+      .single();
+
+    if (userError || !userApp || userApp.email !== 'admin@legacytext.ai') {
+      return new Response(JSON.stringify({ error: 'Admin access required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     console.log('🧪 Running quick phone verification test...');
 
     // Test flow end-to-end status check
