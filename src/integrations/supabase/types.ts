@@ -397,6 +397,10 @@ export type Database = {
         Args: { p_auth_user_id: string }
         Returns: Json
       }
+      update_sms_compliance_status: {
+        Args: { p_phone_e164: string; p_status: string }
+        Returns: undefined
+      }
       update_user_phone_secure: {
         Args: {
           p_auth_user_id: string

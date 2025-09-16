@@ -41,9 +41,11 @@ serve(async (req) => {
     if (["STOP","CANCEL","END","QUIT"].includes(keyword)) {
       console.log('Processing STOP keyword:', keyword);
       
-      // ensure user exists & update status
-      await supabase.from("users_app")
-        .upsert({ phone_e164: from, status: "opted_out" }, { onConflict: "phone_e164" });
+      // Update user status using secure function
+      await supabase.rpc('update_sms_compliance_status', {
+        p_phone_e164: from,
+        p_status: 'opted_out'
+      });
 
       // log inbound for audit
       await supabase.from("messages").insert({
@@ -63,8 +65,11 @@ serve(async (req) => {
     if (["START","UNSTOP"].includes(keyword)) {
       console.log('Processing START keyword:', keyword);
       
-      await supabase.from("users_app")
-        .upsert({ phone_e164: from, status: "active" }, { onConflict: "phone_e164" });
+      // Update user status using secure function
+      await supabase.rpc('update_sms_compliance_status', {
+        p_phone_e164: from,
+        p_status: 'active'
+      });
 
       await supabase.from("messages").insert({
         direction: "in", phone_e164: from, body, twilio_sid: sid,
