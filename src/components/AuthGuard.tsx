@@ -33,8 +33,11 @@ export function AuthGuard({ children }: AuthGuardProps) {
     // Also don't count Settings page navigation as loops - it's a static page
     const isSettingsPageNavigation = location.pathname === '/settings';
     
-    // Reset if more than 10 seconds have passed or if this is settings/phone verification
-    if (now - storedTime > 10000 || isPhoneVerification || isSettingsPageNavigation) {
+    // Don't count test page navigation as loops - they're diagnostic tools
+    const isTestPageNavigation = location.pathname.startsWith('/test/');
+    
+    // Reset if more than 10 seconds have passed or if this is settings/phone verification/test pages
+    if (now - storedTime > 10000 || isPhoneVerification || isSettingsPageNavigation || isTestPageNavigation) {
       localStorage.setItem(loopKey, '1');
       localStorage.setItem(timeKey, String(now));
       setLoopCount(1);
