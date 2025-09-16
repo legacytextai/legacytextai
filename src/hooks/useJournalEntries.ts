@@ -17,12 +17,19 @@ export interface JournalEntry {
 
 export const useJournalEntries = () => {
   const { user } = useAuth()
-  const { userData } = useUserData()
+  const { userData, loading: userLoading } = useUserData()
+
+  console.log('useJournalEntries - userData:', userData)
+  console.log('useJournalEntries - userLoading:', userLoading)
+  console.log('useJournalEntries - user:', user)
 
   return useQuery({
     queryKey: ['journal-entries', userData?.id],
     queryFn: async () => {
+      console.log('Fetching journal entries for user_id:', userData?.id)
+      
       if (!userData?.id) {
+        console.log('No userData.id available, returning empty array')
         return []
       }
 
@@ -32,14 +39,20 @@ export const useJournalEntries = () => {
         .eq('user_id', userData.id)
         .order('received_at', { ascending: false })
 
+      console.log('Supabase response - data:', data)
+      console.log('Supabase response - error:', error)
+
       if (error) {
         console.error('Error fetching journal entries:', error)
         throw error
       }
 
+      console.log('Returning journal entries:', data?.length || 0, 'entries')
       return data || []
     },
-    enabled: !!userData?.id,
+    enabled: !!userData?.id && !userLoading,
+    staleTime: 30000, // 30 seconds
+    retry: 3,
   })
 }
 
