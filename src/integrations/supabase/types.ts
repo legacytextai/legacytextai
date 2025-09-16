@@ -336,6 +336,10 @@ export type Database = {
         Args: { phone_input: string }
         Returns: string
       }
+      recover_stuck_user_account: {
+        Args: { p_auth_user_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

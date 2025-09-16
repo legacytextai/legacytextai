@@ -65,43 +65,32 @@ serve(async (req) => {
       });
     }
 
-    // Recovery actions:
-    // 1. Clear temp phone number
-    // 2. Reset status to 'pending'
-    // 3. Delete any stuck OTP codes for this user
-    const { error: updateError } = await admin
-      .from("users_app")
-      .update({
-        status: 'pending',
-        phone_e164: ''
-      })
-      .eq("auth_user_id", user.id);
+    // Use the database function to recover the user account
+    // This bypasses the client restrictions via SECURITY DEFINER
+    const { data: recoveryResult, error: recoveryError } = await admin
+      .rpc('recover_stuck_user_account', { p_auth_user_id: user.id });
 
-    if (updateError) {
-      console.error("Error updating user:", updateError);
+    if (recoveryError) {
+      console.error("Error calling recovery function:", recoveryError);
       return new Response("Recovery failed", { status: 500, headers: corsHeaders });
     }
 
-    // Clear any stuck OTP codes
-    const { error: otpError } = await admin
-      .from("otp_codes")
-      .delete()
-      .eq("user_auth_id", user.id);
-
-    // Don't fail if OTP deletion fails - it's not critical
-    if (otpError) {
-      console.warn("Warning: Could not clear OTP codes:", otpError);
+    if (!recoveryResult.success) {
+      console.error("Recovery function failed:", recoveryResult.error);
+      return new Response(JSON.stringify({ 
+        recovered: false, 
+        reason: recoveryResult.error 
+      }), {
+        headers: { "Content-Type": "application/json", ...corsHeaders }
+      });
     }
 
     console.log(`User ${user.id} recovered successfully`);
 
     return new Response(JSON.stringify({ 
       recovered: true,
-      message: "User account recovered. You can now set up your phone number again.",
-      previousState: {
-        status: userData.status,
-        phone_e164: userData.phone_e164
-      }
+      message: recoveryResult.message,
+      previousState: recoveryResult.previous_state
     }), {
       headers: { "Content-Type": "application/json", ...corsHeaders }
     });
