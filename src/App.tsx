@@ -17,6 +17,7 @@ import Terms from "./pages/Terms";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import DiagAuth from "./pages/DiagAuth";
+import TestPhoneVerification from "./pages/TestPhoneVerification";
 import NotFound from "./pages/NotFound";
 import { AuthGuard } from "./components/AuthGuard";
 
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/diag/auth" element={<DiagAuth />} />
+          <Route path="/test/phone-verification" element={<TestPhoneVerification />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
