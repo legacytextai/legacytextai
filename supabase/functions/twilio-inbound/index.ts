@@ -124,6 +124,8 @@ serve(async (req) => {
         throw userError;
       }
 
+      let finalUserId = userId;
+
       // If no user found, we need to handle this as an unknown number
       if (!userId) {
         console.log('Unknown phone number, creating minimal record for SMS compliance');
@@ -141,10 +143,35 @@ serve(async (req) => {
           throw createError;
         }
         
-        userId = newUserId;
+        finalUserId = newUserId;
+      } else {
+        // Verify the user still exists in users_app table to avoid foreign key errors
+        const { data: userExists } = await supabase
+          .from("users_app")
+          .select("id")
+          .eq("id", userId)
+          .maybeSingle();
+          
+        if (!userExists) {
+          console.log('User ID exists but user record missing, creating minimal record');
+          // Create minimal record for this auth_user_id
+          const { data: newUserId, error: createError } = await supabase.rpc('create_user_profile_secure', {
+            p_auth_user_id: userId, // Use the existing auth user ID
+            p_email: '', // No email for SMS-only users  
+            p_phone_e164: from,
+            p_status: 'sms_only'
+          });
+          
+          if (createError) {
+            console.error('Error creating user record:', createError);
+            throw createError;
+          }
+          
+          finalUserId = newUserId;
+        }
       }
 
-      console.log('User ID resolved:', userId);
+      console.log('User ID resolved:', finalUserId);
 
       // Log inbound message
       const { error: messageError } = await supabase
@@ -164,7 +191,7 @@ serve(async (req) => {
       const { error: entryError } = await supabase
         .from("journal_entries")
         .insert({
-          user_id: userId,
+          user_id: finalUserId,
           phone_e164: from,
           content: body,
           message_sid: sid,
@@ -182,7 +209,7 @@ serve(async (req) => {
       await supabase.rpc('log_service_access', {
         p_table_name: 'journal_entries',
         p_operation: 'INSERT',
-        p_user_id: userId,
+        p_user_id: finalUserId,
         p_function_name: 'twilio-inbound'
       });
     } else {
