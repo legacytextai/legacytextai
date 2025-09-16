@@ -75,13 +75,6 @@ export type Database = {
             referencedRelation: "users_app"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "daily_prompts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users_app_secure_view"
-            referencedColumns: ["id"]
-          },
         ]
       }
       journal_entries: {
@@ -121,13 +114,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users_app"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "journal_entries_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users_app_secure_view"
             referencedColumns: ["id"]
           },
         ]
@@ -335,30 +321,7 @@ export type Database = {
       }
     }
     Views: {
-      users_app_secure_view: {
-        Row: {
-          auth_user_id: string | null
-          created_at: string | null
-          id: string | null
-          phone_e164: string | null
-          status: string | null
-        }
-        Insert: {
-          auth_user_id?: string | null
-          created_at?: string | null
-          id?: string | null
-          phone_e164?: string | null
-          status?: string | null
-        }
-        Update: {
-          auth_user_id?: string | null
-          created_at?: string | null
-          id?: string | null
-          phone_e164?: string | null
-          status?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       create_user_profile_secure: {
