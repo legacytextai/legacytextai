@@ -49,7 +49,7 @@ serve(async (req) => {
       .eq('auth_user_id', user.id)
       .single();
 
-    if (userError || !userApp || userApp.email !== 'admin@legacytext.ai') {
+    if (userError || !userApp || userApp.email !== 'abdulbidiwi@gmail.com') {
       return new Response(JSON.stringify({ error: 'Admin access required' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
