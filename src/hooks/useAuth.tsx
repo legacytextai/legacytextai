@@ -194,8 +194,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // Bootstrap after state change (defer to avoid deadlocks)
         if (session && event === 'SIGNED_IN') {
-          // Don't auto-redirect from auth callback page
-          if (window.location.pathname !== '/auth/callback' && !bootstrapInProgress) {
+          // Don't auto-redirect from auth callback page or test pages
+          const isTestPage = window.location.pathname.startsWith('/test/');
+          if (window.location.pathname !== '/auth/callback' && !isTestPage && !bootstrapInProgress) {
             setBootstrapInProgress(true);
             setTimeout(() => {
               if (mounted) {
@@ -219,7 +220,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAuthReady(true);
       
       // Bootstrap on initial load if session exists
-      if (session && window.location.pathname !== '/auth/callback' && !bootstrapInProgress) {
+      const isTestPage = window.location.pathname.startsWith('/test/');
+      if (session && window.location.pathname !== '/auth/callback' && !isTestPage && !bootstrapInProgress) {
         setBootstrapInProgress(true);
         setTimeout(() => {
           if (mounted) {
