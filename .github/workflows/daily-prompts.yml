@@ -1,9 +1,9 @@
 name: Send Daily Prompts (8am PT)
 
 on:
-  # Scheduled 8:00 AM PST / 9:00 AM PDT (16:00 UTC year-round)
+  # Scheduled 8:00 AM PDT / 7:00 AM PST (15:00 UTC year-round)
   schedule:
-    - cron: "0 16 * * *"   # 16:00 UTC daily (8:00 AM PST / 9:00 AM PDT)
+    - cron: "0 15 * * *"   # 15:00 UTC daily (8:00 AM PDT / 7:00 AM PST)
   # Manual runs with optional inputs
   workflow_dispatch:
     inputs:
