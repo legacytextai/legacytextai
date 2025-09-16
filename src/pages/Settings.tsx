@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CalendarIcon, Plus, X, Phone, Settings as SettingsIcon, User, MessageSquare, Clock } from 'lucide-react';
+import { CalendarIcon, Plus, X, Phone, Settings as SettingsIcon, User, MessageSquare, Clock, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -316,6 +316,36 @@ const Settings = () => {
     }
   };
 
+  const recoverStuckAccount = async () => {
+    if (!user) return;
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch('https://toxadhuqzdydliplhrws.supabase.co/functions/v1/recover-stuck-user', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.recovered) {
+          toast.success('Account recovered! You can now set up your phone number again.');
+          await loadUserData(); // Refresh user data
+        } else {
+          toast.info(result.reason || 'Account recovery not needed.');
+        }
+      } else {
+        toast.error('Failed to recover account');
+      }
+    } catch (error) {
+      console.error('Error recovering account:', error);
+      toast.error('Failed to recover account: Network error');
+    }
+  };
+
   const addInterest = () => {
     if (newInterest.trim()) {
       const currentInterests = form.getValues('interests');
@@ -545,6 +575,23 @@ const Settings = () => {
                 <p className="text-xs text-legacy-ink/60">
                   Status: {userData?.status || 'pending'}
                 </p>
+                {/* Recovery button for stuck users */}
+                {(userData?.status === 'paused' || 
+                  (userData?.phone_e164 && userData.phone_e164.startsWith('temp_'))) && (
+                  <Alert className="border-amber-200 bg-amber-50">
+                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+                    <AlertDescription className="text-amber-700">
+                      Your account appears to be stuck in verification. 
+                      <Button 
+                        variant="link" 
+                        className="p-0 h-auto text-amber-700 underline ml-1"
+                        onClick={recoverStuckAccount}
+                      >
+                        Click here to recover your account
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
             </CardContent>
           </Card>
