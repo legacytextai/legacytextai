@@ -26,7 +26,7 @@ export const useAuth = () => {
   return context;
 };
 
-let __didAutoKickoff = false;
+let __didAutoKickoff = false; // Reset for fresh testing
 
 export async function afterLoginBootstrap(navigate: (path: string) => void) {
   console.log('[afterLoginBootstrap] Starting bootstrap process');
