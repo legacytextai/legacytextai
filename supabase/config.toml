@@ -14,3 +14,6 @@ verify_jwt = true
 
 [functions.create-missing-user]
 verify_jwt = false
+
+[functions.categorize-journal-entry]
+verify_jwt = false

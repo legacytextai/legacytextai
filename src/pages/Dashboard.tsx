@@ -10,6 +10,7 @@ import { CalendarDays, BookOpen, Users, Clock, Phone, Shield, MessageSquare, Sea
 import { useAuth } from "@/hooks/useAuth";
 import { useUserData } from "@/hooks/useUserData";
 import { useJournalEntries, useCreateJournalEntry, type JournalEntry } from "@/hooks/useJournalEntries";
+import { useBatchCategorizeEntries } from "@/hooks/useCategorizeEntry";
 import { EntryCard } from "@/components/EntryCard";
 import { toast } from "sonner";
 
@@ -32,6 +33,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const { data: entries = [], isLoading: entriesLoading } = useJournalEntries();
   const createMutation = useCreateJournalEntry();
+  const batchCategorize = useBatchCategorizeEntries();
   
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
@@ -84,6 +86,21 @@ function Dashboard() {
         }
       );
     }
+  };
+
+  const handleBatchCategorize = () => {
+    const uncategorizedEntries = entries.filter(entry => !entry.category);
+    if (uncategorizedEntries.length === 0) {
+      toast.info("All entries are already categorized!");
+      return;
+    }
+    
+    const entriesToCategorize = uncategorizedEntries.map(entry => ({
+      id: entry.id,
+      content: entry.content
+    }));
+    
+    batchCategorize.mutate(entriesToCategorize);
   };
 
   if (userLoading) {
@@ -257,8 +274,18 @@ function Dashboard() {
                 </Badge>
               )}
             </CardTitle>
-            <CardDescription>
-              Your journal entries from text messages and manual entries
+            <CardDescription className="flex justify-between items-center">
+              <span>Your journal entries from text messages and manual entries</span>
+              {entries.some(entry => !entry.category) && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleBatchCategorize}
+                  disabled={batchCategorize.isPending}
+                >
+                  {batchCategorize.isPending ? 'Categorizing...' : 'Categorize All Entries'}
+                </Button>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>

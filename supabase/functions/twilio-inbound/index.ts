@@ -160,8 +160,8 @@ serve(async (req) => {
         console.error('Error logging message:', messageError);
       }
 
-      // Save journal entry
-      const { error: entryError } = await supabase
+      // Save journal entry and get the created entry
+      const { data: newEntry, error: entryError } = await supabase
         .from("journal_entries")
         .insert({
           user_id: userId,
@@ -169,7 +169,9 @@ serve(async (req) => {
           content: body,
           message_sid: sid,
           source: "sms",
-        });
+        })
+        .select()
+        .single();
 
       if (entryError) {
         console.error('Error saving journal entry:', entryError);
@@ -177,6 +179,32 @@ serve(async (req) => {
       }
 
       console.log('Journal entry saved successfully');
+
+      // Trigger AI categorization in the background (non-blocking)
+      if (newEntry) {
+        try {
+          console.log(`Triggering AI categorization for entry ${newEntry.id}`);
+          // Fire and forget - don't await this
+          supabase.functions.invoke('categorize-journal-entry', {
+            body: { 
+              entryId: newEntry.id, 
+              content: body, 
+              batchMode: false 
+            }
+          }).then(({ error: categorizeError }) => {
+            if (categorizeError) {
+              console.error('Background categorization failed:', categorizeError);
+            } else {
+              console.log(`Background categorization completed for entry ${newEntry.id}`);
+            }
+          }).catch(error => {
+            console.error('Background categorization error:', error);
+          });
+        } catch (categorizeError) {
+          console.error('Failed to trigger background categorization:', categorizeError);
+          // Don't throw - this is non-critical
+        }
+      }
       
       // Log this security-sensitive operation
       await supabase.rpc('log_service_access', {

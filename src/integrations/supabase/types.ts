@@ -79,6 +79,7 @@ export type Database = {
       }
       journal_entries: {
         Row: {
+          category: string | null
           content: string
           id: number
           message_sid: string | null
@@ -89,6 +90,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          category?: string | null
           content: string
           id?: number
           message_sid?: string | null
@@ -99,6 +101,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          category?: string | null
           content?: string
           id?: number
           message_sid?: string | null

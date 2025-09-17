@@ -3,9 +3,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarDays, Clock, Edit3, Save, X, Trash2 } from "lucide-react";
+import { CalendarDays, Clock, Edit3, Save, X, Trash2, RefreshCw } from "lucide-react";
 import type { JournalEntry } from "@/hooks/useJournalEntries";
 import { useUpdateJournalEntry, useDeleteJournalEntry } from "@/hooks/useJournalEntries";
+import { useCategorizeEntry } from "@/hooks/useCategorizeEntry";
 
 interface EntryCardProps {
   entry: JournalEntry;
@@ -13,14 +14,19 @@ interface EntryCardProps {
   enableInlineEdit?: boolean;
 }
 
-// Helper function to get category colors
+// Helper function to get AI category colors
 function getCategoryColor(category: string): string {
   const colors: { [key: string]: string } = {
-    "Milestones": "bg-green-100 text-green-800",
-    "Values": "bg-blue-100 text-blue-800", 
-    "Daily Life": "bg-purple-100 text-purple-800",
-    "Memories": "bg-yellow-100 text-yellow-800",
-    "Advice": "bg-red-100 text-red-800"
+    "Values": "bg-purple-100 text-purple-800",
+    "Advice": "bg-blue-100 text-blue-800",
+    "Memories": "bg-green-100 text-green-800",
+    "Work Ethics": "bg-orange-100 text-orange-800",
+    "Faith": "bg-yellow-100 text-yellow-800", 
+    "Family": "bg-pink-100 text-pink-800",
+    "Life Lessons": "bg-indigo-100 text-indigo-800",
+    "Encouragement": "bg-emerald-100 text-emerald-800",
+    "Reflection": "bg-slate-100 text-slate-800",
+    "Future Hopes": "bg-sky-100 text-sky-800"
   };
   return colors[category] || "bg-gray-100 text-gray-800";
 }
@@ -34,6 +40,7 @@ export const EntryCard: React.FC<EntryCardProps> = ({
   const [editedContent, setEditedContent] = useState(entry.content);
   const updateMutation = useUpdateJournalEntry();
   const deleteMutation = useDeleteJournalEntry();
+  const categorizeMutation = useCategorizeEntry();
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
@@ -72,14 +79,12 @@ export const EntryCard: React.FC<EntryCardProps> = ({
     }
   };
 
-  const getSourceBadge = () => {
-    if (entry.source === 'manual') {
-      return { text: 'Manual Entry', color: 'bg-blue-100 text-blue-800' };
-    }
-    return { text: 'SMS Entry', color: 'bg-green-100 text-green-800' };
+  const handleRecategorize = () => {
+    categorizeMutation.mutate({
+      entryId: entry.id,
+      content: entry.content
+    });
   };
-
-  const sourceBadge = getSourceBadge();
 
   return (
     <Card className={`shadow-paper hover:shadow-lg transition-shadow ${className}`}>
@@ -96,8 +101,8 @@ export const EntryCard: React.FC<EntryCardProps> = ({
             </span>
           </div>
           <div className="flex items-center space-x-2">
-            <Badge className={sourceBadge.color}>
-              {sourceBadge.text}
+            <Badge className={getCategoryColor(entry.category || 'Uncategorized')}>
+              {entry.category || 'Uncategorized'}
             </Badge>
             {enableInlineEdit && !isEditing && (
               <div className="flex space-x-1">
@@ -108,6 +113,16 @@ export const EntryCard: React.FC<EntryCardProps> = ({
                   className="h-8 w-8 p-0"
                 >
                   <Edit3 className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRecategorize}
+                  disabled={categorizeMutation.isPending}
+                  className="h-8 w-8 p-0"
+                  title="Re-categorize this entry"
+                >
+                  <RefreshCw className={`w-4 h-4 ${categorizeMutation.isPending ? 'animate-spin' : ''}`} />
                 </Button>
                 <Button
                   variant="ghost"

@@ -14,6 +14,7 @@ export interface JournalEntry {
   source?: string
   message_sid?: string
   name?: string
+  category?: string
 }
 
 export const useJournalEntries = () => {
