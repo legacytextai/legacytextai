@@ -297,7 +297,7 @@ function Dashboard() {
             ) : filteredEntries.length > 0 ? (
               <div className="border-2 border-legacy-primary/20 rounded-lg bg-gray-50 shadow-inner p-4">
                 <ScrollArea className="h-[500px] w-full">
-                  <div className="space-y-6 pr-4">
+                  <div className="space-y-6">
                     {filteredEntries.map((entry) => (
                       <EntryCard key={entry.id} entry={entry} enableInlineEdit={true} />
                     ))}
