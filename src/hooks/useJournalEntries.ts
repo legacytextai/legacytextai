@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from './useAuth'
 import { useUserData } from './useUserData'
 import { toast } from 'sonner'
+import { useEffect } from 'react'
 
 export interface JournalEntry {
   id: number
@@ -18,18 +19,12 @@ export interface JournalEntry {
 export const useJournalEntries = () => {
   const { user } = useAuth()
   const { userData, loading: userLoading } = useUserData()
+  const queryClient = useQueryClient()
 
-  console.log('useJournalEntries - userData:', userData)
-  console.log('useJournalEntries - userLoading:', userLoading)
-  console.log('useJournalEntries - user:', user)
-
-  return useQuery({
+  const query = useQuery({
     queryKey: ['journal-entries', userData?.id],
     queryFn: async () => {
-      console.log('Fetching journal entries for user_id:', userData?.id)
-      
       if (!userData?.id) {
-        console.log('No userData.id available, returning empty array')
         return []
       }
 
@@ -39,21 +34,51 @@ export const useJournalEntries = () => {
         .eq('user_id', userData.id)
         .order('received_at', { ascending: false })
 
-      console.log('Supabase response - data:', data)
-      console.log('Supabase response - error:', error)
-
       if (error) {
         console.error('Error fetching journal entries:', error)
         throw error
       }
 
-      console.log('Returning journal entries:', data?.length || 0, 'entries')
       return data || []
     },
     enabled: !!userData?.id && !userLoading,
     staleTime: 30000, // 30 seconds
     retry: 3,
   })
+
+  // Set up real-time subscription for journal entries
+  useEffect(() => {
+    if (!userData?.id) return
+
+    const channel = supabase
+      .channel('journal-entries-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'journal_entries',
+          filter: `user_id=eq.${userData.id}`
+        },
+        (payload) => {
+          console.log('Real-time update received:', payload)
+          // Invalidate and refetch the entries
+          queryClient.invalidateQueries({ queryKey: ['journal-entries', userData.id] })
+          
+          // Show toast for new entries
+          if (payload.eventType === 'INSERT') {
+            toast.success('New journal entry received!')
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [userData?.id, queryClient])
+
+  return query
 }
 
 export const useUpdateJournalEntry = () => {

@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CalendarDays, BookOpen, Users, Clock, Phone, Shield, MessageSquare } from "lucide-react";
+import { CalendarDays, BookOpen, Users, Clock, Phone, Shield, MessageSquare, Search, Filter, Plus } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserData } from "@/hooks/useUserData";
-import { useJournalEntries } from "@/hooks/useJournalEntries";
+import { useJournalEntries, useCreateJournalEntry, type JournalEntry } from "@/hooks/useJournalEntries";
 import { EntryCard } from "@/components/EntryCard";
 import { toast } from "sonner";
 
@@ -30,6 +31,12 @@ function Dashboard() {
   const { userData, loading: userLoading } = useUserData();
   const navigate = useNavigate();
   const { data: entries = [], isLoading: entriesLoading } = useJournalEntries();
+  const createMutation = useCreateJournalEntry();
+  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
+  const [showAddEntry, setShowAddEntry] = useState(false);
+  const [newEntryContent, setNewEntryContent] = useState("");
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -38,6 +45,17 @@ function Dashboard() {
     }
   }, [user, userLoading, navigate]);
 
+
+  // Filter and sort entries
+  const filteredEntries = entries
+    .filter((entry: JournalEntry) => 
+      entry.content.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a: JournalEntry, b: JournalEntry) => {
+      const dateA = new Date(a.received_at).getTime();
+      const dateB = new Date(b.received_at).getTime();
+      return sortBy === 'newest' ? dateB - dateA : dateA - dateB;
+    });
 
   // Check for pending phone from localStorage (from homepage signup)
   useEffect(() => {
@@ -52,6 +70,21 @@ function Dashboard() {
       localStorage.removeItem('pendingPhone');
     }
   }, [userData, navigate]);
+
+  const handleAddEntry = () => {
+    if (newEntryContent.trim()) {
+      createMutation.mutate(
+        { content: newEntryContent.trim() },
+        {
+          onSuccess: () => {
+            setNewEntryContent("");
+            setShowAddEntry(false);
+            toast.success('Entry added successfully!');
+          }
+        }
+      );
+    }
+  };
 
   if (userLoading) {
     return (
@@ -86,12 +119,21 @@ function Dashboard() {
 
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-legacy-primary">Entry History</h1>
-          <Link to="/export">
-            <Button variant="default" size="lg">
-              <BookOpen className="w-5 h-5 mr-2" />
-              Export Journal
+          <div className="flex space-x-3">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowAddEntry(!showAddEntry)}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Entry
             </Button>
-          </Link>
+            <Link to="/export">
+              <Button variant="default" size="lg">
+                <BookOpen className="w-5 h-5 mr-2" />
+                Export Journal
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Statistics Grid */}
@@ -102,10 +144,10 @@ function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-legacy-primary">
-                {entries.length}
+                {filteredEntries.length}
               </div>
               <p className="text-sm text-legacy-ink/70 mt-1">
-                messages saved
+                {searchTerm ? `filtered from ${entries.length} total` : 'messages saved'}
               </p>
             </CardContent>
           </Card>
@@ -130,36 +172,120 @@ function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-legacy-primary">
-                {entries.length > 0 ? 'Recent' : 'None'}
+                {filteredEntries.length > 0 ? 'Recent' : 'None'}
               </div>
               <p className="text-sm text-legacy-ink/70 mt-1">
-                {entries.length > 0 ? new Date(entries[0].received_at).toLocaleDateString() : 'Reply to a prompt to start'}
+                {filteredEntries.length > 0 ? new Date(filteredEntries[0].received_at).toLocaleDateString() : 'Reply to a prompt to start'}
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Recent Entries Section */}
+        {/* Add Entry Section */}
+        {showAddEntry && (
+          <Card className="border-2 border-dashed border-legacy-primary/30">
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-legacy-primary">Add New Entry</h3>
+                <textarea
+                  value={newEntryContent}
+                  onChange={(e) => setNewEntryContent(e.target.value)}
+                  placeholder="Write your journal entry here..."
+                  className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md resize-none focus:ring-2 focus:ring-legacy-primary focus:border-transparent"
+                />
+                <div className="flex justify-end space-x-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setShowAddEntry(false);
+                      setNewEntryContent("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleAddEntry}
+                    disabled={!newEntryContent.trim() || createMutation.isPending}
+                  >
+                    {createMutation.isPending ? 'Adding...' : 'Add Entry'}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Search and Filter Section */}
+        {entries.length > 0 && (
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex flex-col sm:flex-row gap-4 items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder="Search your entries..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-4 h-4 text-gray-500" />
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest')}
+                    className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                  </select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Entries Section */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Users className="w-5 h-5" />
-              <span>Recent Entries</span>
+              <span>Your Journal Entries</span>
+              {searchTerm && (
+                <Badge variant="secondary" className="ml-2">
+                  {filteredEntries.length} of {entries.length}
+                </Badge>
+              )}
             </CardTitle>
             <CardDescription>
-              Your latest journal entries from text messages
+              Your journal entries from text messages and manual entries
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6 max-h-96 overflow-y-auto">
+            <div className="space-y-6">
               {entriesLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-legacy-primary"></div>
                 </div>
-              ) : entries.length > 0 ? (
-                entries.map((entry) => (
-                  <EntryCard key={entry.id} entry={entry} />
+              ) : filteredEntries.length > 0 ? (
+                filteredEntries.map((entry) => (
+                  <EntryCard key={entry.id} entry={entry} enableInlineEdit={true} />
                 ))
+              ) : searchTerm ? (
+                <Card className="shadow-paper">
+                  <CardContent className="p-12 text-center">
+                    <Search className="w-16 h-16 mx-auto text-legacy-ink/30 mb-4" />
+                    <h3 className="text-xl font-semibold text-legacy-primary mb-2">
+                      No entries found
+                    </h3>
+                    <p className="text-legacy-ink/70 mb-6">
+                      No entries match your search term "{searchTerm}". Try a different search or clear the filter.
+                    </p>
+                    <Button variant="outline" onClick={() => setSearchTerm("")}>
+                      Clear Search
+                    </Button>
+                  </CardContent>
+                </Card>
               ) : (
                 <Card className="shadow-paper">
                   <CardContent className="p-12 text-center">
@@ -173,14 +299,20 @@ function Dashboard() {
                         : "Verify your phone number to start receiving daily prompts and build your legacy journal."
                       }
                     </p>
-                    {userData?.status !== 'active' && (
-                      <Link to="/settings">
-                        <Button variant="default">
-                          <Phone className="w-4 h-4 mr-2" />
-                          Verify Phone Number
-                        </Button>
-                      </Link>
-                    )}
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Button onClick={() => setShowAddEntry(true)}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Manual Entry
+                      </Button>
+                      {userData?.status !== 'active' && (
+                        <Link to="/settings">
+                          <Button variant="outline">
+                            <Phone className="w-4 h-4 mr-2" />
+                            Verify Phone Number
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               )}
