@@ -118,7 +118,7 @@ function Dashboard() {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 overflow-x-hidden">
         {/* Phone Verification Banner */}
         {userData && userData.status !== 'active' && (
           <Alert className="mb-6 border-orange-200 bg-orange-50">
@@ -137,16 +137,17 @@ function Dashboard() {
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-legacy-primary">Entry History</h1>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto min-w-0">
             <Button 
               variant="outline" 
               onClick={() => setShowAddEntry(!showAddEntry)}
+              className="flex-shrink-0"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Entry
             </Button>
-            <Link to="/export">
-              <Button variant="default" size="lg">
+            <Link to="/export" className="flex-shrink-0">
+              <Button variant="default" size="lg" className="w-full sm:w-auto">
                 <BookOpen className="w-5 h-5 mr-2" />
                 Export Journal
               </Button>
@@ -238,21 +239,21 @@ function Dashboard() {
           <Card>
             <CardContent className="p-4">
               <div className="flex flex-col sm:flex-row gap-4 items-center">
-                <div className="relative flex-1">
+                <div className="relative flex-1 w-full min-w-0">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
                     placeholder="Search your entries..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 w-full"
                   />
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <Filter className="w-4 h-4 text-gray-500" />
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest')}
-                    className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    className="border border-gray-300 rounded-md px-3 py-2 text-sm min-w-0"
                   >
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
@@ -332,14 +333,14 @@ function Dashboard() {
                       : "Verify your phone number to start receiving daily prompts and build your legacy journal."
                     }
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Button onClick={() => setShowAddEntry(true)}>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-full">
+                    <Button onClick={() => setShowAddEntry(true)} className="flex-shrink-0">
                       <Plus className="w-4 h-4 mr-2" />
                       Add Manual Entry
                     </Button>
                     {userData?.status !== 'active' && (
-                      <Link to="/settings">
-                        <Button variant="outline">
+                      <Link to="/settings" className="flex-shrink-0">
+                        <Button variant="outline" className="w-full sm:w-auto">
                           <Phone className="w-4 h-4 mr-2" />
                           Verify Phone Number
                         </Button>
@@ -359,15 +360,15 @@ function Dashboard() {
             <p className="mb-6 opacity-90">
               Your journal entries are automatically organized and ready to export as a beautiful PDF or premium bound book.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/export">
-                <Button variant="secondary" size="lg">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-full">
+              <Link to="/export" className="flex-shrink-0">
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto">
                   <BookOpen className="w-5 h-5 mr-2" />
                   Export as PDF
                 </Button>
               </Link>
-              <Link to="/export">
-                <Button variant="outline" size="lg" className="text-white border-white hover:bg-white hover:text-legacy-accent">
+              <Link to="/export" className="flex-shrink-0">
+                <Button variant="outline" size="lg" className="text-white border-white hover:bg-white hover:text-legacy-accent w-full sm:w-auto">
                   Order Bound Journal
                 </Button>
               </Link>

@@ -89,28 +89,28 @@ export const EntryCard: React.FC<EntryCardProps> = ({
   return (
     <Card className={`shadow-paper hover:shadow-lg transition-shadow ${className}`}>
       <CardContent className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center space-x-4">
-            <CalendarDays className="w-5 h-5 text-legacy-ink/50" />
-            <span className="text-sm font-medium text-legacy-ink/70">
+        <div className="flex justify-between items-start mb-4 gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-wrap">
+            <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5 text-legacy-ink/50 flex-shrink-0" />
+            <span className="text-xs sm:text-sm font-medium text-legacy-ink/70 whitespace-nowrap">
               {formatDate(entry.received_at)}
             </span>
-            <Clock className="w-4 h-4 text-legacy-ink/50" />
-            <span className="text-sm text-legacy-ink/70">
+            <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-legacy-ink/50 flex-shrink-0" />
+            <span className="text-xs sm:text-sm text-legacy-ink/70 whitespace-nowrap">
               {formatTime(entry.received_at)}
             </span>
           </div>
-          <div className="flex items-center space-x-2">
-            <Badge className={getCategoryColor(entry.category || 'Uncategorized')}>
+          <div className="flex items-center gap-2 min-w-0">
+            <Badge className={`${getCategoryColor(entry.category || 'Uncategorized')} text-xs flex-shrink-0`}>
               {entry.category || 'Uncategorized'}
             </Badge>
             {enableInlineEdit && !isEditing && (
-              <div className="flex space-x-1">
+              <div className="flex gap-1 flex-shrink-0">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsEditing(true)}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 flex-shrink-0"
                 >
                   <Edit3 className="w-4 h-4" />
                 </Button>
@@ -119,7 +119,7 @@ export const EntryCard: React.FC<EntryCardProps> = ({
                   size="sm"
                   onClick={handleRecategorize}
                   disabled={categorizeMutation.isPending}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 flex-shrink-0"
                   title="Re-categorize this entry"
                 >
                   <RefreshCw className={`w-4 h-4 ${categorizeMutation.isPending ? 'animate-spin' : ''}`} />
@@ -128,7 +128,7 @@ export const EntryCard: React.FC<EntryCardProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleDelete}
-                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 flex-shrink-0"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -145,12 +145,13 @@ export const EntryCard: React.FC<EntryCardProps> = ({
               className="min-h-[100px] resize-none"
               placeholder="Write your journal entry..."
             />
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end gap-2 flex-wrap">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleCancel}
                 disabled={updateMutation.isPending}
+                className="flex-shrink-0"
               >
                 <X className="w-4 h-4 mr-1" />
                 Cancel
@@ -159,6 +160,7 @@ export const EntryCard: React.FC<EntryCardProps> = ({
                 size="sm"
                 onClick={handleSave}
                 disabled={updateMutation.isPending || !editedContent.trim()}
+                className="flex-shrink-0"
               >
                 <Save className="w-4 h-4 mr-1" />
                 {updateMutation.isPending ? 'Saving...' : 'Save'}
