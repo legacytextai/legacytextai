@@ -207,7 +207,7 @@ function SidebarLayout({ children }: { children: ReactNode }) {
       <AppSidebar />
       <main className="flex-1 flex flex-col">
         <header className="border-b border-legacy-border bg-card/80 backdrop-blur-sm">
-          <div className="container mx-auto px-6 py-3 flex flex-col">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col">
             <div className="flex items-center justify-between h-10">
             <button 
               onClick={() => navigate("/dashboard")}
@@ -231,11 +231,11 @@ function SidebarLayout({ children }: { children: ReactNode }) {
             )}
           </div>
         </header>
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-4 sm:p-6">
           {children}
         </div>
         <footer className="border-t border-legacy-border bg-card/80 backdrop-blur-sm py-6">
-          <div className="container mx-auto px-6">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-sm text-legacy-ink/60">
                 © 2025 LegacyText AI. All rights reserved.

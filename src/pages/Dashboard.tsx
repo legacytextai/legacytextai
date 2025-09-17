@@ -118,7 +118,7 @@ function Dashboard() {
 
   return (
     <Layout>
-      <div className="space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Phone Verification Banner */}
         {userData && userData.status !== 'active' && (
           <Alert className="mb-6 border-orange-200 bg-orange-50">
@@ -135,9 +135,9 @@ function Dashboard() {
           </Alert>
         )}
 
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-legacy-primary">Entry History</h1>
-          <div className="flex space-x-3">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-legacy-primary">Entry History</h1>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
             <Button 
               variant="outline" 
               onClick={() => setShowAddEntry(!showAddEntry)}
