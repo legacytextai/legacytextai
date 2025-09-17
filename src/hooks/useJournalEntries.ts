@@ -25,8 +25,13 @@ export const useJournalEntries = () => {
     queryKey: ['journal-entries', userData?.id],
     queryFn: async () => {
       if (!userData?.id) {
+        console.log('❌ No userData.id available for journal entries query')
         return []
       }
+
+      console.log('🔍 Fetching journal entries for user_id:', userData.id)
+      console.log('🔍 User auth_user_id:', userData.auth_user_id)
+      console.log('🔍 User email:', userData.email)
 
       const { data, error } = await supabase
         .from('journal_entries')
@@ -35,9 +40,12 @@ export const useJournalEntries = () => {
         .order('received_at', { ascending: false })
 
       if (error) {
-        console.error('Error fetching journal entries:', error)
+        console.error('❌ Error fetching journal entries:', error)
         throw error
       }
+
+      console.log('✅ Journal entries found:', data?.length || 0)
+      console.log('📋 Journal entries data:', data)
 
       return data || []
     },
