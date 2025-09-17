@@ -295,13 +295,15 @@ function Dashboard() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-legacy-primary"></div>
               </div>
             ) : filteredEntries.length > 0 ? (
-              <ScrollArea className="max-h-[500px] w-full">
-                <div className="space-y-6 pr-4">
-                  {filteredEntries.map((entry) => (
-                    <EntryCard key={entry.id} entry={entry} enableInlineEdit={true} />
-                  ))}
-                </div>
-              </ScrollArea>
+              <div className="border border-border rounded-lg bg-card/50 p-4">
+                <ScrollArea className="h-[500px] w-full">
+                  <div className="space-y-6 pr-4">
+                    {filteredEntries.map((entry) => (
+                      <EntryCard key={entry.id} entry={entry} enableInlineEdit={true} />
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
             ) : searchTerm ? (
               <Card className="shadow-paper">
                 <CardContent className="p-12 text-center">
