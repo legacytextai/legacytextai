@@ -279,7 +279,7 @@ export type Database = {
           interests: string[] | null
           last_login_at: string | null
           name: string | null
-          phone_e164: string
+          phone_e164: string | null
           preferred_language: string | null
           status: string | null
           timezone: string | null
@@ -295,7 +295,7 @@ export type Database = {
           interests?: string[] | null
           last_login_at?: string | null
           name?: string | null
-          phone_e164: string
+          phone_e164?: string | null
           preferred_language?: string | null
           status?: string | null
           timezone?: string | null
@@ -311,7 +311,7 @@ export type Database = {
           interests?: string[] | null
           last_login_at?: string | null
           name?: string | null
-          phone_e164?: string
+          phone_e164?: string | null
           preferred_language?: string | null
           status?: string | null
           timezone?: string | null
@@ -345,7 +345,7 @@ export type Database = {
           interests: string[] | null
           last_login_at: string | null
           name: string | null
-          phone_e164: string
+          phone_e164: string | null
           preferred_language: string | null
           status: string | null
           timezone: string | null
