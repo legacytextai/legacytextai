@@ -12,6 +12,7 @@ import { useUserData } from "@/hooks/useUserData";
 import { useJournalEntries, useCreateJournalEntry, type JournalEntry } from "@/hooks/useJournalEntries";
 import { useBatchCategorizeEntries } from "@/hooks/useCategorizeEntry";
 import { EntryCard } from "@/components/EntryCard";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 
 
@@ -289,61 +290,63 @@ function Dashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
-              {entriesLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-legacy-primary"></div>
+            {entriesLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-legacy-primary"></div>
+              </div>
+            ) : filteredEntries.length > 0 ? (
+              <ScrollArea className="max-h-[500px] w-full">
+                <div className="space-y-6 pr-4">
+                  {filteredEntries.map((entry) => (
+                    <EntryCard key={entry.id} entry={entry} enableInlineEdit={true} />
+                  ))}
                 </div>
-              ) : filteredEntries.length > 0 ? (
-                filteredEntries.map((entry) => (
-                  <EntryCard key={entry.id} entry={entry} enableInlineEdit={true} />
-                ))
-              ) : searchTerm ? (
-                <Card className="shadow-paper">
-                  <CardContent className="p-12 text-center">
-                    <Search className="w-16 h-16 mx-auto text-legacy-ink/30 mb-4" />
-                    <h3 className="text-xl font-semibold text-legacy-primary mb-2">
-                      No entries found
-                    </h3>
-                    <p className="text-legacy-ink/70 mb-6">
-                      No entries match your search term "{searchTerm}". Try a different search or clear the filter.
-                    </p>
-                    <Button variant="outline" onClick={() => setSearchTerm("")}>
-                      Clear Search
+              </ScrollArea>
+            ) : searchTerm ? (
+              <Card className="shadow-paper">
+                <CardContent className="p-12 text-center">
+                  <Search className="w-16 h-16 mx-auto text-legacy-ink/30 mb-4" />
+                  <h3 className="text-xl font-semibold text-legacy-primary mb-2">
+                    No entries found
+                  </h3>
+                  <p className="text-legacy-ink/70 mb-6">
+                    No entries match your search term "{searchTerm}". Try a different search or clear the filter.
+                  </p>
+                  <Button variant="outline" onClick={() => setSearchTerm("")}>
+                    Clear Search
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="shadow-paper">
+                <CardContent className="p-12 text-center">
+                  <MessageSquare className="w-16 h-16 mx-auto text-legacy-ink/30 mb-4" />
+                  <h3 className="text-xl font-semibold text-legacy-primary mb-2">
+                    No entries yet
+                  </h3>
+                  <p className="text-legacy-ink/70 mb-6">
+                    {userData?.status === 'active' 
+                      ? "Reply to any prompt to start your journal. You'll receive your first prompt soon!"
+                      : "Verify your phone number to start receiving daily prompts and build your legacy journal."
+                    }
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button onClick={() => setShowAddEntry(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Manual Entry
                     </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card className="shadow-paper">
-                  <CardContent className="p-12 text-center">
-                    <MessageSquare className="w-16 h-16 mx-auto text-legacy-ink/30 mb-4" />
-                    <h3 className="text-xl font-semibold text-legacy-primary mb-2">
-                      No entries yet
-                    </h3>
-                    <p className="text-legacy-ink/70 mb-6">
-                      {userData?.status === 'active' 
-                        ? "Reply to any prompt to start your journal. You'll receive your first prompt soon!"
-                        : "Verify your phone number to start receiving daily prompts and build your legacy journal."
-                      }
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                      <Button onClick={() => setShowAddEntry(true)}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Manual Entry
-                      </Button>
-                      {userData?.status !== 'active' && (
-                        <Link to="/settings">
-                          <Button variant="outline">
-                            <Phone className="w-4 h-4 mr-2" />
-                            Verify Phone Number
-                          </Button>
-                        </Link>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+                    {userData?.status !== 'active' && (
+                      <Link to="/settings">
+                        <Button variant="outline">
+                          <Phone className="w-4 h-4 mr-2" />
+                          Verify Phone Number
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </CardContent>
         </Card>
 
