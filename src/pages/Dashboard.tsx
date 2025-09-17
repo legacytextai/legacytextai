@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserData } from "@/hooks/useUserData";
 import { useJournalEntries, useCreateJournalEntry, type JournalEntry } from "@/hooks/useJournalEntries";
 import { EntryCard } from "@/components/EntryCard";
+import { AuthDiagnostic } from "@/components/AuthDiagnostic";
 import { toast } from "sonner";
 
 
@@ -101,6 +102,7 @@ function Dashboard() {
   return (
     <Layout>
       <div className="space-y-8">
+        <AuthDiagnostic />
         {/* Phone Verification Banner */}
         {userData && userData.status !== 'active' && (
           <Alert className="mb-6 border-orange-200 bg-orange-50">
