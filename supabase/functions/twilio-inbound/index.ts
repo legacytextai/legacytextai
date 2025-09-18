@@ -165,7 +165,6 @@ serve(async (req) => {
         .from("journal_entries")
         .insert({
           user_id: userId,
-          phone_e164: from,
           content: body,
           message_sid: sid,
           source: "sms",

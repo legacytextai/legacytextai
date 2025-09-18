@@ -84,10 +84,9 @@ export type Database = {
           id: number
           message_sid: string | null
           name: string | null
-          phone_e164: string
           received_at: string | null
           source: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           category?: string | null
@@ -95,10 +94,9 @@ export type Database = {
           id?: number
           message_sid?: string | null
           name?: string | null
-          phone_e164: string
           received_at?: string | null
           source?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           category?: string | null
@@ -106,12 +104,18 @@ export type Database = {
           id?: number
           message_sid?: string | null
           name?: string | null
-          phone_e164?: string
           received_at?: string | null
           source?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_journal_entries_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_app"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "journal_entries_user_id_fkey"
             columns: ["user_id"]
