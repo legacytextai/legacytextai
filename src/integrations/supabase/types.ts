@@ -371,6 +371,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_user_email_secure: {
+        Args: { p_auth_user_id: string }
+        Returns: string
+      }
       get_user_id_by_phone_secure: {
         Args: { p_phone_e164: string }
         Returns: string
@@ -399,6 +403,10 @@ export type Database = {
           p_user_id?: string
         }
         Returns: undefined
+      }
+      lookup_user_id_by_phone_minimal: {
+        Args: { p_phone_e164: string }
+        Returns: string
       }
       normalize_phone_e164: {
         Args: { phone_input: string }
