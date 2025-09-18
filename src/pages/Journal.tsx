@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { BookOpen, Download, Star } from "lucide-react";
 import { useDedication } from "@/hooks/useDedication";
 import { useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Journal() {
+  const navigate = useNavigate()
   const { 
     dedication, 
     setDedication, 
@@ -29,6 +31,10 @@ export default function Journal() {
     await saveDedication(dedication)
   }, [saveDedication, dedication])
 
+  const handleExportClick = useCallback(() => {
+    navigate('/export')
+  }, [navigate])
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -41,7 +47,7 @@ export default function Journal() {
             </h1>
             <p className="text-legacy-ink/70 mt-1">Preview your legacy journal and export options</p>
           </div>
-          <Button variant="accent">
+          <Button variant="accent" onClick={handleExportClick}>
             <Download className="w-4 h-4 mr-2" />
             Export
           </Button>
@@ -153,7 +159,7 @@ export default function Journal() {
                     <li>• Custom dedication page</li>
                     <li>• Category organization</li>
                   </ul>
-                  <Button variant="accent" className="w-full">
+                  <Button variant="accent" className="w-full" onClick={handleExportClick}>
                     <Download className="w-4 h-4 mr-2" />
                     Export Premium Journal
                   </Button>
@@ -177,7 +183,7 @@ export default function Journal() {
                     <li>• Basic formatting</li>
                     <li>• Chronological order</li>
                   </ul>
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full" onClick={handleExportClick}>
                     <Download className="w-4 h-4 mr-2" />
                     Export Free PDF
                   </Button>
@@ -201,7 +207,7 @@ export default function Journal() {
                     <li>• Archival quality paper</li>
                     <li>• Gold embossed personalization</li>
                   </ul>
-                  <Button variant="warm" className="w-full">
+                  <Button variant="warm" className="w-full" onClick={handleExportClick}>
                     Order Physical Journal
                   </Button>
                 </CardContent>
