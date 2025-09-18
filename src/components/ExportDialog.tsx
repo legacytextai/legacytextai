@@ -32,8 +32,8 @@ export function ExportDialog({ open, onOpenChange, dedication }: ExportDialogPro
       
       const pdfBlob = await generateBasicPDF({
         entries,
-        dedication,
-        userTitle
+        userTitle,
+        includeDedication: false // Free export doesn't include dedication
       })
       
       const filename = `legacy-journal-${new Date().toISOString().split('T')[0]}.pdf`
@@ -83,7 +83,6 @@ export function ExportDialog({ open, onOpenChange, dedication }: ExportDialogPro
             <CardContent className="space-y-4">
               <ul className="text-sm space-y-1">
                 <li>• All your journal entries</li>
-                <li>• Dedication page</li>
                 <li>• Chronological order</li>
                 <li>• Simple formatting</li>
               </ul>

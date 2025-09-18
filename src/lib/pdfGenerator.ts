@@ -5,9 +5,10 @@ export interface PDFGenerationOptions {
   entries: JournalEntry[]
   dedication?: string
   userTitle?: string
+  includeDedication?: boolean
 }
 
-export const generateBasicPDF = async ({ entries, dedication, userTitle }: PDFGenerationOptions) => {
+export const generateBasicPDF = async ({ entries, dedication, userTitle, includeDedication = false }: PDFGenerationOptions) => {
   const doc = new jsPDF()
   
   // Title page
@@ -17,8 +18,8 @@ export const generateBasicPDF = async ({ entries, dedication, userTitle }: PDFGe
   doc.setFontSize(12)
   doc.text(`Generated on ${new Date().toLocaleDateString()}`, 20, 50)
   
-  // Dedication page
-  if (dedication && dedication.trim()) {
+  // Dedication page (only for premium exports)
+  if (includeDedication && dedication && dedication.trim()) {
     doc.addPage()
     doc.setFontSize(18)
     doc.text('Dedication', 20, 30)
