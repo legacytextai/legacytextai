@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { BookOpen, Download, Star } from "lucide-react";
 import { useDedication } from "@/hooks/useDedication";
 import { useEffect, useCallback } from "react";
-import { useDebounce } from "@/hooks/useDebounce";
 
 export default function Journal() {
   const { 
@@ -17,23 +16,18 @@ export default function Journal() {
     isLoading, 
     isSaving 
   } = useDedication()
-  
-  const debouncedDedication = useDebounce(dedication, 1000)
 
   useEffect(() => {
     loadDedication()
   }, [loadDedication])
 
-  // Auto-save when dedication changes
-  useEffect(() => {
-    if (debouncedDedication && debouncedDedication !== dedication) {
-      saveDedication(debouncedDedication)
-    }
-  }, [debouncedDedication, saveDedication])
-
   const handleDedicationChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setDedication(e.target.value)
   }, [setDedication])
+
+  const handleSaveDedication = useCallback(async () => {
+    await saveDedication(dedication)
+  }, [saveDedication, dedication])
 
   return (
     <Layout>
@@ -120,6 +114,14 @@ export default function Journal() {
                       <p className="text-xs text-legacy-ink/50">Saving...</p>
                     )}
                   </div>
+                  
+                  <Button 
+                    onClick={handleSaveDedication}
+                    disabled={isSaving || isLoading}
+                    className="w-full"
+                  >
+                    {isSaving ? 'Saving...' : 'Save Dedication'}
+                  </Button>
                 </CardContent>
               </Card>
             </div>
