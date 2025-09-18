@@ -160,9 +160,17 @@ const Settings = () => {
       loading
     });
     
-    // Only show verification if explicitly requested AND user needs it
-    // Don't show if already loading or if user already has verified phone
-    if (!loading && shouldShowVerification && (!userData?.phone_e164 || userData.phone_e164 === '' || userData.status !== 'active')) {
+    // Show verification if explicitly requested OR if user status is pending
+    // Don't show if already loading or if user already has verified phone and is active
+    const needsVerification = !loading && (
+      shouldShowVerification || 
+      userData?.status === 'pending' || 
+      !userData?.phone_e164 || 
+      userData.phone_e164 === '' || 
+      userData.status !== 'active'
+    );
+    
+    if (needsVerification) {
       setShowPhoneVerification(true);
       
       // Prefill phone input with pending phone if available
@@ -172,11 +180,13 @@ const Settings = () => {
       }
       
       // Clear the URL parameter to prevent re-triggering
-      const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.delete('verifyPhone');
-      const newUrl = `${window.location.pathname}${newSearchParams.toString() ? '?' + newSearchParams.toString() : ''}`;
-      window.history.replaceState({}, '', newUrl);
-    } else if (!shouldShowVerification) {
+      if (shouldShowVerification) {
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.delete('verifyPhone');
+        const newUrl = `${window.location.pathname}${newSearchParams.toString() ? '?' + newSearchParams.toString() : ''}`;
+        window.history.replaceState({}, '', newUrl);
+      }
+    } else if (!shouldShowVerification && userData?.status === 'active' && userData?.phone_e164) {
       setShowPhoneVerification(false);
     }
   }, [searchParams, user, userData, newPhone, loading]);
