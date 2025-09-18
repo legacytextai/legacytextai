@@ -18,6 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getDebugAuth } from '@/utils/debugConfig';
+import { formatPhoneDisplay, normalizePhoneToE164, isValidPhone } from '@/utils/auth';
 
 // Types
 type Child = { name: string; dob: string };
@@ -99,6 +100,7 @@ const Settings = () => {
   
   // Phone change states
   const [newPhone, setNewPhone] = useState('');
+  const [displayPhone, setDisplayPhone] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [isChangingPhone, setIsChangingPhone] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -166,6 +168,7 @@ const Settings = () => {
       // Prefill phone input with pending phone if available
       if (pendingPhone && !newPhone) {
         setNewPhone(pendingPhone);
+        setDisplayPhone(formatPhoneDisplay(pendingPhone));
       }
       
       // Clear the URL parameter to prevent re-triggering
@@ -378,14 +381,17 @@ const Settings = () => {
     form.setValue('banned_topics', currentTopics.filter((_, i) => i !== index));
   };
 
-  const validateE164Phone = (phone: string): boolean => {
-    const e164Regex = /^\+[1-9]\d{7,14}$/;
-    return e164Regex.test(phone);
+  const handlePhoneChange = (value: string) => {
+    const formatted = formatPhoneDisplay(value);
+    const normalized = normalizePhoneToE164(value);
+    
+    setDisplayPhone(formatted);
+    setNewPhone(normalized);
   };
 
   const sendPhoneChangeCode = async () => {
-    if (!newPhone || !validateE164Phone(newPhone)) {
-      toast.error('Please enter a valid phone number in E.164 format (e.g., +1234567890)');
+    if (!newPhone || !isValidPhone(displayPhone)) {
+      toast.error('Please enter a valid phone number');
       return;
     }
 
@@ -610,19 +616,19 @@ const Settings = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="verify-phone">Phone Number (E.164 format)</Label>
+                  <Label htmlFor="verify-phone">Phone Number</Label>
                   <Input
                     id="verify-phone"
                     type="tel"
-                    placeholder="+1234567890"
-                    value={newPhone}
-                    onChange={(e) => setNewPhone(e.target.value)}
+                    placeholder="(555) 123-4567 or 5551234567"
+                    value={displayPhone}
+                    onChange={(e) => handlePhoneChange(e.target.value)}
                     disabled={isChangingPhone}
-                    className={!validateE164Phone(newPhone) && newPhone ? "border-destructive" : ""}
+                    className={!isValidPhone(displayPhone) && displayPhone ? "border-destructive" : ""}
                   />
-                  {newPhone && !validateE164Phone(newPhone) && (
+                  {displayPhone && !isValidPhone(displayPhone) && (
                     <p className="text-sm text-destructive">
-                      Please enter a valid phone number in E.164 format (e.g., +1234567890)
+                      Please enter a valid phone number
                     </p>
                   )}
                 </div>
@@ -631,7 +637,7 @@ const Settings = () => {
                   <Button
                     type="button"
                     onClick={sendPhoneChangeCode}
-                    disabled={!newPhone || !validateE164Phone(newPhone) || isChangingPhone || resendCooldown > 0}
+                    disabled={!displayPhone || !isValidPhone(displayPhone) || isChangingPhone || resendCooldown > 0}
                     variant="outline"
                   >
                     {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Send Code'}
@@ -682,12 +688,12 @@ const Settings = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>New Phone Number (E.164 format)</Label>
+                  <Label>New Phone Number</Label>
                   <Input
                     type="tel"
-                    placeholder="+1234567890"
-                    value={newPhone}
-                    onChange={(e) => setNewPhone(e.target.value)}
+                    placeholder="(555) 123-4567 or 5551234567"
+                    value={displayPhone}
+                    onChange={(e) => handlePhoneChange(e.target.value)}
                     disabled={isChangingPhone}
                   />
                 </div>
@@ -696,7 +702,7 @@ const Settings = () => {
                   <Button
                     type="button"
                     onClick={sendPhoneChangeCode}
-                    disabled={!newPhone || !validateE164Phone(newPhone) || isChangingPhone || resendCooldown > 0}
+                    disabled={!displayPhone || !isValidPhone(displayPhone) || isChangingPhone || resendCooldown > 0}
                     variant="outline"
                   >
                     {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Send Code'}
