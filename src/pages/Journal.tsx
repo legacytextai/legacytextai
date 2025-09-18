@@ -97,26 +97,31 @@ export default function Journal() {
             {/* Dedication Page Section */}
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-legacy-primary">Dedication Page</h2>
-              <p className="text-legacy-ink/70 text-sm">
-                Write a few sentences about who you'd like to dedicate your Legacy Journal to.
-              </p>
               
-              <div className="space-y-2">
-                <Label htmlFor="dedication" className="text-sm font-medium text-legacy-primary">
-                  Your Dedication
-                </Label>
-                <Textarea
-                  id="dedication"
-                  value={dedication}
-                  onChange={handleDedicationChange}
-                  placeholder="To my loving wife and children..."
-                  className="min-h-[120px] resize-none bg-legacy-warm/50 border-legacy-border focus:border-legacy-primary"
-                  disabled={isLoading}
-                />
-                {isSaving && (
-                  <p className="text-xs text-legacy-ink/50">Saving...</p>
-                )}
-              </div>
+              <Card className="shadow-paper">
+                <CardContent className="p-6 space-y-4">
+                  <p className="text-legacy-ink/70 text-sm">
+                    Write a few sentences about who you'd like to dedicate your Legacy Journal to.
+                  </p>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="dedication" className="text-sm font-medium text-legacy-primary">
+                      Your Dedication
+                    </Label>
+                    <Textarea
+                      id="dedication"
+                      value={dedication}
+                      onChange={handleDedicationChange}
+                      placeholder="To my loving wife and children..."
+                      className="min-h-[120px] resize-none bg-legacy-warm/50 border-legacy-border focus:border-legacy-primary"
+                      disabled={isLoading}
+                    />
+                    {isSaving && (
+                      <p className="text-xs text-legacy-ink/50">Saving...</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
 
