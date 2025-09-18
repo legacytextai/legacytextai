@@ -1,10 +1,14 @@
+import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Download, BookOpen, Star, Package } from "lucide-react";
+import { ExportDialog } from "@/components/ExportDialog";
 
 export default function Export() {
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -75,7 +79,11 @@ export default function Export() {
                 <li>• PDF download</li>
                 <li>• Unlimited exports</li>
               </ul>
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => setIsExportDialogOpen(true)}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Export Free PDF
               </Button>
@@ -108,7 +116,11 @@ export default function Export() {
                 <li>• Premium typography</li>
                 <li>• High-quality PDF</li>
               </ul>
-              <Button variant="accent" className="w-full">
+              <Button 
+                variant="accent" 
+                className="w-full"
+                onClick={() => setIsExportDialogOpen(true)}
+              >
                 <Star className="w-4 h-4 mr-2" />
                 Export Premium Journal
               </Button>
@@ -138,7 +150,11 @@ export default function Export() {
                 <li>• Custom gift box</li>
                 <li>• Shipped to your door</li>
               </ul>
-              <Button variant="warm" className="w-full">
+              <Button 
+                variant="warm" 
+                className="w-full"
+                onClick={() => setIsExportDialogOpen(true)}
+              >
                 <Package className="w-4 h-4 mr-2" />
                 Order Physical Journal
               </Button>
@@ -185,6 +201,11 @@ export default function Export() {
           </CardContent>
         </Card>
       </div>
+
+      <ExportDialog 
+        open={isExportDialogOpen}
+        onOpenChange={setIsExportDialogOpen}
+      />
     </Layout>
   );
 }
