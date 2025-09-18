@@ -1,9 +1,40 @@
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { BookOpen, Download, Star } from "lucide-react";
+import { useDedication } from "@/hooks/useDedication";
+import { useEffect, useCallback } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function Journal() {
+  const { 
+    dedication, 
+    setDedication, 
+    loadDedication, 
+    saveDedication, 
+    isLoading, 
+    isSaving 
+  } = useDedication()
+  
+  const debouncedDedication = useDebounce(dedication, 1000)
+
+  useEffect(() => {
+    loadDedication()
+  }, [loadDedication])
+
+  // Auto-save when dedication changes
+  useEffect(() => {
+    if (debouncedDedication && debouncedDedication !== dedication) {
+      saveDedication(debouncedDedication)
+    }
+  }, [debouncedDedication, saveDedication])
+
+  const handleDedicationChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDedication(e.target.value)
+  }, [setDedication])
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -46,7 +77,7 @@ export default function Journal() {
                       Dedication
                     </h4>
                     <p className="text-[8px] text-legacy-ink/60 leading-tight">
-                      This journal is dedicated to my loving wife, Jane Doe, and to amazing children, Matt Doe and Alex Doe.
+                      {dedication || "This journal is dedicated to my loving wife, Jane Doe, and to amazing children, Matt Doe and Alex Doe."}
                     </p>
                   </div>
 
@@ -62,6 +93,31 @@ export default function Journal() {
                 </div>
               </CardContent>
             </Card>
+            
+            {/* Dedication Page Section */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-legacy-primary">Dedication Page</h2>
+              <p className="text-legacy-ink/70 text-sm">
+                Write a few sentences about who you'd like to dedicate your Legacy Journal to.
+              </p>
+              
+              <div className="space-y-2">
+                <Label htmlFor="dedication" className="text-sm font-medium text-legacy-primary">
+                  Your Dedication
+                </Label>
+                <Textarea
+                  id="dedication"
+                  value={dedication}
+                  onChange={handleDedicationChange}
+                  placeholder="To my loving wife and children..."
+                  className="min-h-[120px] resize-none bg-legacy-warm/50 border-legacy-border focus:border-legacy-primary"
+                  disabled={isLoading}
+                />
+                {isSaving && (
+                  <p className="text-xs text-legacy-ink/50">Saving...</p>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Export Options */}

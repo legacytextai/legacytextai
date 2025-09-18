@@ -15,6 +15,7 @@ interface UserAppData {
   interests: string[] | null;
   banned_topics: string[] | null;
   children: any;
+  dedication: string | null;
   created_at: string;
   last_login_at: string | null;
 }

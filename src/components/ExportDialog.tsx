@@ -49,8 +49,34 @@ export function ExportDialog({ open, onOpenChange, dedication }: ExportDialogPro
     }
   }
 
-  const handlePremiumExport = () => {
-    toast.info('Premium export coming soon!')
+  const handlePremiumExport = async () => {
+    if (entries.length === 0) {
+      toast.error('No journal entries found to export')
+      return
+    }
+
+    setIsGenerating(true)
+    try {
+      const userTitle = userData?.name ? `${userData.name}'s Legacy Journal` : "My Legacy Journal"
+      
+      const pdfBlob = await generateBasicPDF({
+        entries,
+        dedication: userData?.dedication,
+        userTitle,
+        includeDedication: true // Premium export includes dedication
+      })
+      
+      const filename = `legacy-journal-premium-${new Date().toISOString().split('T')[0]}.pdf`
+      downloadPDF(pdfBlob, filename)
+      
+      toast.success('Premium PDF downloaded successfully!')
+      onOpenChange(false)
+    } catch (error) {
+      console.error('Error generating premium PDF:', error)
+      toast.error('Failed to generate PDF. Please try again.')
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   const handlePhysicalOrder = () => {
@@ -118,16 +144,17 @@ export function ExportDialog({ open, onOpenChange, dedication }: ExportDialogPro
                 <li>• Professional formatting</li>
                 <li>• Category organization</li>
                 <li>• Enhanced typography</li>
+                <li>• Custom dedication page</li>
                 <li>• Custom cover design</li>
               </ul>
               <Button 
                 onClick={handlePremiumExport} 
                 variant="outline" 
                 className="w-full"
-                disabled
+                disabled={isGenerating || entries.length === 0}
               >
                 <Crown className="h-4 w-4 mr-2" />
-                Coming Soon
+                {isGenerating ? 'Generating...' : 'Get Premium PDF'}
               </Button>
             </CardContent>
           </Card>

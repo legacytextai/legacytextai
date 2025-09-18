@@ -277,6 +277,7 @@ export type Database = {
           banned_topics: string[] | null
           children: Json | null
           created_at: string | null
+          dedication: string | null
           email: string | null
           id: string
           interests: string[] | null
@@ -293,6 +294,7 @@ export type Database = {
           banned_topics?: string[] | null
           children?: Json | null
           created_at?: string | null
+          dedication?: string | null
           email?: string | null
           id?: string
           interests?: string[] | null
@@ -309,6 +311,7 @@ export type Database = {
           banned_topics?: string[] | null
           children?: Json | null
           created_at?: string | null
+          dedication?: string | null
           email?: string | null
           id?: string
           interests?: string[] | null
@@ -343,6 +346,7 @@ export type Database = {
           banned_topics: string[] | null
           children: Json | null
           created_at: string | null
+          dedication: string | null
           email: string | null
           id: string
           interests: string[] | null
