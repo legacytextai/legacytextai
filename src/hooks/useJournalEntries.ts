@@ -10,7 +10,6 @@ export interface JournalEntry {
   user_id: string
   content: string
   received_at: string
-  phone_e164: string
   source?: string
   message_sid?: string
   name?: string
@@ -159,7 +158,6 @@ export const useCreateJournalEntry = () => {
         .insert({
           user_id: userData?.id,
           content,
-          phone_e164: userData?.phone_e164 || '',
           source: 'manual',
         })
         .select()
