@@ -159,7 +159,6 @@ export function ExportDialog({
       toast.success('Download link copied to clipboard!');
     }
   };
-
   const handleGeneratePreview = async () => {
     setIsPreviewLoading(true);
     try {
@@ -177,7 +176,6 @@ export function ExportDialog({
       setIsPreviewLoading(false);
     }
   };
-
   const downloadFromBlob = async (signedUrl: string, filename: string) => {
     try {
       const response = await fetch(signedUrl);
@@ -199,7 +197,6 @@ export function ExportDialog({
       toast.error('Failed to download PDF. Please try again.');
     }
   };
-
   const handleDownloadPDF = () => {
     if (exportStatus.url) {
       const filename = `legacy-journal-premium-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -258,9 +255,9 @@ export function ExportDialog({
             <li>• Running headers & footers</li>
             <li>• Professional layout</li>
           </ul>
-          <Button variant="outline" className="w-full" disabled>
+          <Button onClick={handlePremiumExportStart} variant="outline" className="w-full" disabled={entries.length === 0}>
             <Sparkles className="h-4 w-4 mr-2" />
-            Coming Soon
+            Create Premium E-Book
           </Button>
         </CardContent>
       </Card>
@@ -275,7 +272,7 @@ export function ExportDialog({
           <CardDescription>
             Heirloom-quality physical book
           </CardDescription>
-          <div className="text-2xl font-bold text-primary">$199</div>
+          
         </CardHeader>
         <CardContent className="space-y-4">
           <ul className="text-sm space-y-1">
@@ -371,11 +368,7 @@ export function ExportDialog({
             <p className="text-sm text-muted-foreground mb-4">
               {entries.length} entries • {THEME_KEY} theme
             </p>
-            <Button 
-              variant="outline" 
-              onClick={handleGeneratePreview}
-              disabled={isPreviewLoading}
-            >
+            <Button variant="outline" onClick={handleGeneratePreview} disabled={isPreviewLoading}>
               <Eye className="h-4 w-4 mr-2" />
               {isPreviewLoading ? 'Generating...' : 'Generate Preview Pages'}
             </Button>
@@ -384,8 +377,7 @@ export function ExportDialog({
       </Card>
 
       {/* Preview Modal */}
-      {showPreviewModal && previewUrl && (
-        <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
+      {showPreviewModal && previewUrl && <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
           <DialogContent className="max-w-4xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center justify-between">
@@ -396,15 +388,10 @@ export function ExportDialog({
               </DialogTitle>
             </DialogHeader>
             <div className="flex-1 min-h-[60vh]">
-              <iframe
-                src={previewUrl}
-                className="w-full h-full border rounded-lg"
-                title="PDF Preview"
-              />
+              <iframe src={previewUrl} className="w-full h-full border rounded-lg" title="PDF Preview" />
             </div>
           </DialogContent>
-        </Dialog>
-      )}
+        </Dialog>}
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={handlePrevStep}>
