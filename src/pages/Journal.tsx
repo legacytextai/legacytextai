@@ -147,7 +147,7 @@ export default function Journal() {
                   </ul>
                   <Button variant="accent" className="w-full" onClick={handleExportClick}>
                     <Download className="w-4 h-4 mr-2" />
-                    Export Premium Journal
+                    Export Premium Journal E-Book
                   </Button>
                 </CardContent>
               </Card>
