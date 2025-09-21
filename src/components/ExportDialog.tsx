@@ -1,142 +1,144 @@
-import React, { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Download, BookOpen, Printer, Check, FileText, ArrowRight, ArrowLeft, Eye, ExternalLink, Copy, Crown, Sparkles } from 'lucide-react'
-import { useJournalEntries } from '@/hooks/useJournalEntries'
-import { useUserData } from '@/hooks/useUserData'
-import { usePDFExport } from '@/hooks/usePDFExport'
-import { usePremiumExport } from '@/hooks/usePremiumExport'
-import { useDedication } from '@/hooks/useDedication'
-import { toast } from 'sonner'
-
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Download, BookOpen, Printer, Check, FileText, ArrowRight, ArrowLeft, Eye, ExternalLink, Copy, Crown, Sparkles } from 'lucide-react';
+import { useJournalEntries } from '@/hooks/useJournalEntries';
+import { useUserData } from '@/hooks/useUserData';
+import { usePDFExport } from '@/hooks/usePDFExport';
+import { usePremiumExport } from '@/hooks/usePremiumExport';
+import { useDedication } from '@/hooks/useDedication';
+import { toast } from 'sonner';
 interface ExportDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  dedication?: string
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  dedication?: string;
 }
-
-type WizardStep = 'selection' | 'theme' | 'dedication' | 'preview' | 'generate' | 'complete'
-
+type WizardStep = 'selection' | 'theme' | 'dedication' | 'preview' | 'generate' | 'complete';
 export function ExportDialog({
   open,
   onOpenChange,
   dedication: propDedication
 }: ExportDialogProps) {
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [wizardStep, setWizardStep] = useState<WizardStep>('selection')
-  const [selectedTheme, setSelectedTheme] = useState('stillness')
-  
-  const { data: entries = [] } = useJournalEntries()
-  const { userData } = useUserData()
-  const { exportPDF } = usePDFExport()
-  const { exportStatus, startExport, generatePreview, resetExport } = usePremiumExport()
-  const { dedication, setDedication, saveDedication, loadDedication, isSaving } = useDedication()
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [wizardStep, setWizardStep] = useState<WizardStep>('selection');
+  const [selectedTheme, setSelectedTheme] = useState('stillness');
+  const {
+    data: entries = []
+  } = useJournalEntries();
+  const {
+    userData
+  } = useUserData();
+  const {
+    exportPDF
+  } = usePDFExport();
+  const {
+    exportStatus,
+    startExport,
+    generatePreview,
+    resetExport
+  } = usePremiumExport();
+  const {
+    dedication,
+    setDedication,
+    saveDedication,
+    loadDedication,
+    isSaving
+  } = useDedication();
 
   // Load dedication when dialog opens
   useEffect(() => {
     if (open) {
-      loadDedication()
+      loadDedication();
     }
-  }, [open, loadDedication])
+  }, [open, loadDedication]);
 
   // Reset wizard when dialog closes
   useEffect(() => {
     if (!open) {
-      setWizardStep('selection')
-      resetExport()
+      setWizardStep('selection');
+      resetExport();
     }
-  }, [open, resetExport])
-
+  }, [open, resetExport]);
   const handleFreeExport = async () => {
     if (entries.length === 0) {
-      toast.error('No journal entries found to export')
-      return
+      toast.error('No journal entries found to export');
+      return;
     }
-
-    setIsGenerating(true)
+    setIsGenerating(true);
     try {
-      const userTitle = userData?.name ? `${userData.name}'s Legacy Journal` : "My Legacy Journal"
+      const userTitle = userData?.name ? `${userData.name}'s Legacy Journal` : "My Legacy Journal";
       await exportPDF({
         entries,
         dedication: userData?.dedication,
         userTitle,
         includeDedication: true
-      })
-      onOpenChange(false)
+      });
+      onOpenChange(false);
     } catch (error) {
-      console.error('Error generating PDF:', error)
-      toast.error('Failed to generate PDF. Please try again.')
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to generate PDF. Please try again.');
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
-
+  };
   const handlePremiumExportStart = () => {
-    setWizardStep('theme')
-  }
-
+    setWizardStep('theme');
+  };
   const handlePhysicalOrder = () => {
-    toast.info('Physical journal ordering coming soon!')
-  }
-
+    toast.info('Physical journal ordering coming soon!');
+  };
   const handleNextStep = () => {
     switch (wizardStep) {
       case 'theme':
-        setWizardStep('dedication')
-        break
+        setWizardStep('dedication');
+        break;
       case 'dedication':
-        setWizardStep('preview')
-        break
+        setWizardStep('preview');
+        break;
       case 'preview':
-        setWizardStep('generate')
-        break
+        setWizardStep('generate');
+        break;
       default:
-        break
+        break;
     }
-  }
-
+  };
   const handlePrevStep = () => {
     switch (wizardStep) {
       case 'dedication':
-        setWizardStep('theme')
-        break
+        setWizardStep('theme');
+        break;
       case 'preview':
-        setWizardStep('dedication')
-        break
+        setWizardStep('dedication');
+        break;
       case 'generate':
-        setWizardStep('preview')
-        break
+        setWizardStep('preview');
+        break;
       default:
-        setWizardStep('selection')
-        break
+        setWizardStep('selection');
+        break;
     }
-  }
-
+  };
   const handleSaveDedication = async () => {
-    await saveDedication(dedication)
-  }
-
+    await saveDedication(dedication);
+  };
   const handleGeneratePDF = async () => {
-    const success = await startExport()
+    const success = await startExport();
     if (success) {
-      setWizardStep('complete')
+      setWizardStep('complete');
     }
-  }
-
+  };
   const handleCopyLink = async () => {
     if (exportStatus.url) {
-      await navigator.clipboard.writeText(exportStatus.url)
-      toast.success('Download link copied to clipboard!')
+      await navigator.clipboard.writeText(exportStatus.url);
+      toast.success('Download link copied to clipboard!');
     }
-  }
-
-  const renderSelectionStep = () => (
-    <div className="grid md:grid-cols-3 gap-6 mt-6">
+  };
+  const renderSelectionStep = () => <div className="grid md:grid-cols-3 gap-6 mt-6">
       {/* Free Basic PDF */}
       <Card className="relative">
         <CardHeader>
@@ -156,11 +158,7 @@ export function ExportDialog({
             <li>• Chronological order</li>
             <li>• Simple formatting</li>
           </ul>
-          <Button 
-            onClick={handleFreeExport} 
-            className="w-full" 
-            disabled={isGenerating || entries.length === 0}
-          >
+          <Button onClick={handleFreeExport} className="w-full" disabled={isGenerating || entries.length === 0}>
             <Download className="h-4 w-4 mr-2" />
             {isGenerating ? 'Generating...' : 'Download PDF'}
           </Button>
@@ -177,9 +175,7 @@ export function ExportDialog({
             <BookOpen className="h-5 w-5" />
             Premium E-Book PDF
           </CardTitle>
-          <CardDescription>
-            Professional "Stillness" theme with enhanced design
-          </CardDescription>
+          <CardDescription>Elegant minimal theme with enhanced design</CardDescription>
           <div>
             <div className="text-2xl font-bold text-primary line-through">$9.99</div>
             <p className="text-lg font-semibold text-accent">Free for Early Access Users</p>
@@ -188,18 +184,13 @@ export function ExportDialog({
         <CardContent className="space-y-4">
           <ul className="text-sm space-y-1">
             <li>• 6×9" premium formatting</li>
-            <li>• Serif typography (EB Garamond)</li>
+            <li>• Elegant theme + typography </li>
             <li>• Category organization</li>
             <li>• One entry per page</li>
             <li>• Running headers & footers</li>
             <li>• Professional layout</li>
           </ul>
-          <Button 
-            onClick={handlePremiumExportStart}
-            variant="outline" 
-            className="w-full" 
-            disabled={entries.length === 0}
-          >
+          <Button onClick={handlePremiumExportStart} variant="outline" className="w-full" disabled={entries.length === 0}>
             <Sparkles className="h-4 w-4 mr-2" />
             Create Premium E-Book
           </Button>
@@ -232,11 +223,8 @@ export function ExportDialog({
           </Button>
         </CardContent>
       </Card>
-    </div>
-  )
-
-  const renderThemeStep = () => (
-    <div className="space-y-6">
+    </div>;
+  const renderThemeStep = () => <div className="space-y-6">
       <div className="text-center">
         <h3 className="text-lg font-semibold mb-2">Choose Your Theme</h3>
         <p className="text-muted-foreground">Select the design theme for your premium journal</p>
@@ -273,11 +261,8 @@ export function ExportDialog({
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
-    </div>
-  )
-
-  const renderDedicationStep = () => (
-    <div className="space-y-6">
+    </div>;
+  const renderDedicationStep = () => <div className="space-y-6">
       <div className="text-center">
         <h3 className="text-lg font-semibold mb-2">Personal Dedication</h3>
         <p className="text-muted-foreground">Add a heartfelt message to open your journal</p>
@@ -285,20 +270,8 @@ export function ExportDialog({
 
       <div className="space-y-4">
         <Label htmlFor="dedication">Dedication Message</Label>
-        <Textarea
-          id="dedication"
-          placeholder="To my beloved children, may these words guide you through life's journey..."
-          value={dedication}
-          onChange={(e) => setDedication(e.target.value)}
-          rows={6}
-          className="resize-none"
-        />
-        <Button 
-          onClick={handleSaveDedication} 
-          variant="outline" 
-          size="sm"
-          disabled={isSaving}
-        >
+        <Textarea id="dedication" placeholder="To my beloved children, may these words guide you through life's journey..." value={dedication} onChange={e => setDedication(e.target.value)} rows={6} className="resize-none" />
+        <Button onClick={handleSaveDedication} variant="outline" size="sm" disabled={isSaving}>
           {isSaving ? 'Saving...' : 'Save Dedication'}
         </Button>
       </div>
@@ -313,11 +286,8 @@ export function ExportDialog({
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
-    </div>
-  )
-
-  const renderPreviewStep = () => (
-    <div className="space-y-6">
+    </div>;
+  const renderPreviewStep = () => <div className="space-y-6">
       <div className="text-center">
         <h3 className="text-lg font-semibold mb-2">Preview Your Journal</h3>
         <p className="text-muted-foreground">Here's how your journal will look</p>
@@ -351,11 +321,8 @@ export function ExportDialog({
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
-    </div>
-  )
-
-  const renderGenerateStep = () => (
-    <div className="space-y-6">
+    </div>;
+  const renderGenerateStep = () => <div className="space-y-6">
       <div className="text-center">
         <h3 className="text-lg font-semibold mb-2">Generating Your Premium Journal</h3>
         <p className="text-muted-foreground">Please wait while we create your beautiful PDF</p>
@@ -371,14 +338,12 @@ export function ExportDialog({
         </div>
       </div>
 
-      {exportStatus.status === 'idle' && (
-        <div className="text-center">
+      {exportStatus.status === 'idle' && <div className="text-center">
           <Button onClick={handleGeneratePDF} size="lg">
             <Sparkles className="h-5 w-5 mr-2" />
             Start Generation
           </Button>
-        </div>
-      )}
+        </div>}
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={handlePrevStep} disabled={exportStatus.status !== 'idle'}>
@@ -386,11 +351,8 @@ export function ExportDialog({
           Back
         </Button>
       </div>
-    </div>
-  )
-
-  const renderCompleteStep = () => (
-    <div className="space-y-6">
+    </div>;
+  const renderCompleteStep = () => <div className="space-y-6">
       <div className="text-center">
         <Check className="h-16 w-16 mx-auto mb-4 text-green-500" />
         <h3 className="text-lg font-semibold mb-2">Your Premium Journal is Ready!</h3>
@@ -402,10 +364,7 @@ export function ExportDialog({
       <Card>
         <CardContent className="pt-6 space-y-4">
           <div className="flex gap-2">
-            <Button 
-              onClick={() => exportStatus.url && window.open(exportStatus.url, '_blank')}
-              className="flex-1"
-            >
+            <Button onClick={() => exportStatus.url && window.open(exportStatus.url, '_blank')} className="flex-1">
               <Download className="h-4 w-4 mr-2" />
               Download PDF
             </Button>
@@ -425,56 +384,50 @@ export function ExportDialog({
           Close
         </Button>
       </div>
-    </div>
-  )
-
+    </div>;
   const renderWizardContent = () => {
     switch (wizardStep) {
       case 'selection':
-        return renderSelectionStep()
+        return renderSelectionStep();
       case 'theme':
-        return renderThemeStep()
+        return renderThemeStep();
       case 'dedication':
-        return renderDedicationStep()
+        return renderDedicationStep();
       case 'preview':
-        return renderPreviewStep()
+        return renderPreviewStep();
       case 'generate':
-        return renderGenerateStep()
+        return renderGenerateStep();
       case 'complete':
-        return renderCompleteStep()
+        return renderCompleteStep();
       default:
-        return renderSelectionStep()
+        return renderSelectionStep();
     }
-  }
-
+  };
   const getDialogTitle = () => {
     switch (wizardStep) {
       case 'selection':
-        return 'Export Your Legacy Journal'
+        return 'Export Your Legacy Journal';
       case 'theme':
-        return 'Premium Export - Theme Selection'
+        return 'Premium Export - Theme Selection';
       case 'dedication':
-        return 'Premium Export - Dedication'
+        return 'Premium Export - Dedication';
       case 'preview':
-        return 'Premium Export - Preview'
+        return 'Premium Export - Preview';
       case 'generate':
-        return 'Premium Export - Generation'
+        return 'Premium Export - Generation';
       case 'complete':
-        return 'Premium Export - Complete'
+        return 'Premium Export - Complete';
       default:
-        return 'Export Your Legacy Journal'
+        return 'Export Your Legacy Journal';
     }
-  }
-
+  };
   const getDialogDescription = () => {
     if (wizardStep === 'selection') {
-      return 'Choose how you\'d like to preserve your memories and wisdom for future generations.'
+      return 'Choose how you\'d like to preserve your memories and wisdom for future generations.';
     }
-    return 'Create a beautifully formatted premium journal with professional design.'
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    return 'Create a beautifully formatted premium journal with professional design.';
+  };
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{getDialogTitle()}</DialogTitle>
@@ -485,13 +438,10 @@ export function ExportDialog({
 
         {renderWizardContent()}
 
-        {wizardStep === 'selection' && entries.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
+        {wizardStep === 'selection' && entries.length === 0 && <div className="text-center py-8 text-muted-foreground">
             <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No journal entries found. Start writing to create your legacy journal!</p>
-          </div>
-        )}
+          </div>}
       </DialogContent>
-    </Dialog>
-  )
+    </Dialog>;
 }
