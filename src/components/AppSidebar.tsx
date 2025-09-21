@@ -2,7 +2,6 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   BookOpen,
   Edit3,
-  Image,
   Settings,
   Home,
   Download
@@ -24,7 +23,6 @@ const mainItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Legacy Journal", url: "/journal", icon: BookOpen },
   { title: "Editor", url: "/editor", icon: Edit3 },
-  { title: "Media Library", url: "/media", icon: Image },
   { title: "Export", url: "/export", icon: Download },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
