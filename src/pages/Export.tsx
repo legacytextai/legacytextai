@@ -107,9 +107,9 @@ export default function Export() {
                 <li>• Premium typography</li>
                 <li>• High-quality PDF</li>
               </ul>
-              <Button variant="accent" className="w-full" disabled>
+              <Button variant="accent" className="w-full" onClick={() => setIsExportDialogOpen(true)}>
                 <Star className="w-4 h-4 mr-2" />
-                Coming Soon
+                Export E-Book
               </Button>
             </CardContent>
           </Card>
@@ -161,14 +161,14 @@ export default function Export() {
               </div>
               <div className="text-center space-y-2">
                 <div className="w-12 h-12 bg-legacy-primary/10 rounded-full flex items-center justify-center mx-auto">
-                  <BookOpen className="w-6 h-6 text-legacy-primary" />
+                  <span className="text-legacy-primary font-bold">24</span>
                 </div>
                 <h4 className="font-medium text-legacy-primary">All Entries</h4>
                 <p className="text-sm text-legacy-ink/70">Every message organized chronologically</p>
               </div>
               <div className="text-center space-y-2">
                 <div className="w-12 h-12 bg-legacy-primary/10 rounded-full flex items-center justify-center mx-auto">
-                  <span className="text-legacy-primary font-bold">6</span>
+                  <span className="text-legacy-primary font-bold">6change t</span>
                 </div>
                 <h4 className="font-medium text-legacy-primary">Photos</h4>
                 <p className="text-sm text-legacy-ink/70">Memories captured in your messages</p>
