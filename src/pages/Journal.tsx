@@ -72,7 +72,7 @@ export default function Journal() {
                       Dedication
                     </h4>
                     <p className="text-[8px] text-legacy-ink/60 leading-tight">
-                      {dedication || "This journal is dedicated to my loving wife, Jane Doe, and to amazing children, Matt Doe and Alex Doe."}
+                      To my family and loved ones
                     </p>
                   </div>
 
