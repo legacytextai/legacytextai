@@ -18,7 +18,7 @@ export const useDedication = () => {
         .from('users_app')
         .select('dedication')
         .eq('auth_user_id', user.id)
-        .single()
+        .maybeSingle()
 
       if (error) {
         console.error('Error loading dedication:', error)
@@ -40,6 +40,7 @@ export const useDedication = () => {
 
     setIsSaving(true)
     try {
+      console.log('Saving dedication for user:', user.id, 'text:', text)
       const { error } = await supabase
         .from('users_app')
         .update({ dedication: text })
@@ -51,7 +52,9 @@ export const useDedication = () => {
         return false
       }
 
+      console.log('Dedication saved successfully')
       setDedication(text)
+      toast.success('Dedication saved successfully')
       return true
     } catch (error) {
       console.error('Error saving dedication:', error)

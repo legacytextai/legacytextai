@@ -24,7 +24,9 @@ export default function Journal() {
     setDedication(e.target.value);
   }, [setDedication]);
   const handleSaveDedication = useCallback(async () => {
-    await saveDedication(dedication);
+    console.log('Save button clicked, dedication value:', dedication)
+    const success = await saveDedication(dedication);
+    console.log('Save result:', success)
   }, [saveDedication, dedication]);
   const handleExportClick = useCallback(() => {
     navigate('/export');
