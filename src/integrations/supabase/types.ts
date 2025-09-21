@@ -84,6 +84,7 @@ export type Database = {
           id: string
           kind: string
           page_count: number | null
+          render_uid: number | null
           status: string
           storage_key_manuscript: string | null
           storage_key_pdf: string | null
@@ -97,6 +98,7 @@ export type Database = {
           id?: string
           kind: string
           page_count?: number | null
+          render_uid?: number | null
           status: string
           storage_key_manuscript?: string | null
           storage_key_pdf?: string | null
@@ -110,6 +112,7 @@ export type Database = {
           id?: string
           kind?: string
           page_count?: number | null
+          render_uid?: number | null
           status?: string
           storage_key_manuscript?: string | null
           storage_key_pdf?: string | null

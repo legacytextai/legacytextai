@@ -667,15 +667,14 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Failed to generate download URL');
     }
 
-    // Update export record including render_uid for tracking
+    // Update export record 
     const { error: updateError } = await supabase
       .from('exports')
       .update({
         storage_key_pdf: pdfKey,
         url: signedUrl.signedUrl,
         page_count: pageNumber - 1,
-        status: 'ready',
-        render_uid: renderUid // Store the render_uid for tracking
+        status: 'ready'
       })
       .eq('id', export_id);
       
