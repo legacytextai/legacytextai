@@ -298,14 +298,15 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  console.log('410 Gone - Legacy renderer disabled, use render-ebook-pdf-v2');
+  // 🔴 HARD STOP: Force all users to use v2 renderer
+  console.log(`🛑 Legacy render-ebook-pdf called - redirecting to v2`);
   
-  return new Response(JSON.stringify({
-    error: 'Legacy renderer disabled. Use render-ebook-pdf-v2 for all PDF exports.',
-    redirect_to: 'render-ebook-pdf-v2'
-  }), {
+  return new Response('USE_V2_ONLY', {
     status: 410,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    headers: {
+      ...corsHeaders,
+      'Content-Type': 'text/plain'
+    }
   });
     
     console.log(`[render-ebook-pdf] export_id:${export_id} boot ok`, { export_id, preview_only });

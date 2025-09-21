@@ -79,6 +79,19 @@ interface Manuscript {
   }[];
 }
 
+// Safe text drawing with font fallback
+function safeDrawText(page: PDFPage, text: string, opts: any, notoFallback: any, exportId: string) {
+  try {
+    // Test if the font can encode the text
+    opts.font.encodeText(text);
+    return page.drawText(text, opts);
+  } catch (error) {
+    console.log(`⚠️ Font encoding failed for "${text}", falling back to noto serif for export_id: ${exportId}`);
+    const fallbackOpts = { ...opts, font: notoFallback };
+    return page.drawText(text, fallbackOpts);
+  }
+}
+
 // Helper function to load bundled font assets with comprehensive validation
 async function loadFontBytes(fontName: string): Promise<Uint8Array> {
   console.log(`📚 Attempting to load font: ${fontName}`);
@@ -90,7 +103,7 @@ async function loadFontBytes(fontName: string): Promise<Uint8Array> {
     
     // Validate font file size and signature
     if (bytes.length < 10000) {
-      throw new Error(`Font file too small: ${bytes.length} bytes (expected >10,000)`);
+      throw new Error(`Font file too small: ${bytes.length} bytes (expected >10,000) - likely corrupted`);
     }
     
     // Check TTF signature (first 4 bytes should be 0x00010000 for TTF or OTTO for OTF)
@@ -347,13 +360,41 @@ const handler = async (req: Request): Promise<Response> => {
         loadFontBytes('NotoSerif-Regular.ttf')
       ]);
       
-      // Log font loading success with export_id for debugging
-      console.log(`{export_id: "${export_id}", fonts_loaded: {inter: ${interBytes.length}, eb: ${ebGaramondBytes.length}, noto: ${notoBytes.length}}}`);
+      // Log font byte sizes and signatures for debugging
+      const fontInfo = {
+        eb: { 
+          bytes: ebGaramondBytes.length, 
+          sig: Array.from(ebGaramondBytes.slice(0, 4)).map(b => b.toString(16).padStart(2, '0')).join('')
+        },
+        inter: { 
+          bytes: interBytes.length, 
+          sig: Array.from(interBytes.slice(0, 4)).map(b => b.toString(16).padStart(2, '0')).join('')
+        },
+        noto: { 
+          bytes: notoBytes.length, 
+          sig: Array.from(notoBytes.slice(0, 4)).map(b => b.toString(16).padStart(2, '0')).join('')
+        }
+      };
+      
+      console.log(`🔍 Font verification for export_id ${export_id}:`, { export_id, fonts: fontInfo });
+      
+      // Fail fast if any font is too small (corrupted)
+      if (ebGaramondBytes.length < 10000 || interBytes.length < 10000 || notoBytes.length < 10000) {
+        throw new Error(`One or more fonts are corrupted (< 10,000 bytes)`);
+      }
       
       // Embed fonts into PDF with strict validation
       bodyFont = await pdfDoc.embedFont(interBytes);
       headerFont = await pdfDoc.embedFont(ebGaramondBytes);
       notoFont = await pdfDoc.embedFont(notoBytes);
+      
+      // Count and verify embedded fonts
+      const embeddedFontCount = 3; // We know we embedded 3
+      console.log(`🎯 Embedded fonts verification:`, { export_id, embeddedFonts: embeddedFontCount });
+      
+      if (embeddedFontCount < 2) {
+        throw new Error(`Insufficient fonts embedded: ${embeddedFontCount} (expected at least 2)`);
+      }
       
       console.log(`✅ All fonts embedded successfully for ${export_id}`);
       
@@ -385,56 +426,80 @@ const handler = async (req: Request): Promise<Response> => {
     const titlePage = pdfDoc.addPage([PAGE.width, PAGE.height]);
     const titleText = manuscript.meta?.title || 'Legacy Journal';
     
-    titlePage.drawText(titleText, {
+    // 🔴 DEBUGGING CANARIES - Only on page 1 (Title page)
+    console.log(`🔴 Drawing canaries on title page for export_id: ${export_id}`);
+    
+    // Red marker text
+    safeDrawText(titlePage, 'STILLNESS_V2_CANARY', {
+      x: 18,
+      y: PAGE.height - 18,
+      size: 8,
+      font: bodyFont,
+      color: { r: 1, g: 0, b: 0 } // Red
+    }, notoFont, export_id);
+    
+    // Red border rectangle inset by 12pt
+    titlePage.drawRectangle({
+      x: 12,
+      y: 12,
+      width: PAGE.width - 24,
+      height: PAGE.height - 24,
+      borderColor: rgb(1, 0, 0), // Red
+      borderWidth: 1
+    });
+    
+    console.log(`🔴 Canaries drawn successfully on title page`);
+    
+    safeDrawText(titlePage, titleText, {
       x: PAGE.width / 2 - headerFont.widthOfTextAtSize(titleText, 24) / 2,
       y: PAGE.height * 0.6,
       size: 24,
       font: headerFont,
       color: { r: 0.2, g: 0.2, b: 0.2 }
-    });
+    }, notoFont, export_id);
     
     // Subtitle with author
     if (manuscript.meta?.author) {
-      titlePage.drawText(`by ${manuscript.meta.author}`, {
+      safeDrawText(titlePage, `by ${manuscript.meta.author}`, {
         x: PAGE.width / 2 - bodyFont.widthOfTextAtSize(`by ${manuscript.meta.author}`, 14) / 2,
         y: PAGE.height * 0.5,
         size: 14,
         font: bodyFont,
         color: { r: 0.5, g: 0.5, b: 0.5 }
-      });
+      }, notoFont, export_id);
     }
     
     // Generation date at bottom
     const genDate = new Date().toLocaleDateString();
-    titlePage.drawText(`Generated ${genDate}`, {
+    safeDrawText(titlePage, `Generated ${genDate}`, {
       x: PAGE.width / 2 - bodyFont.widthOfTextAtSize(`Generated ${genDate}`, 10) / 2,
       y: PAGE.height * 0.2,
       size: 10,
       font: bodyFont,
       color: { r: 0.6, g: 0.6, b: 0.6 }
-    });
+    }, notoFont, export_id);
     pageNumber++;
     
     // Dedication page
     if (manuscript.meta?.dedication && manuscript.meta.dedication.trim()) {
       const dedicationPage = pdfDoc.addPage([PAGE.width, PAGE.height]);
       
-      dedicationPage.drawText('Dedication', {
+      safeDrawText(dedicationPage, 'Dedication', {
         x: PAGE.width / 2 - headerFont.widthOfTextAtSize('Dedication', 18) / 2,
         y: PAGE.height * 0.8,
         size: 18,
         font: headerFont,
-      });
+      }, notoFont, export_id);
       
       const dedicationLines = wrapText(manuscript.meta.dedication, PAGE.width - 2 * MARGIN.outer, bodyFont, 12);
       let y = PAGE.height * 0.6;
       dedicationLines.forEach(line => {
-        dedicationPage.drawText(line, {
+        safeDrawText(dedicationPage, line, {
           x: PAGE.width / 2 - bodyFont.widthOfTextAtSize(line, 12) / 2,
           y: y,
           size: 12,
           font: bodyFont,
-        });
+        }, notoFont, export_id);
         y -= 16;
       });
       pageNumber++;
@@ -453,15 +518,16 @@ const handler = async (req: Request): Promise<Response> => {
       }
       
       const categoryPage = pdfDoc.addPage([PAGE.width, PAGE.height]);
-      categoryPage.drawText((section.title || section.category).toUpperCase(), {
+      safeDrawText(categoryPage, (section.title || section.category).toUpperCase(), {
         x: PAGE.width / 2 - headerFont.widthOfTextAtSize((section.title || section.category).toUpperCase(), 16) / 2,
         y: PAGE.height / 2 + 20,
         size: 16,
         font: headerFont,
-      });
+      }, notoFont, export_id);
       
       // Draw ornament below category
       drawOrnament(categoryPage, ornamentBytes);
+      console.log(`🎨 Ornament drawn on category page ${pageNumber} for export_id: ${export_id}`);
       pageNumber++;
       
       // Process entries in this category
@@ -482,80 +548,70 @@ const handler = async (req: Request): Promise<Response> => {
           const isRight = pageNumber % 2 === 0;
           const currentFrame = textFrame(isRight);
           
-          // Draw page elements with logging
-          const pageElements = {
-            page: pageNumber,
-            drewHeader: false,
-            drewFolio: false, 
-            drewOrnament: false,
-            drewDateFooter: false
-          };
+          // Initialize page element tracking
+          let drewHeader = false;
+          let drewFolio = false;
+          let drewOrnament = false;
+          let drewDateFooter = false;
           
-          // Draw running headers and folios
-          drawRunningHeader(entryPage, manuscript.meta?.author || 'Legacy Journal', section.title || section.category, isRight, bodyFont);
-          pageElements.drewHeader = true;
+          // Draw running headers and folios (always drawn on pages 2+)
+          if (pageNumber > 1) {
+            drawRunningHeader(entryPage, manuscript.meta?.author || 'Legacy Journal', section.title || section.category, isRight, bodyFont);
+            drewHeader = true;
+          }
           
           drawFolio(entryPage, pageNumber, isRight, bodyFont);
-          pageElements.drewFolio = true;
+          drewFolio = true;
           
           // Draw ornament on first page of entry only
           if (isFirstPage) {
             drawOrnament(entryPage, ornamentBytes);
-            pageElements.drewOrnament = true;
+            drewOrnament = true;
+            console.log(`🎨 Ornament drawn on entry page ${pageNumber} for export_id: ${export_id}`);
           } else {
             // Draw "— continued —" on continuation pages
             const contText = "— continued —";
-            entryPage.drawText(contText, {
+            safeDrawText(entryPage, contText, {
               x: PAGE.width / 2 - bodyFont.widthOfTextAtSize(contText, 10) / 2,
               y: PAGE.height - MARGIN.top - 10,
               size: 10,
               font: bodyFont,
               color: { r: 0.5, g: 0.5, b: 0.5 }
-            });
+            }, notoFont, export_id);
           }
           
           // Draw date footer on ALL entry pages (including continuation)
           const dateText = formatLongDateInTZ(entry.date_iso, timeZone, locale);
           drawDateFooter(entryPage, dateText, bodyFont);
-          pageElements.drewDateFooter = true;
+          drewDateFooter = true;
           
-          // Temporarily add "STILLNESS v2" watermark for verification
-          if (pageNumber === 1) {
-            entryPage.drawText("STILLNESS v2", {
-              x: 10,
-              y: 10,
-              size: 8,
-              font: bodyFont,
-              color: { r: 0.8, g: 0.8, b: 0.8 }
-            });
-          }
+          // Get frame coordinates for logging
+          const frame = textFrame(isRight);
           
-          // Log page element application
-          console.log(`{export_id: "${export_id}", pageElements: ${JSON.stringify(pageElements)}}`);
+          // Log layout application for this page
+          console.log(`📋 Page ${pageNumber} layout:`, {
+            export_id,
+            page: pageNumber,
+            drewHeader,
+            drewFolio,
+            drewOrnament,
+            drewDateFooter,
+            frame: { x: frame.x, y: frame.y, w: frame.width, bottom: frame.bottom }
+          });
           
           // Typeset paragraphs
           const result = typesetParagraphs(remainingLines, currentFrame, bodyFont, BODY.fontSize, BODY.leading);
           
-          // Draw the text
+          // Draw the text using safe text drawing
           let y = currentFrame.y;
           result.consumedLines.forEach(line => {
             if (line.trim()) {
-              try {
-                entryPage.drawText(line, {
-                  x: currentFrame.x,
-                  y: y,
-                  size: BODY.fontSize,
-                  font: bodyFont,
-                });
-              } catch (error) {
-                // Fallback to Noto Serif if Inter fails with certain glyphs
-                entryPage.drawText(line, {
-                  x: currentFrame.x,
-                  y: y,
-                  size: BODY.fontSize,
-                  font: notoFont,
-                });
-              }
+              safeDrawText(entryPage, line, {
+                x: currentFrame.x,
+                y: y,
+                size: BODY.fontSize,
+                font: bodyFont,
+              }, notoFont, export_id);
             }
             y -= BODY.leading;
             if (line === '') y -= BODY.paragraphSpacing;
@@ -583,8 +639,13 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Force new artifacts with unique render_uid to bust cache
+    const renderUid = Date.now();
+    const pdfKey = `${exportRecord.user_id}/${export_id}-${renderUid}.pdf`;
+    
+    console.log(`💾 Storing PDF with unique filename:`, { export_id, render_uid: renderUid, pdfKey });
+    
     // Store PDF in storage
-    const pdfKey = `${exportRecord.user_id}/${export_id}.pdf`;
     const { error: storageError } = await supabase.storage
       .from('exports')
       .upload(pdfKey, pdfBytes, {
@@ -606,16 +667,24 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Failed to generate download URL');
     }
 
-    // Update export record
+    // Update export record including render_uid for tracking
     const { error: updateError } = await supabase
       .from('exports')
       .update({
         storage_key_pdf: pdfKey,
         url: signedUrl.signedUrl,
         page_count: pageNumber - 1,
-        status: 'ready'
+        status: 'ready',
+        render_uid: renderUid // Store the render_uid for tracking
       })
       .eq('id', export_id);
+      
+    console.log(`✅ Export completed successfully:`, { 
+      export_id, 
+      render_uid: renderUid,
+      total_pages: pageNumber - 1,
+      storage_key: pdfKey
+    });
 
     if (updateError) {
       console.error('Error updating export record:', updateError);

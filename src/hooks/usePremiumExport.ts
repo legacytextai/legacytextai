@@ -31,6 +31,12 @@ export const usePremiumExport = () => {
     }
 
     try {
+      console.log('🎯 Starting premium export - calling v2 only:', { 
+        phase: 'calling-v2', 
+        fn: 'render-ebook-pdf-v2',
+        user_id: userData.id 
+      });
+      
       setExportStatus({
         export_id: null,
         status: 'formatting',
@@ -119,6 +125,13 @@ export const usePremiumExport = () => {
     }
 
     try {
+      console.log('🎯 Starting preview generation - calling v2 only:', { 
+        phase: 'calling-v2', 
+        fn: 'render-ebook-pdf-v2',
+        preview_only: true,
+        user_id: userData.id 
+      });
+      
       // Call build-ebook-manuscript function
       const { data: manuscriptResult, error: manuscriptError } = await supabase.functions
         .invoke('build-ebook-manuscript', {
