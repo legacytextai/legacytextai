@@ -35,8 +35,9 @@ export function ExportDialog({
       const userTitle = userData?.name ? `${userData.name}'s Legacy Journal` : "My Legacy Journal";
       const pdfBlob = await generateBasicPDF({
         entries,
+        dedication: userData?.dedication,
         userTitle,
-        includeDedication: false // Free export doesn't include dedication
+        includeDedication: true // Free export now includes dedication
       });
       const filename = `legacy-journal-${new Date().toISOString().split('T')[0]}.pdf`;
       downloadPDF(pdfBlob, filename);
@@ -102,6 +103,7 @@ export function ExportDialog({
             <CardContent className="space-y-4">
               <ul className="text-sm space-y-1">
                 <li>• All your journal entries</li>
+                <li>• Custom dedication page</li>
                 <li>• Chronological order</li>
                 <li>• Simple formatting</li>
               </ul>

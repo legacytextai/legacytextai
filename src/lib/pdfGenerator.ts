@@ -18,8 +18,8 @@ export const generateBasicPDF = async ({ entries, dedication, userTitle, include
   doc.setFontSize(12)
   doc.text(`Generated on ${new Date().toLocaleDateString()}`, 20, 50)
   
-  // Dedication page (only for premium exports)
-  if (includeDedication && dedication && dedication.trim()) {
+  // Dedication page
+  if (dedication && dedication.trim()) {
     doc.addPage()
     doc.setFontSize(18)
     doc.text('Dedication', 20, 30)
