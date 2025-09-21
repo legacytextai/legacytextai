@@ -125,12 +125,16 @@ export default function Journal() {
                 <div className="absolute top-0 right-0 bg-gradient-accent text-white px-3 py-1 text-xs font-medium">
                   Recommended
                 </div>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-legacy-primary flex items-center gap-2">
-                    <Star className="w-5 h-5 text-legacy-accent" />
-                    Premium Export - $9.99
-                  </CardTitle>
-                </CardHeader>
+                 <CardHeader className="pb-3">
+                   <CardTitle className="text-legacy-primary flex items-center gap-2">
+                     <Star className="w-5 h-5 text-legacy-accent" />
+                     Premium E-Book Export
+                   </CardTitle>
+                   <div className="flex flex-col gap-1">
+                     <span className="text-lg font-semibold text-legacy-ink/70 line-through">$9.99</span>
+                     <span className="text-sm text-legacy-accent font-medium">Free for Early Access Users</span>
+                   </div>
+                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-legacy-ink/70">
                     Beautifully formatted legacy journal with professional layout, photos, and premium typography.
