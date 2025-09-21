@@ -1,8 +1,45 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { PDFDocument, rgb, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
-import { format } from "https://esm.sh/date-fns@3.6.0";
-import { utcToZonedTime } from "https://esm.sh/date-fns-tz@3.0.0";
+
+console.log("[render-ebook-pdf] boot ok");
+
+// Cache date formatters to avoid recreating them for every page
+const dateFormatterCache = new Map<string, Intl.DateTimeFormat>();
+
+function formatLongDateInTZ(dateIso: string, timeZone: string, locale = "en-US"): string {
+  // Example output: "September 21, 2025"
+  const cacheKey = `${timeZone}-${locale}`;
+  
+  let formatter = dateFormatterCache.get(cacheKey);
+  if (!formatter) {
+    try {
+      formatter = new Intl.DateTimeFormat(locale, {
+        timeZone,
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      dateFormatterCache.set(cacheKey, formatter);
+    } catch {
+      // Safe fallback in case of bad tz string
+      const fallbackKey = `UTC-${locale}`;
+      formatter = dateFormatterCache.get(fallbackKey);
+      if (!formatter) {
+        formatter = new Intl.DateTimeFormat(locale, {
+          timeZone: "UTC",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        dateFormatterCache.set(fallbackKey, formatter);
+      }
+    }
+  }
+  
+  const d = new Date(dateIso);
+  return formatter.format(d);
+}
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
@@ -26,6 +63,9 @@ interface Manuscript {
     dedication: string;
     timezone: string;
   };
+  user?: {
+    preferred_language?: string;
+  };
   sections: {
     category: string;
     pages: {
@@ -46,7 +86,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { export_id, preview_only = false }: RenderRequest = await req.json();
     
-    console.log('Rendering PDF for export:', export_id, 'preview_only:', preview_only);
+    console.log(`[render-ebook-pdf] export_id:${export_id} Rendering PDF for export:`, export_id, 'preview_only:', preview_only);
 
     // Get export record
     const { data: exportRecord, error: exportError } = await supabase
@@ -113,7 +153,11 @@ const handler = async (req: Request): Promise<Response> => {
       maxWidth: pageWidth - margins.outer - margins.inner,
     });
 
-    titlePage.drawText(`Generated on ${format(new Date(), 'MMMM d, yyyy')}`, {
+    const userLocale = manuscript.user?.preferred_language || "en-US";
+    const tz = manuscript.meta?.timezone || "UTC";
+    const currentDate = formatLongDateInTZ(new Date().toISOString(), tz, userLocale);
+    
+    titlePage.drawText(`Generated on ${currentDate}`, {
       x: margins.outer,
       y: pageHeight - 200,
       size: 12,
@@ -209,10 +253,8 @@ const handler = async (req: Request): Promise<Response> => {
           color: rgb(0.5, 0.5, 0.5),
         });
 
-        // Format date using user timezone
-        const entryDate = new Date(pageEntry.date_iso);
-        const zonedDate = utcToZonedTime(entryDate, manuscript.meta.timezone);
-        const formattedDate = format(zonedDate, 'MMMM d, yyyy');
+        // Format date using user timezone and locale
+        const formattedDate = formatLongDateInTZ(pageEntry.date_iso, tz, userLocale);
 
         // Entry content
         const contentLines = splitTextToLines(
@@ -356,23 +398,35 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
   } catch (error: any) {
-    console.error('Error in render-ebook-pdf function:', error);
+    let export_id_for_logs = 'unknown';
     
-    // Update export status to error if we have an export_id
+    // Try to get export_id for logging
     try {
       const body = await req.json();
-      if (body.export_id) {
+      export_id_for_logs = body.export_id || 'unknown';
+    } catch (e) {
+      // Ignore JSON parsing errors
+    }
+    
+    console.error(`[render-ebook-pdf] export_id:${export_id_for_logs} Error:`, error);
+    
+    // Update export status to error if we have an export_id
+    if (export_id_for_logs !== 'unknown') {
+      try {
         await supabase
           .from('exports')
           .update({ status: 'error' })
-          .eq('id', body.export_id);
+          .eq('id', export_id_for_logs);
+      } catch (e) {
+        // Ignore errors in error handling
       }
-    } catch (e) {
-      // Ignore errors in error handling
     }
 
+    // Truncate error message to first 120 chars for better toast display
+    const errorMessage = error.message ? error.message.substring(0, 120) : 'Unknown error occurred';
+
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
