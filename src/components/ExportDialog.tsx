@@ -301,7 +301,7 @@ export function ExportDialog({
               {userData?.name ? `${userData.name}'s Legacy Journal` : 'My Legacy Journal'}
             </h4>
             <p className="text-sm text-muted-foreground mb-4">
-              {entries.length} entries • Stillness theme
+              {entries.length} entries • minimal elegant theme
             </p>
             <Button variant="outline" onClick={generatePreview}>
               <Eye className="h-4 w-4 mr-2" />
