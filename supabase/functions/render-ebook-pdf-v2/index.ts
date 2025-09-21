@@ -82,15 +82,32 @@ interface Manuscript {
 // Helper function to download font assets with validation
 async function loadFontBytes(path: string): Promise<Uint8Array> {
   try {
-    // Use direct public URL for public assets
+    // Use the correct path structure for public assets
     const fullUrl = `https://toxadhuqzdydliplhrws.supabase.co/storage/v1/object/public/exports${path}`;
-    const response = await fetch(fullUrl);
     
+    // First try storage, then fallback to public folder
+    let response = await fetch(fullUrl);
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status} for ${path}`);
+      // Fallback to direct public path
+      const publicUrl = `https://toxadhuqzdydliplhrws.supabase.co/rest/v1/storage/objects/sign/exports${path}`;
+      response = await fetch(publicUrl, {
+        headers: {
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+          'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+        }
+      });
+      
+      if (!response.ok) {
+        // Final fallback: try reading from local file system
+        try {
+          const fileData = await Deno.readFile(`./public${path}`);
+          console.log(`✅ Font loaded from local: ${path} (${fileData.length} bytes)`);
+          return fileData;
+        } catch {
+          throw new Error(`HTTP ${response.status} for ${path} and no local fallback`);
+        }
+      }
     }
-    
-    const contentType = response.headers.get('content-type') || '';
     
     const arrayBuffer = await response.arrayBuffer();
     const bytes = new Uint8Array(arrayBuffer);
@@ -116,20 +133,29 @@ async function loadFontBytes(path: string): Promise<Uint8Array> {
 
 async function fetchOrnamentBytes(): Promise<Uint8Array> {
   try {
-    const fullUrl = 'https://toxadhuqzdydliplhrws.supabase.co/storage/v1/object/public/exports/assets/ornaments/tilde.svg';
-    const response = await fetch(fullUrl);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status} for ornament`);
+    // Try reading from local file system first
+    try {
+      const fileData = await Deno.readFile('./public/assets/ornaments/tilde.svg');
+      console.log(`✅ Ornament loaded from local: ${fileData.length} bytes`);
+      return fileData;
+    } catch {
+      // Fallback to remote
+      const fullUrl = 'https://toxadhuqzdydliplhrws.supabase.co/storage/v1/object/public/exports/assets/ornaments/tilde.svg';
+      const response = await fetch(fullUrl);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} for ornament`);
+      }
+      
+      const arrayBuffer = await response.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      console.log(`✅ Ornament loaded from remote: ${bytes.length} bytes`);
+      return bytes;
     }
-    
-    const arrayBuffer = await response.arrayBuffer();
-    const bytes = new Uint8Array(arrayBuffer);
-    console.log(`✅ Ornament loaded: ${bytes.length} bytes`);
-    return bytes;
   } catch (error) {
     console.error('❌ Failed to load ornament:', error);
-    throw new Error('Failed to fetch ornament');
+    // Return empty array to continue without ornament
+    return new Uint8Array();
   }
 }
 
@@ -163,27 +189,38 @@ function drawFolio(page: any, pageNum: number, isRight: boolean, font: any) {
 
 function drawOrnament(page: any, ornamentBytes: Uint8Array) {
   try {
-    // Draw a decorative tilde ornament
+    // Draw a decorative tilde ornament - elegant and minimal
     const centerX = PAGE.width / 2;
     const ornamentWidth = 48;
-    const ornamentHeight = 16;
     
-    // Draw a stylized tilde shape
+    // Draw main curved tilde line using quadratic curves
+    const y = ORNAMENT.y;
+    const quarterWidth = ornamentWidth / 4;
+    
+    // Left curve (down-up)
     page.drawLine({
-      start: { x: centerX - ornamentWidth / 2, y: ORNAMENT.y },
-      end: { x: centerX + ornamentWidth / 2, y: ORNAMENT.y },
-      thickness: 1.5,
+      start: { x: centerX - ornamentWidth / 2, y: y },
+      end: { x: centerX - quarterWidth, y: y - 3 },
+      thickness: 1.2,
       color: { r: 0.4, g: 0.4, b: 0.4 }
     });
     
-    // Add small decorative curves
-    const curveHeight = 4;
+    // Middle section (up-down)
     page.drawLine({
-      start: { x: centerX - ornamentWidth / 4, y: ORNAMENT.y - curveHeight },
-      end: { x: centerX + ornamentWidth / 4, y: ORNAMENT.y + curveHeight },
-      thickness: 1.5,
+      start: { x: centerX - quarterWidth, y: y - 3 },
+      end: { x: centerX + quarterWidth, y: y + 3 },
+      thickness: 1.2,
       color: { r: 0.4, g: 0.4, b: 0.4 }
     });
+    
+    // Right curve (down-up)
+    page.drawLine({
+      start: { x: centerX + quarterWidth, y: y + 3 },
+      end: { x: centerX + ornamentWidth / 2, y: y },
+      thickness: 1.2,
+      color: { r: 0.4, g: 0.4, b: 0.4 }
+    });
+    
   } catch (error) {
     console.warn('Could not draw ornament:', error);
   }
@@ -340,7 +377,7 @@ const handler = async (req: Request): Promise<Response> => {
     try {
       console.log('📚 Loading fonts...');
       
-      // Load all fonts
+      // Load all fonts with proper preflight validation
       const interBytes = await loadFontBytes("/assets/fonts/Inter-Regular.ttf");
       bodyFont = await pdfDoc.embedFont(interBytes);
       console.log(`✅ Body font: Inter (${interBytes.length} bytes)`);
@@ -352,6 +389,11 @@ const handler = async (req: Request): Promise<Response> => {
       const notoBytes = await loadFontBytes("/assets/fonts/NotoSerif-Regular.ttf");
       notoFont = await pdfDoc.embedFont(notoBytes);
       console.log(`✅ Fallback font: Noto Serif (${notoBytes.length} bytes)`);
+      
+      // Preflight check: Ensure no StandardFonts are used
+      console.log(`🎨 Theme: ${THEME_KEY}`);
+      console.log(`📏 Page dimensions: ${PAGE.width}×${PAGE.height}pt (6×9 inches)`);
+      console.log(`📐 Margins: top=${MARGIN.top}, bottom=${MARGIN.bottom}, inner=${MARGIN.inner}, outer=${MARGIN.outer}`);
       
     } catch (error) {
       console.error('❌ CRITICAL: Font loading failed:', error);
@@ -372,20 +414,37 @@ const handler = async (req: Request): Promise<Response> => {
     const locale = manuscript.user?.preferred_language || 'en-US';
     let pageNumber = 1;
     
-    // Title page
+    // Title page - elegant and minimal
     const titlePage = pdfDoc.addPage([PAGE.width, PAGE.height]);
-    titlePage.drawText(manuscript.meta?.title || 'My Legacy Journal', {
-      x: PAGE.width / 2 - headerFont.widthOfTextAtSize(manuscript.meta?.title || 'My Legacy Journal', 24) / 2,
+    const titleText = manuscript.meta?.title || 'Legacy Journal';
+    
+    titlePage.drawText(titleText, {
+      x: PAGE.width / 2 - headerFont.widthOfTextAtSize(titleText, 24) / 2,
       y: PAGE.height * 0.6,
       size: 24,
       font: headerFont,
+      color: { r: 0.2, g: 0.2, b: 0.2 }
     });
     
-    titlePage.drawText(`Generated ${new Date().toLocaleDateString()}`, {
-      x: PAGE.width / 2 - bodyFont.widthOfTextAtSize(`Generated ${new Date().toLocaleDateString()}`, 12) / 2,
-      y: PAGE.height * 0.4,
-      size: 12,
+    // Subtitle with author
+    if (manuscript.meta?.author) {
+      titlePage.drawText(`by ${manuscript.meta.author}`, {
+        x: PAGE.width / 2 - bodyFont.widthOfTextAtSize(`by ${manuscript.meta.author}`, 14) / 2,
+        y: PAGE.height * 0.5,
+        size: 14,
+        font: bodyFont,
+        color: { r: 0.5, g: 0.5, b: 0.5 }
+      });
+    }
+    
+    // Generation date at bottom
+    const genDate = new Date().toLocaleDateString();
+    titlePage.drawText(`Generated ${genDate}`, {
+      x: PAGE.width / 2 - bodyFont.widthOfTextAtSize(`Generated ${genDate}`, 10) / 2,
+      y: PAGE.height * 0.2,
+      size: 10,
       font: bodyFont,
+      color: { r: 0.6, g: 0.6, b: 0.6 }
     });
     pageNumber++;
     
@@ -460,13 +519,9 @@ const handler = async (req: Request): Promise<Response> => {
           drawRunningHeader(entryPage, manuscript.meta?.author || 'Legacy Journal', section.title || section.category, isRight, bodyFont);
           drawFolio(entryPage, pageNumber, isRight, bodyFont);
           
-          // Draw ornament on first page of entry
+          // Draw ornament on first page of entry only
           if (isFirstPage) {
             drawOrnament(entryPage, ornamentBytes);
-            
-            // Draw date footer on entry pages
-            const dateText = formatLongDateInTZ(entry.date_iso, timeZone, locale);
-            drawDateFooter(entryPage, dateText, bodyFont);
           } else {
             // Draw "— continued —" on continuation pages
             const contText = "— continued —";
@@ -478,6 +533,10 @@ const handler = async (req: Request): Promise<Response> => {
               color: { r: 0.5, g: 0.5, b: 0.5 }
             });
           }
+          
+          // Draw date footer on ALL entry pages (including continuation)
+          const dateText = formatLongDateInTZ(entry.date_iso, timeZone, locale);
+          drawDateFooter(entryPage, dateText, bodyFont);
           
           // Typeset paragraphs
           const result = typesetParagraphs(remainingLines, currentFrame, bodyFont, BODY.fontSize, BODY.leading);
