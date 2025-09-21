@@ -107,9 +107,9 @@ export default function Export() {
                 <li>• Premium typography</li>
                 <li>• High-quality PDF</li>
               </ul>
-              <Button variant="accent" className="w-full" onClick={() => setIsExportDialogOpen(true)}>
+              <Button variant="accent" className="w-full" disabled>
                 <Star className="w-4 h-4 mr-2" />
-                Export E-Book
+                Coming Soon
               </Button>
             </CardContent>
           </Card>
