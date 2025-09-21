@@ -367,11 +367,6 @@ function Dashboard() {
                   Export as PDF
                 </Button>
               </Link>
-              <Link to="/export" className="flex-shrink-0">
-                <Button variant="outline" size="lg" className="text-white border-white hover:bg-white hover:text-legacy-accent w-full sm:w-auto">
-                  Order Bound Journal
-                </Button>
-              </Link>
             </div>
           </CardContent>
         </Card>
