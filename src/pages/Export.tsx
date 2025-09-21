@@ -85,9 +85,8 @@ export default function Export() {
 
           {/* Premium Export */}
           <Card className="shadow-deep border-legacy-accent relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-gradient-accent text-white px-3 py-1 text-xs font-medium">
-              Most Popular
-            </div>
+            <div className="absolute top-0 right-0 bg-gradient-accent text-white px-3 py-1 text-xs font-medium">Formatted Legacy Journal
+E-Book</div>
             <CardHeader className="text-center pb-4">
               <Badge variant="default" className="w-fit mx-auto mb-2 bg-legacy-accent">
                 Premium
@@ -99,8 +98,7 @@ export default function Export() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
-                <span className="text-3xl font-bold text-legacy-primary line-through">$9.99</span>
-                <p className="text-lg font-semibold text-legacy-accent mt-1">Free for Early Access Users</p>
+                <span className="text-3xl font-bold text-legacy-primary">$9.99</span>
               </div>
               <ul className="space-y-2 text-sm text-legacy-ink/70">
                 <li>• Professional book layout</li>
@@ -140,9 +138,9 @@ export default function Export() {
                 <li>• Custom gift box</li>
                 <li>• Shipped to your door</li>
               </ul>
-              <Button disabled className="w-full bg-gray-300 text-gray-600 cursor-not-allowed">
+              <Button variant="warm" className="w-full" onClick={() => setIsExportDialogOpen(true)}>
                 <Package className="w-4 h-4 mr-2" />
-                Coming Soon
+                Order Physical Journal
               </Button>
             </CardContent>
           </Card>
