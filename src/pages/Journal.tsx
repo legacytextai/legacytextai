@@ -179,10 +179,10 @@ export default function Journal() {
               {/* Physical Journal */}
               <Card className="shadow-paper">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-legacy-primary flex items-center gap-2">
-                    <BookOpen className="w-5 h-5" />
-                    Physical Journal - $199
-                  </CardTitle>
+                   <CardTitle className="text-legacy-primary flex items-center gap-2">
+                     <BookOpen className="w-5 h-5" />
+                     Physical Journal
+                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-legacy-ink/70">
