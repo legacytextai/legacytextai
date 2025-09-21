@@ -7,36 +7,29 @@ import { BookOpen, Download, Star } from "lucide-react";
 import { useDedication } from "@/hooks/useDedication";
 import { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-
 export default function Journal() {
-  const navigate = useNavigate()
-  const { 
-    dedication, 
-    setDedication, 
-    loadDedication, 
-    saveDedication, 
-    isLoading, 
-    isSaving 
-  } = useDedication()
-
+  const navigate = useNavigate();
+  const {
+    dedication,
+    setDedication,
+    loadDedication,
+    saveDedication,
+    isLoading,
+    isSaving
+  } = useDedication();
   useEffect(() => {
-    loadDedication()
-  }, [loadDedication])
-
+    loadDedication();
+  }, [loadDedication]);
   const handleDedicationChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setDedication(e.target.value)
-  }, [setDedication])
-
+    setDedication(e.target.value);
+  }, [setDedication]);
   const handleSaveDedication = useCallback(async () => {
-    await saveDedication(dedication)
-  }, [saveDedication, dedication])
-
+    await saveDedication(dedication);
+  }, [saveDedication, dedication]);
   const handleExportClick = useCallback(() => {
-    navigate('/export')
-  }, [navigate])
-
-  return (
-    <Layout>
+    navigate('/export');
+  }, [navigate]);
+  return <Layout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -108,24 +101,11 @@ export default function Journal() {
                     <Label htmlFor="dedication" className="text-sm font-medium text-legacy-primary">
                       Your Dedication
                     </Label>
-                    <Textarea
-                      id="dedication"
-                      value={dedication}
-                      onChange={handleDedicationChange}
-                      placeholder="To my loving wife and children..."
-                      className="min-h-[120px] resize-none bg-legacy-warm/50 border-legacy-border focus:border-legacy-primary"
-                      disabled={isLoading}
-                    />
-                    {isSaving && (
-                      <p className="text-xs text-legacy-ink/50">Saving...</p>
-                    )}
+                    <Textarea id="dedication" value={dedication} onChange={handleDedicationChange} placeholder="To my loving wife and children..." className="min-h-[120px] resize-none bg-legacy-warm/50 border-legacy-border focus:border-legacy-primary" disabled={isLoading} />
+                    {isSaving && <p className="text-xs text-legacy-ink/50">Saving...</p>}
                   </div>
                   
-                  <Button 
-                    onClick={handleSaveDedication}
-                    disabled={isSaving || isLoading}
-                    className="w-full"
-                  >
+                  <Button onClick={handleSaveDedication} disabled={isSaving || isLoading} className="w-full">
                     {isSaving ? 'Saving...' : 'Save Dedication'}
                   </Button>
                 </CardContent>
@@ -155,7 +135,7 @@ export default function Journal() {
                   </p>
                   <ul className="text-sm text-legacy-ink/70 space-y-1">
                     <li>• Professional book design</li>
-                    <li>• Photo integration</li>
+                    
                     <li>• Custom dedication page</li>
                     <li>• Category organization</li>
                   </ul>
@@ -195,7 +175,7 @@ export default function Journal() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-legacy-primary flex items-center gap-2">
                     <BookOpen className="w-5 h-5" />
-                    Leatherbound Journal
+                    Physical Journal - $199
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -207,11 +187,8 @@ export default function Journal() {
                     <li>• Archival quality paper</li>
                     <li>• Gold embossed personalization</li>
                   </ul>
-                  <Button 
-                    disabled 
-                    className="w-full bg-muted text-muted-foreground cursor-not-allowed"
-                  >
-                    Coming Soon
+                  <Button variant="warm" className="w-full" onClick={handleExportClick}>
+                    Order Physical Journal
                   </Button>
                 </CardContent>
               </Card>
@@ -219,6 +196,5 @@ export default function Journal() {
           </div>
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 }
