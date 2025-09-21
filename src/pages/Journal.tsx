@@ -124,9 +124,15 @@ export default function Journal() {
                   Recommended
                 </div>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-legacy-primary flex items-center gap-2">
-                    <Star className="w-5 h-5 text-legacy-accent" />
-                    Premium Export - $9.99
+                  <CardTitle className="text-legacy-primary">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Star className="w-5 h-5 text-legacy-accent" />
+                      Premium E-Book Export
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="line-through text-legacy-ink/50">$9.99</span>
+                      <span className="text-legacy-accent font-medium">Free for Early Access Users</span>
+                    </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
