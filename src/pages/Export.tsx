@@ -99,7 +99,8 @@ export default function Export() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
-                <span className="text-3xl font-bold text-legacy-primary">$9.99</span>
+                <span className="text-3xl font-bold text-legacy-primary line-through">$9.99</span>
+                <p className="text-lg font-semibold text-legacy-accent mt-1">Free for Early Access Users</p>
               </div>
               <ul className="space-y-2 text-sm text-legacy-ink/70">
                 <li>• Professional book layout</li>
