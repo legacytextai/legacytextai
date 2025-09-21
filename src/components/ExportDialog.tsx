@@ -125,7 +125,10 @@ export function ExportDialog({
               <CardDescription>
                 Professional design with enhanced features
               </CardDescription>
-              <div className="text-2xl font-bold text-primary">$9.99</div>
+              <div>
+                <div className="text-2xl font-bold text-primary line-through">$9.99</div>
+                <p className="text-lg font-semibold text-accent">Free for Early Access Users</p>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <ul className="text-sm space-y-1">
