@@ -3,8 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { BookOpen, Download, Star } from "lucide-react";
 import { useDedication } from "@/hooks/useDedication";
+import { useJournalEntries } from "@/hooks/useJournalEntries";
+import { useUserData } from "@/hooks/useUserData";
+import { EntryCard } from "@/components/EntryCard";
 import { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 export default function Journal() {
@@ -17,6 +21,14 @@ export default function Journal() {
     isLoading,
     isSaving
   } = useDedication();
+  
+  const { userData } = useUserData();
+  const { data: entries = [] } = useJournalEntries();
+  
+  // Sort entries chronologically (oldest first)
+  const sortedEntries = [...entries].sort((a, b) => 
+    new Date(a.received_at || '').getTime() - new Date(b.received_at || '').getTime()
+  );
   useEffect(() => {
     loadDedication();
   }, [loadDedication]);
@@ -53,39 +65,59 @@ export default function Journal() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-legacy-primary">Journal Preview</h2>
             
-            <Card className="shadow-deep max-w-sm mx-auto lg:mx-0">
-              <CardContent className="p-8">
-                <div className="text-center space-y-6">
-                  {/* Cover */}
-                  <div className="w-32 h-40 bg-legacy-primary/10 border-2 border-legacy-border rounded-lg mx-auto flex flex-col items-center justify-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-legacy-primary/5 to-legacy-accent/5"></div>
-                    <div className="relative z-10 text-center">
-                      <div className="w-8 h-8 border-2 border-legacy-primary/30 rounded-full mb-2 mx-auto"></div>
-                      <h3 className="font-bold text-legacy-primary text-sm">John Doe's</h3>
-                      <p className="text-xs text-legacy-ink/70">Legacy Journal</p>
+            <Card className="shadow-deep">
+              <CardContent className="p-0">
+                <ScrollArea className="h-96 w-full">
+                  <div className="space-y-6 p-6">
+                    {/* Journal Title */}
+                    <div className="text-center border-b border-legacy-border pb-4">
+                      <h1 className="text-2xl font-bold text-legacy-primary">
+                        {userData?.name || 'My'}'s Legacy Journal
+                      </h1>
+                    </div>
+                    
+                    {/* Dedication */}
+                    {dedication && (
+                      <Card className="shadow-warm">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg text-legacy-primary text-center">
+                            Dedication
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-legacy-ink/80 text-center italic leading-relaxed">
+                            {dedication}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+                    
+                    {/* Journal Entries */}
+                    <div className="space-y-4">
+                      <h2 className="text-lg font-semibold text-legacy-primary text-center border-b border-legacy-border pb-2">
+                        Journal Entries
+                      </h2>
+                      {sortedEntries.length > 0 ? (
+                        sortedEntries.map((entry) => (
+                          <EntryCard 
+                            key={entry.id} 
+                            entry={entry} 
+                            enableInlineEdit={false}
+                            className="shadow-paper"
+                          />
+                        ))
+                      ) : (
+                        <Card className="shadow-paper">
+                          <CardContent className="p-6 text-center">
+                            <p className="text-legacy-ink/60">
+                              No journal entries yet. Start by sending your first text message!
+                            </p>
+                          </CardContent>
+                        </Card>
+                      )}
                     </div>
                   </div>
-
-                  {/* Dedication Section */}
-                  <div className="w-32 h-20 bg-legacy-warm border border-legacy-border rounded mx-auto p-3">
-                    <h4 className="text-xs font-semibold text-legacy-primary mb-1 border-b border-legacy-border/50 pb-1">
-                      Dedication
-                    </h4>
-                    <p className="text-[8px] text-legacy-ink/60 leading-tight">
-                      To my family and loved ones
-                    </p>
-                  </div>
-
-                  {/* Introduction Section */}
-                  <div className="w-32 h-20 bg-legacy-warm border border-legacy-border rounded mx-auto p-3">
-                    <h4 className="text-xs font-semibold text-legacy-primary mb-1 border-b border-legacy-border/50 pb-1">
-                      Introduction
-                    </h4>
-                    <p className="text-[8px] text-legacy-ink/60 leading-tight">
-                      As you read this, I hope these words will guide you through life's journey...
-                    </p>
-                  </div>
-                </div>
+                </ScrollArea>
               </CardContent>
             </Card>
             
