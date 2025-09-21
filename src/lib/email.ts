@@ -23,7 +23,7 @@ export const sendJournalEmail = async ({
     // Convert buffer to array for edge function
     const pdfArray = pdfBuffer ? Array.from(new Uint8Array(pdfBuffer)) : [];
 
-    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-journal-email`, {
+    const response = await fetch(`https://toxadhuqzdydliplhrws.supabase.co/functions/v1/send-journal-email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

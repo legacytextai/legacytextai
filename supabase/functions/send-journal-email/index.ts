@@ -31,13 +31,18 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`Sending email to ${to} with subject: ${subject}`);
+    // Configure sender - use env vars with fallbacks for default Resend domain
+    const FROM = Deno.env.get("RESEND_FROM") || "LegacyText <onboarding@resend.dev>";
+    const REPLY_TO = Deno.env.get("REPLY_TO") || "legacytextai@gmail.com";
+
+    console.log(`Sending email to ${to} with subject: ${subject}, from: ${FROM}`);
 
     // Prepare email options
     const emailOptions: any = {
-      from: "LegacyText AI <noreply@legacytext.ai>",
+      from: FROM,
       to: [to],
       subject: subject,
+      reply_to: REPLY_TO,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           ${body}

@@ -11,88 +11,20 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email } = await req.json();
+    const { email, name } = await req.json();
 
-    if (!email) {
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
       return new Response(
-        JSON.stringify({ error: 'email is required' }),
+        JSON.stringify({ error: 'Valid email address is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`Testing email functionality for: ${email}`);
+    console.log(`Testing email functionality for: ${email}${name ? ` (${name})` : ''}`);
 
-    // Create a simple test PDF
-    const testPdfContent = `%PDF-1.4
-1 0 obj
-<<
-/Type /Catalog
-/Pages 2 0 R
->>
-endobj
+    // No PDF needed for basic test
 
-2 0 obj
-<<
-/Type /Pages
-/Kids [3 0 R]
-/Count 1
->>
-endobj
-
-3 0 obj
-<<
-/Type /Page
-/Parent 2 0 R
-/MediaBox [0 0 612 792]
-/Contents 4 0 R
-/Resources <<
-/Font <<
-/F1 <<
-/Type /Font
-/Subtype /Type1
-/BaseFont /Helvetica
->>
->>
->>
->>
-endobj
-
-4 0 obj
-<<
-/Length 120
->>
-stream
-BT
-/F1 12 Tf
-72 720 Td
-(This is a test PDF attachment for LegacyText AI) Tj
-0 -20 Td
-(If you receive this, the email system is working!) Tj
-0 -20 Td
-(Date: ${new Date().toLocaleDateString()}) Tj
-ET
-endstream
-endobj
-
-xref
-0 5
-0000000000 65535 f 
-0000000009 00000 n 
-0000000058 00000 n 
-0000000115 00000 n 
-0000000189 00000 n 
-trailer
-<<
-/Size 5
-/Root 1 0 R
->>
-startxref
-400
-%%EOF`;
-
-    const pdfBuffer = new TextEncoder().encode(testPdfContent);
-
-    // Call the send-journal-email function
+    // Call the send-journal-email function with simple test (no PDF)
     const emailResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-journal-email`, {
       method: 'POST',
       headers: {
@@ -101,27 +33,25 @@ startxref
       },
       body: JSON.stringify({
         to: email,
-        subject: 'Test Journal Email - LegacyText AI',
+        subject: '[Test] LegacyText email check',
         body: `
-          <h1 style="color: #1D3557;">Email Test Successful! 🎉</h1>
-          <p>Hello,</p>
-          <p>This is a test email from your LegacyText AI email infrastructure.</p>
+          <h1 style="color: #1D3557;">Email Test Successful! 📧</h1>
+          <p>Hello${name ? ` ${name}` : ''},</p>
+          <p>This is a simple test email to confirm your LegacyText AI email infrastructure is working correctly with Resend's default domain.</p>
           <p><strong>What was tested:</strong></p>
           <ul>
-            <li>✅ Email delivery via Resend</li>
-            <li>✅ PDF attachment functionality</li>
+            <li>✅ Email delivery via Resend (default domain)</li>
             <li>✅ HTML email formatting</li>
             <li>✅ Edge function integration</li>
+            <li>✅ Environment variable configuration</li>
           </ul>
-          <p>You should see a test PDF attached to this email. If you received this email with the attachment, your email infrastructure is working correctly!</p>
+          <p>If you received this email, your basic email infrastructure is working and ready for PDF attachments!</p>
           <div style="background-color: #F8F9FA; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0; color: #1D3557;"><strong>Next steps:</strong></p>
-            <p style="margin: 5px 0 0 0;">Your weekly journal email system is ready to send automated PDFs to users.</p>
+            <p style="margin: 0; color: #1D3557;"><strong>Ready for production:</strong></p>
+            <p style="margin: 5px 0 0 0;">You can now set up a custom domain in Resend and update the RESEND_FROM environment variable when ready.</p>
           </div>
           <p>Best regards,<br>LegacyText AI System</p>
-        `,
-        pdf_buffer: Array.from(pdfBuffer),
-        pdf_filename: 'test-journal.pdf'
+        `
       })
     });
 
@@ -138,7 +68,7 @@ startxref
       message: 'Test email sent successfully',
       email_id: emailResult.email_id,
       recipient: email,
-      pdf_size: pdfBuffer.length,
+      recipient_name: name || null,
       test_time: new Date().toISOString()
     }), {
       status: 200,
