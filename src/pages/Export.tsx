@@ -85,8 +85,6 @@ export default function Export() {
 
           {/* Premium Export */}
           <Card className="shadow-deep border-legacy-accent relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-gradient-accent text-white px-3 py-1 text-xs font-medium">Formatted Legacy Journal
-E-Book</div>
             <CardHeader className="text-center pb-4">
               <Badge variant="default" className="w-fit mx-auto mb-2 bg-legacy-accent">
                 Premium
