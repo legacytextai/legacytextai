@@ -77,6 +77,48 @@ export type Database = {
           },
         ]
       }
+      exports: {
+        Row: {
+          content_signature: string | null
+          created_at: string
+          id: string
+          kind: string
+          page_count: number | null
+          status: string
+          storage_key_manuscript: string | null
+          storage_key_pdf: string | null
+          updated_at: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          content_signature?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          page_count?: number | null
+          status: string
+          storage_key_manuscript?: string | null
+          storage_key_pdf?: string | null
+          updated_at?: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          content_signature?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          page_count?: number | null
+          status?: string
+          storage_key_manuscript?: string | null
+          storage_key_pdf?: string | null
+          updated_at?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           category: string | null
