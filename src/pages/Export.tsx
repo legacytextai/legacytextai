@@ -3,7 +3,7 @@ import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Download, BookOpen, Star, Package } from "lucide-react";
+import { Download, BookOpen, Star, Package, Camera } from "lucide-react";
 import { ExportDialog } from "@/components/ExportDialog";
 export default function Export() {
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
@@ -168,7 +168,7 @@ export default function Export() {
               </div>
               <div className="text-center space-y-2">
                 <div className="w-12 h-12 bg-legacy-primary/10 rounded-full flex items-center justify-center mx-auto">
-                  <span className="text-legacy-primary font-bold">6change t</span>
+                  <Camera className="w-6 h-6 text-legacy-primary" />
                 </div>
                 <h4 className="font-medium text-legacy-primary">Photos</h4>
                 <p className="text-sm text-legacy-ink/70">Memories captured in your messages</p>
