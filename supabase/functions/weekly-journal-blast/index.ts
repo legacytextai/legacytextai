@@ -13,6 +13,12 @@ interface User {
   status: string;
 }
 
+interface BlastRequest {
+  dryRun?: boolean;
+  testTo?: string;
+  limit?: number;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -24,7 +30,35 @@ const handler = async (req: Request): Promise<Response> => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    console.log('Starting weekly journal blast...');
+    // Parse request body for parameters
+    let requestBody: BlastRequest = {};
+    try {
+      if (req.body) {
+        requestBody = await req.json();
+      }
+    } catch {
+      // Ignore JSON parse errors for empty body
+    }
+
+    // Default values
+    const defaultDryRun = Deno.env.get('WEEKLY_BLAST_DEFAULT_DRY_RUN') === 'true';
+    const dryRun = requestBody.dryRun ?? defaultDryRun ?? true;
+    const testTo = requestBody.testTo;
+    const limit = requestBody.limit ?? (dryRun ? 10 : undefined);
+
+    console.log(`Starting weekly journal blast... dryRun: ${dryRun}, testTo: ${testTo}, limit: ${limit}`);
+
+    // Check RESEND_API_KEY if not in dry run mode
+    if (!dryRun && !Deno.env.get('RESEND_API_KEY')) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'RESEND_API_KEY is required when dryRun is false',
+          dryRun: false,
+          status: 'failed'
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Calculate week start date (last Sunday)
     const now = new Date();
@@ -35,12 +69,19 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Processing week starting: ${weekStartDate}`);
 
-    // Get all active users who haven't received this week's blast yet
-    const { data: users, error: usersError } = await supabase
+    // Get users based on test parameters
+    let usersQuery = supabase
       .from('users_app')
       .select('id, email, name, status')
       .eq('status', 'active')
       .not('email', 'is', null);
+
+    // Apply limit if specified
+    if (limit) {
+      usersQuery = usersQuery.limit(limit);
+    }
+
+    const { data: users, error: usersError } = await usersQuery;
 
     if (usersError) {
       console.error('Error fetching users:', usersError);
@@ -53,7 +94,13 @@ const handler = async (req: Request): Promise<Response> => {
     if (!users || users.length === 0) {
       console.log('No active users found');
       return new Response(
-        JSON.stringify({ message: 'No active users found', processed: 0 }),
+        JSON.stringify({ 
+          message: 'No active users found', 
+          dryRun: dryRun,
+          selectedUsers: 0,
+          attemptedSends: 0,
+          emailsSent: 0
+        }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -61,8 +108,11 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Found ${users.length} active users`);
 
     const results: any[] = [];
+    const errors: any[] = [];
     let successCount = 0;
     let errorCount = 0;
+    let attemptedSends = 0;
+    let pdfBytesTotal = 0;
 
     // Process each user
     for (const user of users as User[]) {
@@ -86,7 +136,9 @@ const handler = async (req: Request): Promise<Response> => {
           continue;
         }
 
-        console.log(`Processing user: ${user.email}`);
+        // Determine target email (testTo override or original)
+        const targetEmail = testTo || user.email;
+        console.log(`Processing user: ${user.email}${testTo ? ` -> ${targetEmail}` : ''}`);
 
         // Generate PDF for this user
         const pdfResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/generate-weekly-journal-pdf`, {
@@ -108,89 +160,97 @@ const handler = async (req: Request): Promise<Response> => {
         const pdfBuffer = await pdfResponse.arrayBuffer();
         const pdfBytes = new Uint8Array(pdfBuffer);
         const pdfSize = pdfBytes.length;
+        pdfBytesTotal += pdfSize;
 
         console.log(`Generated PDF for ${user.email}, size: ${pdfSize} bytes`);
 
-        // Send email with PDF attachment
-        const emailResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-weekly-journal-email`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: user.email,
-            name: user.name,
-            week_start_date: weekStartDate,
-            pdf_buffer: Array.from(pdfBytes),
-            pdf_size: pdfSize
-          })
-        });
-
-        if (!emailResponse.ok) {
-          throw new Error(`Email sending failed: ${emailResponse.statusText}`);
-        }
-
-        // Log successful blast
-        await supabase
-          .from('weekly_blasts')
-          .insert({
+        if (dryRun) {
+          // Dry run mode - just log what would happen
+          console.log(`[DRY RUN] Would send email to ${targetEmail}, PDF size: ${pdfSize} bytes`);
+          
+          results.push({
             user_id: user.id,
-            week_start_date: weekStartDate,
-            email_sent: true,
-            pdf_size: pdfSize,
-            sent_at: new Date().toISOString()
+            intendedTo: targetEmail,
+            pdfSize: pdfSize,
+            status: 'dry_run'
           });
 
-        results.push({
-          user_id: user.id,
-          email: user.email,
-          emailSent: true,
-          pdfSize: pdfSize,
-          status: 'success'
-        });
-
-        successCount++;
-        console.log(`✅ Successfully sent weekly journal to ${user.email}`);
-
-      } catch (error) {
-        console.error(`❌ Error processing user ${user.email}:`, error);
-
-        // Log failed blast
-        await supabase
-          .from('weekly_blasts')
-          .insert({
-            user_id: user.id,
-            week_start_date: weekStartDate,
-            email_sent: false,
-            error_message: error.message
-          });
-
-        // Try to send fallback email
-        try {
-          await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-weekly-journal-email`, {
+          successCount++;
+        } else {
+          // Real mode - send email
+          attemptedSends++;
+          
+          const emailResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-journal-email`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              email: user.email,
-              name: user.name,
-              week_start_date: weekStartDate,
-              pdf_buffer: [], // Empty PDF for fallback
-              pdf_size: 0,
-              is_fallback: true
+              to: targetEmail,
+              subject: `Your Weekly Journal - Week of ${weekStartDate}`,
+              body: `
+                <h2>Your Weekly Journal</h2>
+                <p>Hi ${user.name || 'there'},</p>
+                <p>Here's your weekly journal for the week of ${weekStartDate}.</p>
+                <p>Your thoughts and memories from this week are attached as a PDF.</p>
+                <p>Best regards,<br>The LegacyText Team</p>
+              `,
+              pdf_buffer: Array.from(pdfBytes),
+              pdf_filename: `weekly-journal-${weekStartDate}.pdf`
             })
           });
-          console.log(`Sent fallback email to ${user.email}`);
-        } catch (fallbackError) {
-          console.error(`Failed to send fallback email to ${user.email}:`, fallbackError);
+
+          if (!emailResponse.ok) {
+            throw new Error(`Email sending failed: ${emailResponse.statusText}`);
+          }
+
+          // Log successful blast
+          await supabase
+            .from('weekly_blasts')
+            .insert({
+              user_id: user.id,
+              week_start_date: weekStartDate,
+              email_sent: true,
+              pdf_size: pdfSize,
+              sent_at: new Date().toISOString()
+            });
+
+          results.push({
+            user_id: user.id,
+            to: targetEmail,
+            emailSent: true,
+            pdfSize: pdfSize,
+            status: 'success'
+          });
+
+          successCount++;
+          console.log(`✅ Successfully sent weekly journal to ${targetEmail}`);
+        }
+
+      } catch (error) {
+        console.error(`❌ Error processing user ${user.email}:`, error);
+        
+        errors.push({
+          user_id: user.id,
+          message: error.message
+        });
+
+        if (!dryRun) {
+          // Log failed blast in real mode
+          await supabase
+            .from('weekly_blasts')
+            .insert({
+              user_id: user.id,
+              week_start_date: weekStartDate,
+              email_sent: false,
+              error_message: error.message
+            });
         }
 
         results.push({
           user_id: user.id,
-          email: user.email,
+          email: testTo || user.email,
           emailSent: false,
           error: error.message,
           status: 'error'
@@ -201,10 +261,16 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const summary = {
+      dryRun: dryRun,
+      testTo: testTo,
       week_start_date: weekStartDate,
-      total_users: users.length,
+      selectedUsers: users.length,
+      attemptedSends: attemptedSends,
+      emailsSent: dryRun ? 0 : successCount,
+      pdfBytesTotal: pdfBytesTotal,
       success_count: successCount,
       error_count: errorCount,
+      errors: errors,
       results: results
     };
 
