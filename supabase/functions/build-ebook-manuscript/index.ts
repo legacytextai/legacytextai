@@ -122,7 +122,7 @@ const handler = async (req: Request): Promise<Response> => {
         user_id,
         kind: 'premium_pdf',
         status: 'formatting',
-        content_signature
+        content_signature: contentSignature
       })
       .select()
       .single();
