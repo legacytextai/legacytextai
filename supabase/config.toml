@@ -17,3 +17,12 @@ verify_jwt = false
 
 [functions.categorize-journal-entry]
 verify_jwt = false
+
+[functions.build-ebook-manuscript]
+verify_jwt = true
+
+[functions.render-ebook-pdf]
+verify_jwt = true
+
+[functions.send-premium-journal-email]
+verify_jwt = false

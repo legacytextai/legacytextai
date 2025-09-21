@@ -1,186 +1,497 @@
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Download, FileText, BookOpen, Crown } from 'lucide-react';
-import { useJournalEntries } from '@/hooks/useJournalEntries';
-import { useUserData } from '@/hooks/useUserData';
-import { generateBasicPDF, downloadPDF } from '@/lib/pdfGenerator';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from 'react'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Download, BookOpen, Printer, Check, FileText, ArrowRight, ArrowLeft, Eye, ExternalLink, Copy, Crown, Sparkles } from 'lucide-react'
+import { useJournalEntries } from '@/hooks/useJournalEntries'
+import { useUserData } from '@/hooks/useUserData'
+import { usePDFExport } from '@/hooks/usePDFExport'
+import { usePremiumExport } from '@/hooks/usePremiumExport'
+import { useDedication } from '@/hooks/useDedication'
+import { toast } from 'sonner'
+
 interface ExportDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  dedication?: string;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  dedication?: string
 }
+
+type WizardStep = 'selection' | 'theme' | 'dedication' | 'preview' | 'generate' | 'complete'
+
 export function ExportDialog({
   open,
   onOpenChange,
-  dedication
+  dedication: propDedication
 }: ExportDialogProps) {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const {
-    data: entries = []
-  } = useJournalEntries();
-  const {
-    userData
-  } = useUserData();
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [wizardStep, setWizardStep] = useState<WizardStep>('selection')
+  const [selectedTheme, setSelectedTheme] = useState('stillness')
+  
+  const { data: entries = [] } = useJournalEntries()
+  const { userData } = useUserData()
+  const { exportPDF } = usePDFExport()
+  const { exportStatus, startExport, generatePreview, resetExport } = usePremiumExport()
+  const { dedication, setDedication, saveDedication, loadDedication, isSaving } = useDedication()
+
+  // Load dedication when dialog opens
+  useEffect(() => {
+    if (open) {
+      loadDedication()
+    }
+  }, [open, loadDedication])
+
+  // Reset wizard when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setWizardStep('selection')
+      resetExport()
+    }
+  }, [open, resetExport])
+
   const handleFreeExport = async () => {
     if (entries.length === 0) {
-      toast.error('No journal entries found to export');
-      return;
+      toast.error('No journal entries found to export')
+      return
     }
-    setIsGenerating(true);
+
+    setIsGenerating(true)
     try {
-      const userTitle = userData?.name ? `${userData.name}'s Legacy Journal` : "My Legacy Journal";
-      const pdfBlob = await generateBasicPDF({
+      const userTitle = userData?.name ? `${userData.name}'s Legacy Journal` : "My Legacy Journal"
+      await exportPDF({
         entries,
         dedication: userData?.dedication,
         userTitle,
-        includeDedication: true // Free export now includes dedication
-      });
-      const filename = `legacy-journal-${new Date().toISOString().split('T')[0]}.pdf`;
-      downloadPDF(pdfBlob, filename);
-      toast.success('PDF downloaded successfully!');
-      onOpenChange(false);
+        includeDedication: true
+      })
+      onOpenChange(false)
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast.error('Failed to generate PDF. Please try again.');
+      console.error('Error generating PDF:', error)
+      toast.error('Failed to generate PDF. Please try again.')
     } finally {
-      setIsGenerating(false);
+      setIsGenerating(false)
     }
-  };
-  const handlePremiumExport = async () => {
-    if (entries.length === 0) {
-      toast.error('No journal entries found to export');
-      return;
-    }
-    setIsGenerating(true);
-    try {
-      const userTitle = userData?.name ? `${userData.name}'s Legacy Journal` : "My Legacy Journal";
-      const pdfBlob = await generateBasicPDF({
-        entries,
-        dedication: userData?.dedication,
-        userTitle,
-        includeDedication: true // Premium export includes dedication
-      });
-      const filename = `legacy-journal-premium-${new Date().toISOString().split('T')[0]}.pdf`;
-      downloadPDF(pdfBlob, filename);
-      toast.success('Premium PDF downloaded successfully!');
-      onOpenChange(false);
-    } catch (error) {
-      console.error('Error generating premium PDF:', error);
-      toast.error('Failed to generate PDF. Please try again.');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+  }
+
+  const handlePremiumExportStart = () => {
+    setWizardStep('theme')
+  }
+
   const handlePhysicalOrder = () => {
-    toast.info('Physical journal ordering coming soon!');
-  };
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+    toast.info('Physical journal ordering coming soon!')
+  }
+
+  const handleNextStep = () => {
+    switch (wizardStep) {
+      case 'theme':
+        setWizardStep('dedication')
+        break
+      case 'dedication':
+        setWizardStep('preview')
+        break
+      case 'preview':
+        setWizardStep('generate')
+        break
+      default:
+        break
+    }
+  }
+
+  const handlePrevStep = () => {
+    switch (wizardStep) {
+      case 'dedication':
+        setWizardStep('theme')
+        break
+      case 'preview':
+        setWizardStep('dedication')
+        break
+      case 'generate':
+        setWizardStep('preview')
+        break
+      default:
+        setWizardStep('selection')
+        break
+    }
+  }
+
+  const handleSaveDedication = async () => {
+    await saveDedication(dedication)
+  }
+
+  const handleGeneratePDF = async () => {
+    const success = await startExport()
+    if (success) {
+      setWizardStep('complete')
+    }
+  }
+
+  const handleCopyLink = async () => {
+    if (exportStatus.url) {
+      await navigator.clipboard.writeText(exportStatus.url)
+      toast.success('Download link copied to clipboard!')
+    }
+  }
+
+  const renderSelectionStep = () => (
+    <div className="grid md:grid-cols-3 gap-6 mt-6">
+      {/* Free Basic PDF */}
+      <Card className="relative">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Basic PDF
+          </CardTitle>
+          <CardDescription>
+            Simple, clean format perfect for sharing
+          </CardDescription>
+          <div className="text-2xl font-bold text-primary">Free</div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <ul className="text-sm space-y-1">
+            <li>• All your journal entries</li>
+            <li>• Custom dedication page</li>
+            <li>• Chronological order</li>
+            <li>• Simple formatting</li>
+          </ul>
+          <Button 
+            onClick={handleFreeExport} 
+            className="w-full" 
+            disabled={isGenerating || entries.length === 0}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            {isGenerating ? 'Generating...' : 'Download PDF'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Premium Formatted PDF */}
+      <Card className="relative border-primary">
+        <Badge className="absolute -top-2 left-4 bg-primary text-primary-foreground">
+          Recommended
+        </Badge>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5" />
+            Premium E-Book PDF
+          </CardTitle>
+          <CardDescription>
+            Professional "Stillness" theme with enhanced design
+          </CardDescription>
+          <div>
+            <div className="text-2xl font-bold text-primary line-through">$9.99</div>
+            <p className="text-lg font-semibold text-accent">Free for Early Access Users</p>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <ul className="text-sm space-y-1">
+            <li>• 6×9" premium formatting</li>
+            <li>• Serif typography (EB Garamond)</li>
+            <li>• Category organization</li>
+            <li>• One entry per page</li>
+            <li>• Running headers & footers</li>
+            <li>• Professional layout</li>
+          </ul>
+          <Button 
+            onClick={handlePremiumExportStart}
+            variant="outline" 
+            className="w-full" 
+            disabled={entries.length === 0}
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            Create Premium E-Book
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Physical Journal */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5" />
+            Leatherbound Journal
+          </CardTitle>
+          <CardDescription>
+            Heirloom-quality physical book
+          </CardDescription>
+          <div className="text-2xl font-bold text-primary">$199</div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <ul className="text-sm space-y-1">
+            <li>• Premium leather binding</li>
+            <li>• Gold foil embossing</li>
+            <li>• Archival quality paper</li>
+            <li>• Custom dedication</li>
+            <li>• Gift-ready presentation</li>
+          </ul>
+          <Button onClick={handlePhysicalOrder} variant="outline" className="w-full" disabled>
+            <BookOpen className="h-4 w-4 mr-2" />
+            Coming Soon
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  )
+
+  const renderThemeStep = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h3 className="text-lg font-semibold mb-2">Choose Your Theme</h3>
+        <p className="text-muted-foreground">Select the design theme for your premium journal</p>
+      </div>
+      
+      <Card className="border-primary bg-primary/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Stillness Theme
+          </CardTitle>
+          <CardDescription>
+            Minimalist design focused on readability and elegance
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="text-sm space-y-1">
+            <li>• Clean serif typography (EB Garamond)</li>
+            <li>• Generous whitespace</li>
+            <li>• 6×9" professional format</li>
+            <li>• Subtle ornamental elements</li>
+            <li>• One entry per page</li>
+          </ul>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={handlePrevStep}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+        <Button onClick={handleNextStep}>
+          Continue
+          <ArrowRight className="h-4 w-4 ml-2" />
+        </Button>
+      </div>
+    </div>
+  )
+
+  const renderDedicationStep = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h3 className="text-lg font-semibold mb-2">Personal Dedication</h3>
+        <p className="text-muted-foreground">Add a heartfelt message to open your journal</p>
+      </div>
+
+      <div className="space-y-4">
+        <Label htmlFor="dedication">Dedication Message</Label>
+        <Textarea
+          id="dedication"
+          placeholder="To my beloved children, may these words guide you through life's journey..."
+          value={dedication}
+          onChange={(e) => setDedication(e.target.value)}
+          rows={6}
+          className="resize-none"
+        />
+        <Button 
+          onClick={handleSaveDedication} 
+          variant="outline" 
+          size="sm"
+          disabled={isSaving}
+        >
+          {isSaving ? 'Saving...' : 'Save Dedication'}
+        </Button>
+      </div>
+
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={handlePrevStep}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+        <Button onClick={handleNextStep}>
+          Preview
+          <ArrowRight className="h-4 w-4 ml-2" />
+        </Button>
+      </div>
+    </div>
+  )
+
+  const renderPreviewStep = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h3 className="text-lg font-semibold mb-2">Preview Your Journal</h3>
+        <p className="text-muted-foreground">Here's how your journal will look</p>
+      </div>
+
+      <Card>
+        <CardContent className="pt-6">
+          <div className="bg-gray-50 p-6 rounded-lg text-center">
+            <BookOpen className="h-12 w-12 mx-auto mb-4 text-primary" />
+            <h4 className="font-semibold mb-2">
+              {userData?.name ? `${userData.name}'s Legacy Journal` : 'My Legacy Journal'}
+            </h4>
+            <p className="text-sm text-muted-foreground mb-4">
+              {entries.length} entries • Stillness theme
+            </p>
+            <Button variant="outline" onClick={generatePreview}>
+              <Eye className="h-4 w-4 mr-2" />
+              Generate Preview Pages
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={handlePrevStep}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+        <Button onClick={handleNextStep}>
+          Generate PDF
+          <ArrowRight className="h-4 w-4 ml-2" />
+        </Button>
+      </div>
+    </div>
+  )
+
+  const renderGenerateStep = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h3 className="text-lg font-semibold mb-2">Generating Your Premium Journal</h3>
+        <p className="text-muted-foreground">Please wait while we create your beautiful PDF</p>
+      </div>
+
+      <div className="space-y-4">
+        <Progress value={exportStatus.progress} className="w-full" />
+        <div className="text-center text-sm text-muted-foreground">
+          {exportStatus.status === 'formatting' && 'Preparing manuscript...'}
+          {exportStatus.status === 'rendering' && 'Rendering PDF with Stillness theme...'}
+          {exportStatus.status === 'ready' && 'Complete!'}
+          {exportStatus.status === 'error' && 'Error occurred'}
+        </div>
+      </div>
+
+      {exportStatus.status === 'idle' && (
+        <div className="text-center">
+          <Button onClick={handleGeneratePDF} size="lg">
+            <Sparkles className="h-5 w-5 mr-2" />
+            Start Generation
+          </Button>
+        </div>
+      )}
+
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={handlePrevStep} disabled={exportStatus.status !== 'idle'}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+      </div>
+    </div>
+  )
+
+  const renderCompleteStep = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <Check className="h-16 w-16 mx-auto mb-4 text-green-500" />
+        <h3 className="text-lg font-semibold mb-2">Your Premium Journal is Ready!</h3>
+        <p className="text-muted-foreground">
+          {exportStatus.page_count} pages • Stillness theme • Professional formatting
+        </p>
+      </div>
+
+      <Card>
+        <CardContent className="pt-6 space-y-4">
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => exportStatus.url && window.open(exportStatus.url, '_blank')}
+              className="flex-1"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download PDF
+            </Button>
+            <Button variant="outline" onClick={handleCopyLink}>
+              <Copy className="h-4 w-4 mr-2" />
+              Copy Link
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground text-center">
+            Download link expires in 24 hours
+          </p>
+        </CardContent>
+      </Card>
+
+      <div className="text-center">
+        <Button variant="outline" onClick={() => onOpenChange(false)}>
+          Close
+        </Button>
+      </div>
+    </div>
+  )
+
+  const renderWizardContent = () => {
+    switch (wizardStep) {
+      case 'selection':
+        return renderSelectionStep()
+      case 'theme':
+        return renderThemeStep()
+      case 'dedication':
+        return renderDedicationStep()
+      case 'preview':
+        return renderPreviewStep()
+      case 'generate':
+        return renderGenerateStep()
+      case 'complete':
+        return renderCompleteStep()
+      default:
+        return renderSelectionStep()
+    }
+  }
+
+  const getDialogTitle = () => {
+    switch (wizardStep) {
+      case 'selection':
+        return 'Export Your Legacy Journal'
+      case 'theme':
+        return 'Premium Export - Theme Selection'
+      case 'dedication':
+        return 'Premium Export - Dedication'
+      case 'preview':
+        return 'Premium Export - Preview'
+      case 'generate':
+        return 'Premium Export - Generation'
+      case 'complete':
+        return 'Premium Export - Complete'
+      default:
+        return 'Export Your Legacy Journal'
+    }
+  }
+
+  const getDialogDescription = () => {
+    if (wizardStep === 'selection') {
+      return 'Choose how you\'d like to preserve your memories and wisdom for future generations.'
+    }
+    return 'Create a beautifully formatted premium journal with professional design.'
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Export Your Legacy Journal</DialogTitle>
+          <DialogTitle>{getDialogTitle()}</DialogTitle>
           <DialogDescription>
-            Choose how you'd like to preserve your memories and wisdom for future generations.
+            {getDialogDescription()}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid md:grid-cols-3 gap-6 mt-6">
-          {/* Free Basic PDF */}
-          <Card className="relative">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Basic PDF
-              </CardTitle>
-              <CardDescription>
-                Simple, clean format perfect for sharing
-              </CardDescription>
-              <div className="text-2xl font-bold text-primary">Free</div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ul className="text-sm space-y-1">
-                <li>• All your journal entries</li>
-                <li>• Custom dedication page</li>
-                <li>• Chronological order</li>
-                <li>• Simple formatting</li>
-              </ul>
-              <Button onClick={handleFreeExport} className="w-full" disabled={isGenerating || entries.length === 0}>
-                <Download className="h-4 w-4 mr-2" />
-                {isGenerating ? 'Generating...' : 'Download PDF'}
-              </Button>
-            </CardContent>
-          </Card>
+        {renderWizardContent()}
 
-          {/* Premium Formatted PDF */}
-          <Card className="relative border-primary">
-            <Badge className="absolute -top-2 left-4 bg-primary text-primary-foreground">
-              Recommended
-            </Badge>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
-                Formatted Legacy Journal
-              </CardTitle>
-              <CardDescription>
-                Professional design with enhanced features
-              </CardDescription>
-              <div>
-                <div className="text-2xl font-bold text-primary line-through">$9.99</div>
-                <p className="text-lg font-semibold text-accent">Free for Early Access Users</p>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ul className="text-sm space-y-1">
-                <li>• Everything in Basic PDF</li>
-                <li>• Professional formatting</li>
-                <li>• Category organization</li>
-                <li>• Enhanced typography</li>
-                <li>• Custom dedication page</li>
-                <li>• Custom cover design</li>
-              </ul>
-              <Button onClick={handlePremiumExport} variant="outline" className="w-full" disabled={isGenerating || entries.length === 0}>
-                <Crown className="h-4 w-4 mr-2" />
-                {isGenerating ? 'Generating...' : 'Get Premium PDF'}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Physical Journal */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
-                Leatherbound Journal
-              </CardTitle>
-              <CardDescription>
-                Heirloom-quality physical book
-              </CardDescription>
-              <div className="text-2xl font-bold text-primary">
-            </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ul className="text-sm space-y-1">
-                <li>• Premium leather binding</li>
-                <li>• Gold foil embossing</li>
-                <li>• Archival quality paper</li>
-                <li>• Custom dedication</li>
-                <li>• Gift-ready presentation</li>
-              </ul>
-              <Button onClick={handlePhysicalOrder} variant="outline" className="w-full" disabled>
-                <BookOpen className="h-4 w-4 mr-2" />
-                Coming Soon
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {entries.length === 0 && <div className="text-center py-8 text-muted-foreground">
+        {wizardStep === 'selection' && entries.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
             <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No journal entries found. Start writing to create your legacy journal!</p>
-          </div>}
+          </div>
+        )}
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+  )
 }
