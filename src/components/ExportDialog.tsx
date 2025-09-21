@@ -180,12 +180,9 @@ export function ExportDialog({ open, onOpenChange, dedication }: ExportDialogPro
                 <li>• Gift-ready presentation</li>
               </ul>
               <Button 
-                onClick={handlePhysicalOrder} 
-                variant="outline" 
-                className="w-full"
-                disabled
+                disabled 
+                className="w-full bg-muted text-muted-foreground cursor-not-allowed"
               >
-                <BookOpen className="h-4 w-4 mr-2" />
                 Coming Soon
               </Button>
             </CardContent>

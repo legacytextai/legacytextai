@@ -151,12 +151,10 @@ export default function Export() {
                 <li>• Shipped to your door</li>
               </ul>
               <Button 
-                variant="warm" 
-                className="w-full"
-                onClick={() => setIsExportDialogOpen(true)}
+                disabled 
+                className="w-full bg-muted text-muted-foreground cursor-not-allowed"
               >
-                <Package className="w-4 h-4 mr-2" />
-                Order Physical Journal
+                Coming Soon
               </Button>
             </CardContent>
           </Card>
