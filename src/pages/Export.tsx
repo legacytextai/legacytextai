@@ -109,7 +109,7 @@ export default function Export() {
               </ul>
               <Button variant="accent" className="w-full" onClick={() => setIsExportDialogOpen(true)}>
                 <Star className="w-4 h-4 mr-2" />
-                Export Premium Journal
+                Export E-Book
               </Button>
             </CardContent>
           </Card>
