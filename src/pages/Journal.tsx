@@ -65,7 +65,7 @@ export default function Journal() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-legacy-primary">Journal Preview</h2>
             
-            <Card className="shadow-deep">
+            <Card className="shadow-deep max-w-2xl mx-auto">
               <CardContent className="p-0">
                 <ScrollArea className="h-96 w-full">
                   <div className="space-y-6 p-6">
