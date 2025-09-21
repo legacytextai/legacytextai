@@ -195,7 +195,7 @@ export default function Journal() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-legacy-primary flex items-center gap-2">
                     <BookOpen className="w-5 h-5" />
-                    Physical Journal - $199
+                    Leatherbound Journal
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
