@@ -384,8 +384,7 @@ export const useJournalEntries = () => {
 - [ ] 7.1 Set up PDF generation library (jsPDF or React-PDF)
 - [ ] 7.2 Create basic journal template
 - [ ] 7.3 Implement free PDF generation
-- [ ] 7.4 Add dedication page functionality
-- [ ] 7.5 Store generated PDFs in Supabase Storage (CONFIRMED: Primary storage)
+- [ ] 7.4 Add dedication page functionality to free basic PDF export
 
 #### PDF Generation:
 ```typescript
