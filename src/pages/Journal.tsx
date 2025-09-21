@@ -187,8 +187,8 @@ export default function Journal() {
                     <li>• Archival quality paper</li>
                     <li>• Gold embossed personalization</li>
                   </ul>
-                  <Button variant="warm" className="w-full" onClick={handleExportClick}>
-                    Order Physical Journal
+                  <Button variant="warm" className="w-full" disabled>
+                    Coming Soon
                   </Button>
                 </CardContent>
               </Card>
