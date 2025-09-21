@@ -137,9 +137,9 @@ export default function Export() {
                 <li>• Custom gift box</li>
                 <li>• Shipped to your door</li>
               </ul>
-              <Button variant="warm" className="w-full" onClick={() => setIsExportDialogOpen(true)}>
+              <Button variant="warm" className="w-full" disabled>
                 <Package className="w-4 h-4 mr-2" />
-                Order Physical Journal
+                Coming soon
               </Button>
             </CardContent>
           </Card>
