@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
-import { PDFDocument, PDFPage, rgb, grayscale } from "https://esm.sh/pdf-lib@1.17.1";
 
-const THEME_KEY = "stillness";
-
-console.log("[render-ebook-pdf] boot ok");
+console.log("[render-ebook-pdf] DISABLED - redirecting to v2");
 
 // PDF layout and helper functions
 const PAGE = { width: 432, height: 648 }; // 6x9 in points
@@ -291,14 +287,26 @@ function wrapText(text: string, maxWidth: number, font: any, fontSize: number): 
   return lines;
 }
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    const { export_id, preview_only = false }: RenderRequest = await req.json();
+  console.log('410 Gone - Legacy renderer disabled, use render-ebook-pdf-v2');
+  
+  return new Response(JSON.stringify({
+    error: 'Legacy renderer disabled. Use render-ebook-pdf-v2 for all PDF exports.',
+    redirect_to: 'render-ebook-pdf-v2'
+  }), {
+    status: 410,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  });
     
     console.log(`[render-ebook-pdf] export_id:${export_id} boot ok`, { export_id, preview_only });
     console.log(`🎨 Theme: stillness`);
@@ -593,16 +601,6 @@ const handler = async (req: Request): Promise<Response> => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
-  } catch (error: any) {
-    console.error(`[render-ebook-pdf] Failed:`, error);
-    
-    return new Response(JSON.stringify({
-      error: error.message || 'Unknown error occurred'
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
-  }
 };
 
 serve(handler);

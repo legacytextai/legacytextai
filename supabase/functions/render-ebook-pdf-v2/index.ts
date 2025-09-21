@@ -79,79 +79,42 @@ interface Manuscript {
   }[];
 }
 
-// Helper function to download font assets with validation
-async function loadFontBytes(path: string): Promise<Uint8Array> {
+// Helper function to load bundled font assets with comprehensive validation
+async function loadFontBytes(fontName: string): Promise<Uint8Array> {
+  console.log(`📚 Attempting to load font: ${fontName}`);
+  
   try {
-    // Use the correct path structure for public assets
-    const fullUrl = `https://toxadhuqzdydliplhrws.supabase.co/storage/v1/object/public/exports${path}`;
+    // Load from bundled fonts directory using Deno.readFile
+    const fontPath = `./fonts/${fontName}`;
+    const bytes = await Deno.readFile(fontPath);
     
-    // First try storage, then fallback to public folder
-    let response = await fetch(fullUrl);
-    if (!response.ok) {
-      // Fallback to direct public path
-      const publicUrl = `https://toxadhuqzdydliplhrws.supabase.co/rest/v1/storage/objects/sign/exports${path}`;
-      response = await fetch(publicUrl, {
-        headers: {
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-          'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-        }
-      });
-      
-      if (!response.ok) {
-        // Final fallback: try reading from local file system
-        try {
-          const fileData = await Deno.readFile(`./public${path}`);
-          console.log(`✅ Font loaded from local: ${path} (${fileData.length} bytes)`);
-          return fileData;
-        } catch {
-          throw new Error(`HTTP ${response.status} for ${path} and no local fallback`);
-        }
-      }
-    }
-    
-    const arrayBuffer = await response.arrayBuffer();
-    const bytes = new Uint8Array(arrayBuffer);
-    
-    // Validate this is actually a font file (TTF starts with specific bytes)
+    // Validate font file size and signature
     if (bytes.length < 10000) {
-      throw new Error(`Font file too small: ${bytes.length} bytes`);
+      throw new Error(`Font file too small: ${bytes.length} bytes (expected >10,000)`);
     }
     
-    // Check for TTF signature (0x00010000) or OTF signature (OTTO)
+    // Check TTF signature (first 4 bytes should be 0x00010000 for TTF or OTTO for OTF)
     const signature = Array.from(bytes.slice(0, 4)).map(b => b.toString(16).padStart(2, '0')).join('');
-    if (!signature.startsWith('00010000') && !signature.startsWith('4f54544f')) {
-      console.warn(`Unexpected font signature for ${path}: ${signature}`);
+    console.log(`✅ Font loaded: ${fontName} (${bytes.length} bytes, signature: ${signature})`);
+    
+    if (signature !== '00010000' && signature !== '4f54544f') { // TTF or OTF
+      console.log(`⚠️ Warning: Unexpected font signature ${signature} for ${fontName}`);
     }
     
-    console.log(`✅ Font loaded: ${path} (${bytes.length} bytes, signature: ${signature})`);
     return bytes;
   } catch (error) {
-    console.error(`❌ Failed to load font ${path}:`, error);
-    throw new Error(`Failed to fetch font: ${path}`);
+    console.log(`❌ CRITICAL: Font loading failed: ${error}`);
+    throw new Error(`Failed to fetch font: ${fontName}`);
   }
 }
 
 async function fetchOrnamentBytes(): Promise<Uint8Array> {
   try {
-    // Try reading from local file system first
-    try {
-      const fileData = await Deno.readFile('./public/assets/ornaments/tilde.svg');
-      console.log(`✅ Ornament loaded from local: ${fileData.length} bytes`);
-      return fileData;
-    } catch {
-      // Fallback to remote
-      const fullUrl = 'https://toxadhuqzdydliplhrws.supabase.co/storage/v1/object/public/exports/assets/ornaments/tilde.svg';
-      const response = await fetch(fullUrl);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status} for ornament`);
-      }
-      
-      const arrayBuffer = await response.arrayBuffer();
-      const bytes = new Uint8Array(arrayBuffer);
-      console.log(`✅ Ornament loaded from remote: ${bytes.length} bytes`);
-      return bytes;
-    }
+    // Load from bundled ornaments directory
+    const ornamentPath = './ornaments/tilde.svg';
+    const bytes = await Deno.readFile(ornamentPath);
+    console.log(`✅ Ornament loaded: ${bytes.length} bytes`);
+    return bytes;
   } catch (error) {
     console.error('❌ Failed to load ornament:', error);
     // Return empty array to continue without ornament
@@ -377,18 +340,22 @@ const handler = async (req: Request): Promise<Response> => {
     try {
       console.log('📚 Loading fonts...');
       
-      // Load all fonts with proper preflight validation
-      const interBytes = await loadFontBytes("/assets/fonts/Inter-Regular.ttf");
+      // Load fonts with comprehensive validation and logging
+      const [interBytes, ebGaramondBytes, notoBytes] = await Promise.all([
+        loadFontBytes('Inter-Regular.ttf'),
+        loadFontBytes('EBGaramond-Regular.ttf'), 
+        loadFontBytes('NotoSerif-Regular.ttf')
+      ]);
+      
+      // Log font loading success with export_id for debugging
+      console.log(`{export_id: "${export_id}", fonts_loaded: {inter: ${interBytes.length}, eb: ${ebGaramondBytes.length}, noto: ${notoBytes.length}}}`);
+      
+      // Embed fonts into PDF with strict validation
       bodyFont = await pdfDoc.embedFont(interBytes);
-      console.log(`✅ Body font: Inter (${interBytes.length} bytes)`);
-      
-      const ebGaramondBytes = await loadFontBytes("/assets/fonts/EBGaramond-Regular.ttf");
       headerFont = await pdfDoc.embedFont(ebGaramondBytes);
-      console.log(`✅ Header font: EB Garamond (${ebGaramondBytes.length} bytes)`);
-      
-      const notoBytes = await loadFontBytes("/assets/fonts/NotoSerif-Regular.ttf");
       notoFont = await pdfDoc.embedFont(notoBytes);
-      console.log(`✅ Fallback font: Noto Serif (${notoBytes.length} bytes)`);
+      
+      console.log(`✅ All fonts embedded successfully for ${export_id}`);
       
       // Preflight check: Ensure no StandardFonts are used
       console.log(`🎨 Theme: ${THEME_KEY}`);
@@ -515,13 +482,26 @@ const handler = async (req: Request): Promise<Response> => {
           const isRight = pageNumber % 2 === 0;
           const currentFrame = textFrame(isRight);
           
+          // Draw page elements with logging
+          const pageElements = {
+            page: pageNumber,
+            drewHeader: false,
+            drewFolio: false, 
+            drewOrnament: false,
+            drewDateFooter: false
+          };
+          
           // Draw running headers and folios
           drawRunningHeader(entryPage, manuscript.meta?.author || 'Legacy Journal', section.title || section.category, isRight, bodyFont);
+          pageElements.drewHeader = true;
+          
           drawFolio(entryPage, pageNumber, isRight, bodyFont);
+          pageElements.drewFolio = true;
           
           // Draw ornament on first page of entry only
           if (isFirstPage) {
             drawOrnament(entryPage, ornamentBytes);
+            pageElements.drewOrnament = true;
           } else {
             // Draw "— continued —" on continuation pages
             const contText = "— continued —";
@@ -537,6 +517,21 @@ const handler = async (req: Request): Promise<Response> => {
           // Draw date footer on ALL entry pages (including continuation)
           const dateText = formatLongDateInTZ(entry.date_iso, timeZone, locale);
           drawDateFooter(entryPage, dateText, bodyFont);
+          pageElements.drewDateFooter = true;
+          
+          // Temporarily add "STILLNESS v2" watermark for verification
+          if (pageNumber === 1) {
+            entryPage.drawText("STILLNESS v2", {
+              x: 10,
+              y: 10,
+              size: 8,
+              font: bodyFont,
+              color: { r: 0.8, g: 0.8, b: 0.8 }
+            });
+          }
+          
+          // Log page element application
+          console.log(`{export_id: "${export_id}", pageElements: ${JSON.stringify(pageElements)}}`);
           
           // Typeset paragraphs
           const result = typesetParagraphs(remainingLines, currentFrame, bodyFont, BODY.fontSize, BODY.leading);
