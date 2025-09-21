@@ -1,0 +1,48 @@
+name: Weekly Journal Blast
+
+on:
+  schedule:
+    # Every Sunday at 7 PM PST (Monday 2 AM UTC during PST, 3 AM UTC during PDT)
+    - cron: '0 2 * * 1'  # UTC time for PST
+  workflow_dispatch:  # Allow manual triggering for testing
+
+jobs:
+  send-weekly-journals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Send Weekly Journal Blast
+        run: |
+          echo "Triggering weekly journal blast..."
+          
+          response=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            "${{ secrets.SUPABASE_URL }}/functions/v1/weekly-journal-blast" \
+            -d '{}')
+          
+          echo "HTTP Status: $response"
+          
+          if [ "$response" -eq 200 ]; then
+            echo "✅ Weekly journal blast completed successfully"
+            echo "Response:"
+            cat /tmp/response.json | jq .
+          else
+            echo "❌ Weekly journal blast failed with status $response"
+            echo "Response:"
+            cat /tmp/response.json
+            exit 1
+          fi
+
+      - name: Upload Response Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-blast-response-${{ github.run_number }}
+          path: /tmp/response.json
+          retention-days: 30

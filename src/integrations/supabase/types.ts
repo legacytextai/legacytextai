@@ -374,6 +374,39 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_blasts: {
+        Row: {
+          created_at: string
+          email_sent: boolean
+          error_message: string | null
+          id: string
+          pdf_size: number | null
+          sent_at: string | null
+          user_id: string
+          week_start_date: string
+        }
+        Insert: {
+          created_at?: string
+          email_sent?: boolean
+          error_message?: string | null
+          id?: string
+          pdf_size?: number | null
+          sent_at?: string | null
+          user_id: string
+          week_start_date: string
+        }
+        Update: {
+          created_at?: string
+          email_sent?: boolean
+          error_message?: string | null
+          id?: string
+          pdf_size?: number | null
+          sent_at?: string | null
+          user_id?: string
+          week_start_date?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

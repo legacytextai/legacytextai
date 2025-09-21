@@ -29,3 +29,12 @@ verify_jwt = true
 
 [functions.send-premium-journal-email]
 verify_jwt = false
+
+[functions.generate-weekly-journal-pdf]
+verify_jwt = false
+
+[functions.send-weekly-journal-email]
+verify_jwt = false
+
+[functions.weekly-journal-blast]
+verify_jwt = false
