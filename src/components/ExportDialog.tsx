@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Download, BookOpen, Printer, Check, FileText, ArrowRight, ArrowLeft, Eye, ExternalLink, Copy, Crown, Sparkles } from 'lucide-react';
+import { Download, BookOpen, Printer, Check, FileText, ArrowRight, ArrowLeft, Eye, ExternalLink, Copy, Crown, Sparkles, X } from 'lucide-react';
 import { useJournalEntries } from '@/hooks/useJournalEntries';
 import { useUserData } from '@/hooks/useUserData';
 import { usePDFExport } from '@/hooks/usePDFExport';
@@ -28,6 +28,10 @@ export function ExportDialog({
   const [isGenerating, setIsGenerating] = useState(false);
   const [wizardStep, setWizardStep] = useState<WizardStep>('selection');
   const [selectedTheme, setSelectedTheme] = useState('stillness');
+  const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const {
     data: entries = []
   } = useJournalEntries();
@@ -63,8 +67,24 @@ export function ExportDialog({
     if (!open) {
       setWizardStep('selection');
       resetExport();
+      // Clean up preview
+      setPreviewBlob(null);
+      setShowPreviewModal(false);
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
     }
-  }, [open, resetExport]);
+  }, [open, resetExport, previewUrl]);
+
+  // Clean up preview URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
   const handleFreeExport = async () => {
     if (entries.length === 0) {
       toast.error('No journal entries found to export');
@@ -137,6 +157,53 @@ export function ExportDialog({
     if (exportStatus.url) {
       await navigator.clipboard.writeText(exportStatus.url);
       toast.success('Download link copied to clipboard!');
+    }
+  };
+
+  const handleGeneratePreview = async () => {
+    setIsPreviewLoading(true);
+    try {
+      const blob = await generatePreview();
+      if (blob) {
+        setPreviewBlob(blob);
+        const url = URL.createObjectURL(blob);
+        setPreviewUrl(url);
+        setShowPreviewModal(true);
+      }
+    } catch (error) {
+      console.error('Preview generation failed:', error);
+      toast.error('Failed to generate preview. Please try again.');
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  };
+
+  const downloadFromBlob = async (signedUrl: string, filename: string) => {
+    try {
+      const response = await fetch(signedUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch PDF: ${response.status}`);
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success('PDF downloaded successfully!');
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast.error('Failed to download PDF. Please try again.');
+    }
+  };
+
+  const handleDownloadPDF = () => {
+    if (exportStatus.url) {
+      const filename = `legacy-journal-premium-${new Date().toISOString().split('T')[0]}.pdf`;
+      downloadFromBlob(exportStatus.url, filename);
     }
   };
   const renderSelectionStep = () => <div className="grid md:grid-cols-3 gap-6 mt-6">
@@ -304,13 +371,40 @@ export function ExportDialog({
             <p className="text-sm text-muted-foreground mb-4">
               {entries.length} entries • {THEME_KEY} theme
             </p>
-            <Button variant="outline" onClick={generatePreview}>
+            <Button 
+              variant="outline" 
+              onClick={handleGeneratePreview}
+              disabled={isPreviewLoading}
+            >
               <Eye className="h-4 w-4 mr-2" />
-              Generate Preview Pages
+              {isPreviewLoading ? 'Generating...' : 'Generate Preview Pages'}
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Preview Modal */}
+      {showPreviewModal && previewUrl && (
+        <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
+          <DialogContent className="max-w-4xl max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-between">
+                PDF Preview
+                <Button variant="ghost" size="sm" onClick={() => setShowPreviewModal(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 min-h-[60vh]">
+              <iframe
+                src={previewUrl}
+                className="w-full h-full border rounded-lg"
+                title="PDF Preview"
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={handlePrevStep}>
@@ -365,7 +459,7 @@ export function ExportDialog({
       <Card>
         <CardContent className="pt-6 space-y-4">
           <div className="flex gap-2">
-            <Button onClick={() => exportStatus.url && window.open(exportStatus.url, '_blank')} className="flex-1">
+            <Button onClick={handleDownloadPDF} className="flex-1" disabled={!exportStatus.url}>
               <Download className="h-4 w-4 mr-2" />
               Download PDF
             </Button>
