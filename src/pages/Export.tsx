@@ -161,7 +161,7 @@ export default function Export() {
               </div>
               <div className="text-center space-y-2">
                 <div className="w-12 h-12 bg-legacy-primary/10 rounded-full flex items-center justify-center mx-auto">
-                  <span className="text-legacy-primary font-bold">24</span>
+                  <BookOpen className="w-6 h-6 text-legacy-primary" />
                 </div>
                 <h4 className="font-medium text-legacy-primary">All Entries</h4>
                 <p className="text-sm text-legacy-ink/70">Every message organized chronologically</p>
