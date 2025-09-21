@@ -76,9 +76,9 @@ export const usePremiumExport = () => {
         return true
       }
 
-      // Call render-ebook-pdf function
+      // Call render-ebook-pdf-v2 function
       const { data: renderResult, error: renderError } = await supabase.functions
-        .invoke('render-ebook-pdf', {
+        .invoke('render-ebook-pdf-v2', {
           body: {
             export_id: exportId
           }
@@ -133,9 +133,9 @@ export const usePremiumExport = () => {
         throw new Error('Failed to build manuscript for preview')
       }
 
-      // Call render-ebook-pdf function with preview flag
+      // Call render-ebook-pdf-v2 function with preview flag
       const { data: pdfBlob, error: renderError } = await supabase.functions
-        .invoke('render-ebook-pdf', {
+        .invoke('render-ebook-pdf-v2', {
           body: {
             export_id: manuscriptResult.export_id,
             preview_only: true
