@@ -38,3 +38,9 @@ verify_jwt = false
 
 [functions.weekly-journal-blast]
 verify_jwt = false
+
+[functions.send-journal-email]
+verify_jwt = false
+
+[functions.test-email]
+verify_jwt = false
