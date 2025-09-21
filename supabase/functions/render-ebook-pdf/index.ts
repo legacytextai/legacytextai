@@ -1,10 +1,30 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
-import { PDFDocument, rgb, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
+import { PDFDocument, PDFPage, rgb, grayscale } from "https://esm.sh/pdf-lib@1.17.1";
 
-export const THEME_KEY = "stillness";
+const THEME_KEY = "stillness";
 
 console.log("[render-ebook-pdf] boot ok");
+
+// Theme constants
+const PAGE = { width: 432, height: 648 }; // 6x9 in points
+const MARGIN = { top: 72, bottom: 72, inner: 64, outer: 54 };
+const BODY = { fontSize: 11.5, leading: 16.5, paragraphSpacing: 10 };
+const HEADER = { fontSize: 9, y: PAGE.height - 48, color: 0.5 };  // gray
+const FOLIO = { fontSize: 9, y: 36, color: 0.5 };
+const ORNAMENT = { y: PAGE.height - MARGIN.top - 36 }; // between header and body
+
+// Content frame (mirrors on left/right pages)
+function textFrame(isRight: boolean) {
+  const left = isRight ? MARGIN.inner : MARGIN.outer;
+  const right = isRight ? PAGE.width - MARGIN.outer : PAGE.width - MARGIN.inner;
+  return { 
+    x: left, 
+    y: PAGE.height - MARGIN.top - 24, 
+    width: right - left, 
+    bottom: MARGIN.bottom + 36 
+  };
+}
 
 // Cache date formatters to avoid recreating them for every page
 const dateFormatterCache = new Map<string, Intl.DateTimeFormat>();
@@ -69,10 +89,11 @@ interface Manuscript {
     preferred_language?: string;
   };
   sections: {
+    title: string;
     category: string;
     pages: {
       entry_id: string;
-      body: string;
+      content: string;
       date_iso: string;
       continued: boolean;
     }[];
@@ -121,194 +142,305 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Manuscript loaded:', manuscript.meta.title);
 
-    // Create PDF document
-    const pdfDoc = await PDFDocument.create();
+    // Create the PDF document
+    const pdfDoc = await PDFDocument.create()
     
-    // Embed fonts
-    const titleFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
-    const headerFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-    const bodyFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const dateFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+    // Helper to fetch font bytes
+    async function fetchFontBytes(path: string): Promise<Uint8Array> {
+      try {
+        const response = await fetch(`https://toxadhuqzdydliplhrws.supabase.co${path}`)
+        if (!response.ok) throw new Error(`Failed to fetch font: ${path}`)
+        return new Uint8Array(await response.arrayBuffer())
+      } catch (error) {
+        console.error(`Error fetching font ${path}:`, error)
+        throw error
+      }
+    }
 
-    // PDF dimensions for 6x9 inches (432x648 points)
-    const pageWidth = 432;
-    const pageHeight = 648;
-    const margins = {
-      top: 72,
-      bottom: 72,
-      inner: 64,
-      outer: 54
-    };
-
-    let pageCount = 0;
-
-    // Title Page
-    const titlePage = pdfDoc.addPage([pageWidth, pageHeight]);
-    pageCount++;
+    // Helper to fetch ornament SVG
+    async function fetchOrnamentBytes(): Promise<Uint8Array> {
+      try {
+        const response = await fetch('https://toxadhuqzdydliplhrws.supabase.co/assets/ornaments/tilde.svg')
+        if (!response.ok) throw new Error('Failed to fetch ornament')
+        return new Uint8Array(await response.arrayBuffer())
+      } catch (error) {
+        console.error('Error fetching ornament:', error)
+        // Return a simple fallback ornament
+        const fallback = '<svg width="48" height="16" viewBox="0 0 48 16"><path d="M8 8C12 4 16 4 20 8C24 12 28 12 32 8C36 4 40 4 44 8" stroke="#666666" stroke-width="1.5" fill="none"/></svg>'
+        return new TextEncoder().encode(fallback)
+      }
+    }
     
-    titlePage.drawText(manuscript.meta.title, {
-      x: margins.outer,
-      y: pageHeight - 150,
-      size: 24,
+    // Embed fonts with fallbacks
+    let bodyFont, titleFont, headerFont;
+    try {
+      bodyFont = await pdfDoc.embedFont(await fetchFontBytes('/assets/fonts/Inter-Regular.ttf'))
+    } catch (error) {
+      console.warn('Failed to embed Inter, using Noto Serif fallback')
+      try {
+        bodyFont = await pdfDoc.embedFont(await fetchFontBytes('/assets/fonts/NotoSerif-Regular.ttf'))
+      } catch (fallbackError) {
+        console.warn('Failed to embed fonts, using Helvetica')
+        const { StandardFonts } = await import('https://esm.sh/pdf-lib@1.17.1')
+        bodyFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
+      }
+    }
+    
+    try {
+      titleFont = await pdfDoc.embedFont(await fetchFontBytes('/assets/fonts/EBGaramond-Regular.ttf'))
+    } catch (error) {
+      console.warn('Failed to embed EB Garamond, using body font')
+      titleFont = bodyFont
+    }
+    
+    headerFont = bodyFont // Use same font for headers
+    
+    // Get ornament
+    const ornamentBytes = await fetchOrnamentBytes()
+
+    // Helper functions for layout
+    function drawRunningHeader(page: PDFPage, author: string, category: string, isRight: boolean): void {
+      const leftText = author || 'Legacy Journal'
+      const rightText = category || ''
+      
+      if (!isRight && leftText) {
+        page.drawText(leftText, {
+          x: MARGIN.outer,
+          y: HEADER.y,
+          size: HEADER.fontSize,
+          font: headerFont,
+          color: grayscale(HEADER.color),
+        })
+      }
+      
+      if (isRight && rightText) {
+        const textWidth = headerFont.widthOfTextAtSize(rightText, HEADER.fontSize)
+        page.drawText(rightText, {
+          x: PAGE.width - MARGIN.outer - textWidth,
+          y: HEADER.y,
+          size: HEADER.fontSize,
+          font: headerFont,
+          color: grayscale(HEADER.color),
+        })
+      }
+    }
+    
+    function drawFolio(page: PDFPage, pageNum: number, isRight: boolean): void {
+      const pageText = pageNum.toString()
+      const textWidth = headerFont.widthOfTextAtSize(pageText, FOLIO.fontSize)
+      const x = isRight ? PAGE.width - MARGIN.outer - textWidth : MARGIN.outer
+      
+      page.drawText(pageText, {
+        x,
+        y: FOLIO.y,
+        size: FOLIO.fontSize,
+        font: headerFont,
+        color: grayscale(FOLIO.color),
+      })
+    }
+    
+    function drawOrnament(page: PDFPage): void {
+      // Simple ornament using text characters as fallback
+      const ornamentText = '~'
+      const textWidth = headerFont.widthOfTextAtSize(ornamentText, 14)
+      
+      page.drawText(ornamentText, {
+        x: (PAGE.width - textWidth) / 2,
+        y: ORNAMENT.y,
+        size: 14,
+        font: headerFont,
+        color: grayscale(0.6),
+      })
+    }
+    
+    function typesetParagraphs(lines: string[], frame: any, font: any, fontSize: number, leading: number) {
+      const consumedLines: string[] = []
+      const remainingLines: string[] = [...lines]
+      let yPos = frame.y
+      
+      while (remainingLines.length > 0 && yPos - leading >= frame.bottom) {
+        const line = remainingLines.shift()!
+        consumedLines.push(line)
+        yPos -= leading
+      }
+      
+      return {
+        consumedLines,
+        remainingLines,
+        yEnd: yPos
+      }
+    }
+
+    // Title page
+    const titlePage = pdfDoc.addPage([PAGE.width, PAGE.height])
+    
+    // Title (centered, large)
+    const title = manuscript.meta?.title || 'My Legacy Journal'
+    const titleWidth = titleFont.widthOfTextAtSize(title, 28)
+    titlePage.drawText(title, {
+      x: (PAGE.width - titleWidth) / 2,
+      y: PAGE.height / 2 + 50,
+      size: 28,
       font: titleFont,
-      color: rgb(0, 0, 0),
-      maxWidth: pageWidth - margins.outer - margins.inner,
-    });
-
+      color: rgb(0.1, 0.1, 0.1),
+    })
+    
+    // Subtitle (centered)
     const userLocale = manuscript.user?.preferred_language || "en-US";
     const tz = manuscript.meta?.timezone || "UTC";
     const currentDate = formatLongDateInTZ(new Date().toISOString(), tz, userLocale);
-    
-    titlePage.drawText(`Generated on ${currentDate}`, {
-      x: margins.outer,
-      y: pageHeight - 200,
+    const subtitle = `Generated on ${currentDate}`
+    const subtitleWidth = bodyFont.widthOfTextAtSize(subtitle, 12)
+    titlePage.drawText(subtitle, {
+      x: (PAGE.width - subtitleWidth) / 2,
+      y: PAGE.height / 2,
       size: 12,
       font: bodyFont,
-      color: rgb(0.4, 0.4, 0.4),
-    });
-
-    // Dedication Page (if exists)
-    if (manuscript.meta.dedication && manuscript.meta.dedication.trim()) {
-      const dedicationPage = pdfDoc.addPage([pageWidth, pageHeight]);
-      pageCount++;
+      color: grayscale(0.5),
+    })
+    
+    // Dedication page (if exists)
+    if (manuscript.meta?.dedication && manuscript.meta.dedication.trim()) {
+      const dedicationPage = pdfDoc.addPage([PAGE.width, PAGE.height])
       
-      dedicationPage.drawText('Dedication', {
-        x: margins.outer,
-        y: pageHeight - 100,
+      const dedicationTitle = 'Dedication'
+      const dedicationTitleWidth = titleFont.widthOfTextAtSize(dedicationTitle, 18)
+      dedicationPage.drawText(dedicationTitle, {
+        x: (PAGE.width - dedicationTitleWidth) / 2,
+        y: PAGE.height - 150,
         size: 18,
         font: titleFont,
-        color: rgb(0, 0, 0),
-      });
-
-      // Split dedication text to fit on page
-      const dedicationLines = wrapText(
-        manuscript.meta.dedication,
-        pageWidth - margins.outer - margins.inner,
-        bodyFont,
-        12
-      );
-
-      let yPosition = pageHeight - 140;
-      dedicationLines.forEach(line => {
+        color: rgb(0.1, 0.1, 0.1),
+      })
+      
+      const dedicationLines = wrapText(manuscript.meta.dedication, PAGE.width - 2 * MARGIN.outer, bodyFont, 12)
+      let dedicationY = PAGE.height - 200
+      
+      dedicationLines.forEach((line) => {
+        const lineWidth = bodyFont.widthOfTextAtSize(line, 12)
         dedicationPage.drawText(line, {
-          x: margins.outer,
-          y: yPosition,
+          x: (PAGE.width - lineWidth) / 2,
+          y: dedicationY,
           size: 12,
           font: bodyFont,
-          color: rgb(0, 0, 0),
-        });
-        yPosition -= 16;
-      });
+          color: rgb(0.2, 0.2, 0.2),
+        })
+        dedicationY -= 18
+      })
     }
 
-    // Entry Pages
-    let totalEntries = 0;
+    // Process each section
+    let pageNum = pdfDoc.getPageCount() + 1
+    let totalEntries = 0
+    
     for (const section of manuscript.sections) {
-      // Category title page (right-hand page)
-      if (pageCount % 2 === 1) {
-        pdfDoc.addPage([pageWidth, pageHeight]); // Blank left page
-        pageCount++;
-      }
+      // Category section page (right-hand)
+      if (pageNum % 2 === 0) pageNum++ // Ensure right page
       
-      const categoryPage = pdfDoc.addPage([pageWidth, pageHeight]);
-      pageCount++;
+      const categoryPage = pdfDoc.addPage([PAGE.width, PAGE.height])
       
-      categoryPage.drawText(section.category, {
-        x: margins.outer,
-        y: pageHeight - 150,
-        size: 20,
+      // Large category title in EB Garamond small caps, centered
+      const categoryTitle = section.title || section.category || 'Entries'
+      const categoryTitleSize = 20
+      const categoryTitleWidth = titleFont.widthOfTextAtSize(categoryTitle.toUpperCase(), categoryTitleSize)
+      
+      categoryPage.drawText(categoryTitle.toUpperCase(), {
+        x: (PAGE.width - categoryTitleWidth) / 2,
+        y: PAGE.height / 2 + 20,
+        size: categoryTitleSize,
         font: titleFont,
-        color: rgb(0, 0, 0),
-      });
-
-      // Add ornament (tilde)
-      categoryPage.drawText('~', {
-        x: margins.outer,
-        y: pageHeight - 180,
-        size: 14,
-        font: headerFont,
-        color: rgb(0.6, 0.6, 0.6),
-      });
-
-      // Entry pages for this section
-      for (const pageEntry of section.pages) {
+        color: rgb(0.1, 0.1, 0.1),
+      })
+      
+      // Ornament below title
+      drawOrnament(categoryPage)
+      
+      pageNum++
+      
+      // Process entries in this section
+      for (const page of section.pages) {
         if (preview_only && totalEntries >= 3) break; // Limit preview to 3 entries
         
-        try {
-          const entryPage = pdfDoc.addPage([pageWidth, pageHeight]);
-          pageCount++;
-          totalEntries++;
-
-        // Running header
-        entryPage.drawText(manuscript.meta.author, {
-          x: margins.outer,
-          y: pageHeight - 30,
-          size: 10,
-          font: headerFont,
-          color: rgb(0.5, 0.5, 0.5),
-        });
-
-        entryPage.drawText(section.category, {
-          x: pageWidth - margins.inner - 100,
-          y: pageHeight - 30,
-          size: 10,
-          font: headerFont,
-          color: rgb(0.5, 0.5, 0.5),
-        });
-
-        // Format date using user timezone and locale
-        const formattedDate = formatLongDateInTZ(pageEntry.date_iso, tz, userLocale);
-
-        // Entry content
-        const contentLines = wrapText(
-          pageEntry.body,
-          pageWidth - margins.outer - margins.inner,
-          bodyFont,
-          12
-        );
-
-        let yPosition = pageHeight - 100;
-        const lineHeight = 18;
-        const maxLinesPerPage = Math.floor((pageHeight - margins.top - margins.bottom - 100) / lineHeight);
-
-        for (let i = 0; i < Math.min(contentLines.length, maxLinesPerPage); i++) {
-          entryPage.drawText(contentLines[i], {
-            x: margins.outer,
-            y: yPosition,
-            size: 12,
-            font: bodyFont,
-            color: rgb(0, 0, 0),
-          });
-          yPosition -= lineHeight;
-        }
-
-        // Date footer
-        entryPage.drawText(formattedDate, {
-          x: pageWidth / 2 - 50,
-          y: 30,
-          size: 10,
-          font: dateFont,
-          color: rgb(0.4, 0.4, 0.4),
-        });
-
-        // Page number
-        entryPage.drawText(pageCount.toString(), {
-          x: pageWidth - margins.inner - 20,
-          y: 30,
-          size: 10,
-          font: bodyFont,
-          color: rgb(0.5, 0.5, 0.5),
-        });
+        const entry = page
+        let remainingLines = wrapText(sanitizeEntryText(entry.content || ''), textFrame(pageNum % 2 === 0).width, bodyFont, BODY.fontSize)
+        let isFirstPage = true
         
-        } catch (entryError: any) {
-          console.error(`[render-ebook-pdf] export_id:${export_id} Failed to render entry ${pageEntry.entry_id}:`, entryError);
-          if (!preview_only) {
-            throw entryError; // Fail full export on entry errors
+        while (remainingLines.length > 0) {
+          try {
+            const entryPage = pdfDoc.addPage([PAGE.width, PAGE.height])
+            const isRight = pageNum % 2 === 0
+            const frame = textFrame(isRight)
+            
+            // Running headers and folio
+            drawRunningHeader(entryPage, manuscript.meta?.author || 'Author', section.title || section.category || 'Legacy', isRight)
+            drawFolio(entryPage, pageNum, isRight)
+            
+            let yPos = frame.y
+            
+            if (isFirstPage) {
+              // Ornament on first page of entry
+              drawOrnament(entryPage)
+              yPos -= 30
+              
+              // Date header
+              const dateStr = formatLongDateInTZ(entry.date_iso, tz, userLocale)
+              const dateWidth = bodyFont.widthOfTextAtSize(dateStr, 10)
+              entryPage.drawText(dateStr, {
+                x: (PAGE.width - dateWidth) / 2,
+                y: 48,
+                size: 10,
+                font: bodyFont,
+                color: grayscale(0.5),
+              })
+              
+              isFirstPage = false
+            } else {
+              // Continuation indicator
+              yPos -= 10
+              const contText = '— continued —'
+              const contWidth = bodyFont.widthOfTextAtSize(contText, 9)
+              entryPage.drawText(contText, {
+                x: (PAGE.width - contWidth) / 2,
+                y: yPos,
+                size: 9,
+                font: bodyFont,
+                color: grayscale(0.5),
+              })
+              yPos -= 20
+            }
+            
+            // Typeset paragraphs that fit on this page
+            const result = typesetParagraphs(remainingLines, { ...frame, y: yPos }, bodyFont, BODY.fontSize, BODY.leading)
+            
+            // Draw the lines
+            let drawY = yPos
+            for (const line of result.consumedLines) {
+              if (line.trim()) {
+                entryPage.drawText(line, {
+                  x: frame.x,
+                  y: drawY,
+                  size: BODY.fontSize,
+                  font: bodyFont,
+                  color: rgb(0.1, 0.1, 0.1),
+                })
+              }
+              drawY -= BODY.leading
+            }
+            
+            remainingLines = result.remainingLines
+            pageNum++
+            
+          } catch (entryError: any) {
+            console.error(`[render-ebook-pdf] export_id:${export_id} Failed to render entry ${entry.entry_id}:`, entryError);
+            if (!preview_only) {
+              throw entryError; // Fail full export on entry errors
+            }
+            // Skip this entry in preview mode and continue
+            break;
           }
-          // Skip this entry in preview mode and continue
-          totalEntries--;
-          pageCount--;
         }
+        
+        totalEntries++
       }
 
       if (preview_only && totalEntries >= 3) break;
@@ -358,7 +490,7 @@ const handler = async (req: Request): Promise<Response> => {
       .update({
         storage_key_pdf: pdfKey,
         url: signedUrl.signedUrl,
-        page_count: pageCount,
+        page_count: pageNum - 1,
         status: 'ready'
       })
       .eq('id', export_id);
@@ -382,7 +514,7 @@ const handler = async (req: Request): Promise<Response> => {
             email: userData.email,
             name: userData.name,
             download_url: signedUrl.signedUrl,
-            page_count: pageCount
+            page_count: pageNum - 1
           }
         });
 
@@ -404,7 +536,7 @@ const handler = async (req: Request): Promise<Response> => {
       export_id,
       status: 'ready',
       url: signedUrl.signedUrl,
-      page_count: pageCount
+      page_count: pageNum - 1
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -448,47 +580,76 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
+// Text sanitizing function - newline safe
 function sanitizeEntryText(raw: string): string {
+  if (!raw) return '';
+  
   return raw
-    .replace(/\r\n/g, "\n")                 // normalize EOL
-    .replace(/\r/g, "\n")
-    .replace(/\u00A0/g, " ")                // NBSP -> space
-    .replace(/\t/g, " ")                    // tabs -> space
-    .replace(/[^\S\n]+/g, " ")              // collapse spaces but keep \n
-    .replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g, ""); // remove control chars (keep \n)
+    // Normalize line endings
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    // Replace non-breaking spaces and tabs with regular spaces
+    .replace(/\u00A0/g, ' ')
+    .replace(/\t/g, ' ')
+    // Collapse multiple spaces into single spaces
+    .replace(/[ ]+/g, ' ')
+    // Remove control characters (except newlines)
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
 }
 
+// Enhanced text wrapping that preserves newlines and handles word breaking
 function wrapText(text: string, maxWidth: number, font: any, fontSize: number): string[] {
-  const out: string[] = [];
-  for (const para of sanitizeEntryText(text).split("\n")) {
-    const words = para.split(" ").filter(Boolean);
-    if (words.length === 0) { out.push(""); continue; }
-
-    let line = "";
-    for (const w of words) {
-      const test = line ? line + " " + w : w;
-      if (font.widthOfTextAtSize(test, fontSize) <= maxWidth) {
-        line = test;
+  if (!text) return [''];
+  
+  const lines: string[] = [];
+  const paragraphs = text.split('\n');
+  
+  for (const paragraph of paragraphs) {
+    if (paragraph.trim() === '') {
+      lines.push('');
+      continue;
+    }
+    
+    const words = paragraph.split(' ');
+    let currentLine = '';
+    
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+      
+      if (testWidth <= maxWidth) {
+        currentLine = testLine;
       } else {
-        if (line) out.push(line);
-
-        // Hard split very long "word" that exceeds max width by itself
-        if (font.widthOfTextAtSize(w, fontSize) > maxWidth) {
-          let chunk = "";
-          for (const ch of [...w]) {
-            const t = chunk + ch;
-            if (font.widthOfTextAtSize(t, fontSize) <= maxWidth) chunk = t;
-            else { out.push(chunk); chunk = ch; }
-          }
-          line = chunk;
+        if (currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
         } else {
-          line = w;
+          // Word is too long for the line, need to split it
+          let remainingWord = word;
+          while (remainingWord) {
+            let splitWord = '';
+            for (let i = 0; i < remainingWord.length; i++) {
+              const testChar = splitWord + remainingWord[i];
+              if (font.widthOfTextAtSize(testChar, fontSize) <= maxWidth) {
+                splitWord = testChar;
+              } else {
+                break;
+              }
+            }
+            if (!splitWord) splitWord = remainingWord[0]; // At least one character
+            lines.push(splitWord);
+            remainingWord = remainingWord.slice(splitWord.length);
+          }
         }
       }
     }
-    if (line) out.push(line);
+    
+    if (currentLine) {
+      lines.push(currentLine);
+    }
   }
-  return out;
+  
+  return lines;
 }
 
 serve(handler);
