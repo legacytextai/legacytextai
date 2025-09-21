@@ -124,15 +124,9 @@ export default function Journal() {
                   Recommended
                 </div>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-legacy-primary">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Star className="w-5 h-5 text-legacy-accent" />
-                      Premium E-Book Export
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="line-through text-legacy-ink/50">$9.99</span>
-                      <span className="text-legacy-accent font-medium">Free for Early Access Users</span>
-                    </div>
+                  <CardTitle className="text-legacy-primary flex items-center gap-2">
+                    <Star className="w-5 h-5 text-legacy-accent" />
+                    Premium Export - $9.99
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -165,7 +159,7 @@ export default function Journal() {
                     Basic PDF export with all your journal entries in chronological order.
                   </p>
                   <ul className="text-sm text-legacy-ink/70 space-y-1">
-                    <li>• Text-only entries</li>
+                    <li>Physical Journal </li>
                     <li>• Basic formatting</li>
                     <li>• Chronological order</li>
                   </ul>
