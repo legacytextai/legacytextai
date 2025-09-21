@@ -255,9 +255,9 @@ export function ExportDialog({
             <li>• Running headers & footers</li>
             <li>• Professional layout</li>
           </ul>
-          <Button onClick={handlePremiumExportStart} variant="outline" className="w-full" disabled={entries.length === 0}>
+          <Button disabled className="w-full">
             <Sparkles className="h-4 w-4 mr-2" />
-            Create Premium E-Book
+            Coming Soon
           </Button>
         </CardContent>
       </Card>
