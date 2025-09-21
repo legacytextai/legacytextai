@@ -246,7 +246,7 @@ export function ExportDialog({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            Stillness Theme
+            Minimal Theme
           </CardTitle>
           <CardDescription>
             Minimalist design focused on readability and elegance
