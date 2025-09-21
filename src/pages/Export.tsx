@@ -5,12 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Download, BookOpen, Star, Package } from "lucide-react";
 import { ExportDialog } from "@/components/ExportDialog";
-
 export default function Export() {
-  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
-
-  return (
-    <Layout>
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  return <Layout>
       <div className="space-y-6">
         {/* Header */}
         <div className="text-center">
@@ -79,11 +76,7 @@ export default function Export() {
                 <li>• PDF download</li>
                 <li>• Unlimited exports</li>
               </ul>
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => setIsExportDialogOpen(true)}
-              >
+              <Button variant="outline" className="w-full" onClick={() => setIsExportDialogOpen(true)}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Free PDF
               </Button>
@@ -116,11 +109,7 @@ export default function Export() {
                 <li>• Premium typography</li>
                 <li>• High-quality PDF</li>
               </ul>
-              <Button 
-                variant="accent" 
-                className="w-full"
-                onClick={() => setIsExportDialogOpen(true)}
-              >
+              <Button variant="accent" className="w-full" onClick={() => setIsExportDialogOpen(true)}>
                 <Star className="w-4 h-4 mr-2" />
                 Export Premium Journal
               </Button>
@@ -140,7 +129,7 @@ export default function Export() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
-                <span className="text-3xl font-bold text-legacy-primary">$199</span>
+                <span className="text-3xl font-bold text-legacy-primary"></span>
               </div>
               <ul className="space-y-2 text-sm text-legacy-ink/70">
                 <li>• Premium leather binding</li>
@@ -150,11 +139,9 @@ export default function Export() {
                 <li>• Custom gift box</li>
                 <li>• Shipped to your door</li>
               </ul>
-              <Button 
-                disabled 
-                className="w-full bg-muted text-muted-foreground cursor-not-allowed"
-              >
-                Coming Soon
+              <Button variant="warm" className="w-full" onClick={() => setIsExportDialogOpen(true)}>
+                <Package className="w-4 h-4 mr-2" />
+                Order Physical Journal
               </Button>
             </CardContent>
           </Card>
@@ -200,10 +187,6 @@ export default function Export() {
         </Card>
       </div>
 
-      <ExportDialog 
-        open={isExportDialogOpen}
-        onOpenChange={setIsExportDialogOpen}
-      />
-    </Layout>
-  );
+      <ExportDialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen} />
+    </Layout>;
 }
