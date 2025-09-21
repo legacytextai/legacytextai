@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useUserData } from '@/hooks/useUserData'
 import { toast } from 'sonner'
+import { THEME_KEY } from '@/lib/constants'
 
 export interface ExportStatus {
   export_id: string | null
@@ -43,7 +44,7 @@ export const usePremiumExport = () => {
         .invoke('build-ebook-manuscript', {
           body: {
             user_id: userData.id,
-            theme: 'stillness'
+            theme: THEME_KEY
           }
         })
 
@@ -123,7 +124,7 @@ export const usePremiumExport = () => {
         .invoke('build-ebook-manuscript', {
           body: {
             user_id: userData.id,
-            theme: 'stillness'
+            theme: THEME_KEY
           }
         })
 

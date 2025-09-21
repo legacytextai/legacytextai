@@ -13,6 +13,7 @@ import { usePDFExport } from '@/hooks/usePDFExport';
 import { usePremiumExport } from '@/hooks/usePremiumExport';
 import { useDedication } from '@/hooks/useDedication';
 import { toast } from 'sonner';
+import { THEME_KEY } from '@/lib/constants';
 interface ExportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -301,7 +302,7 @@ export function ExportDialog({
               {userData?.name ? `${userData.name}'s Legacy Journal` : 'My Legacy Journal'}
             </h4>
             <p className="text-sm text-muted-foreground mb-4">
-              {entries.length} entries • minimal elegant theme
+              {entries.length} entries • {THEME_KEY} theme
             </p>
             <Button variant="outline" onClick={generatePreview}>
               <Eye className="h-4 w-4 mr-2" />
@@ -332,7 +333,7 @@ export function ExportDialog({
         <Progress value={exportStatus.progress} className="w-full" />
         <div className="text-center text-sm text-muted-foreground">
           {exportStatus.status === 'formatting' && 'Preparing manuscript...'}
-          {exportStatus.status === 'rendering' && 'Rendering PDF with Stillness theme...'}
+          {exportStatus.status === 'rendering' && `Rendering PDF with ${THEME_KEY} theme...`}
           {exportStatus.status === 'ready' && 'Complete!'}
           {exportStatus.status === 'error' && 'Error occurred'}
         </div>
@@ -357,7 +358,7 @@ export function ExportDialog({
         <Check className="h-16 w-16 mx-auto mb-4 text-green-500" />
         <h3 className="text-lg font-semibold mb-2">Your Premium Journal is Ready!</h3>
         <p className="text-muted-foreground">
-          {exportStatus.page_count} pages • Stillness theme • Professional formatting
+          {exportStatus.page_count} pages • {THEME_KEY} theme • Professional formatting
         </p>
       </div>
 

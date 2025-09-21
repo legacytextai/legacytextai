@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { PDFDocument, rgb, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
 
+export const THEME_KEY = "stillness";
+
 console.log("[render-ebook-pdf] boot ok");
 
 // Cache date formatters to avoid recreating them for every page
@@ -86,7 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { export_id, preview_only = false }: RenderRequest = await req.json();
     
-    console.log(`[render-ebook-pdf] export_id:${export_id} Rendering PDF for export:`, export_id, 'preview_only:', preview_only);
+    console.log(`[render-ebook-pdf] export_id:${export_id} boot ok`, { export_id, preview_only });
 
     // Get export record
     const { data: exportRecord, error: exportError } = await supabase
@@ -179,11 +181,11 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       // Split dedication text to fit on page
-      const dedicationLines = splitTextToLines(
+      const dedicationLines = wrapText(
         manuscript.meta.dedication,
+        pageWidth - margins.outer - margins.inner,
         bodyFont,
-        12,
-        pageWidth - margins.outer - margins.inner
+        12
       );
 
       let yPosition = pageHeight - 140;
@@ -232,9 +234,10 @@ const handler = async (req: Request): Promise<Response> => {
       for (const pageEntry of section.pages) {
         if (preview_only && totalEntries >= 3) break; // Limit preview to 3 entries
         
-        const entryPage = pdfDoc.addPage([pageWidth, pageHeight]);
-        pageCount++;
-        totalEntries++;
+        try {
+          const entryPage = pdfDoc.addPage([pageWidth, pageHeight]);
+          pageCount++;
+          totalEntries++;
 
         // Running header
         entryPage.drawText(manuscript.meta.author, {
@@ -257,11 +260,11 @@ const handler = async (req: Request): Promise<Response> => {
         const formattedDate = formatLongDateInTZ(pageEntry.date_iso, tz, userLocale);
 
         // Entry content
-        const contentLines = splitTextToLines(
+        const contentLines = wrapText(
           pageEntry.body,
+          pageWidth - margins.outer - margins.inner,
           bodyFont,
-          12,
-          pageWidth - margins.outer - margins.inner
+          12
         );
 
         let yPosition = pageHeight - 100;
@@ -296,6 +299,16 @@ const handler = async (req: Request): Promise<Response> => {
           font: bodyFont,
           color: rgb(0.5, 0.5, 0.5),
         });
+        
+        } catch (entryError: any) {
+          console.error(`[render-ebook-pdf] export_id:${export_id} Failed to render entry ${pageEntry.entry_id}:`, entryError);
+          if (!preview_only) {
+            throw entryError; // Fail full export on entry errors
+          }
+          // Skip this entry in preview mode and continue
+          totalEntries--;
+          pageCount--;
+        }
       }
 
       if (preview_only && totalEntries >= 3) break;
@@ -435,33 +448,47 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-function splitTextToLines(text: string, font: any, fontSize: number, maxWidth: number): string[] {
-  const words = text.split(' ');
-  const lines: string[] = [];
-  let currentLine = '';
+function sanitizeEntryText(raw: string): string {
+  return raw
+    .replace(/\r\n/g, "\n")                 // normalize EOL
+    .replace(/\r/g, "\n")
+    .replace(/\u00A0/g, " ")                // NBSP -> space
+    .replace(/\t/g, " ")                    // tabs -> space
+    .replace(/[^\S\n]+/g, " ")              // collapse spaces but keep \n
+    .replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g, ""); // remove control chars (keep \n)
+}
 
-  for (const word of words) {
-    const testLine = currentLine ? `${currentLine} ${word}` : word;
-    const testWidth = font.widthOfTextAtSize(testLine, fontSize);
-    
-    if (testWidth <= maxWidth) {
-      currentLine = testLine;
-    } else {
-      if (currentLine) {
-        lines.push(currentLine);
-        currentLine = word;
+function wrapText(text: string, maxWidth: number, font: any, fontSize: number): string[] {
+  const out: string[] = [];
+  for (const para of sanitizeEntryText(text).split("\n")) {
+    const words = para.split(" ").filter(Boolean);
+    if (words.length === 0) { out.push(""); continue; }
+
+    let line = "";
+    for (const w of words) {
+      const test = line ? line + " " + w : w;
+      if (font.widthOfTextAtSize(test, fontSize) <= maxWidth) {
+        line = test;
       } else {
-        // Word is too long, break it
-        lines.push(word);
+        if (line) out.push(line);
+
+        // Hard split very long "word" that exceeds max width by itself
+        if (font.widthOfTextAtSize(w, fontSize) > maxWidth) {
+          let chunk = "";
+          for (const ch of [...w]) {
+            const t = chunk + ch;
+            if (font.widthOfTextAtSize(t, fontSize) <= maxWidth) chunk = t;
+            else { out.push(chunk); chunk = ch; }
+          }
+          line = chunk;
+        } else {
+          line = w;
+        }
       }
     }
+    if (line) out.push(line);
   }
-  
-  if (currentLine) {
-    lines.push(currentLine);
-  }
-
-  return lines;
+  return out;
 }
 
 serve(handler);
