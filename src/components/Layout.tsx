@@ -90,7 +90,7 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
       <div className="min-h-screen bg-gradient-warm">
         <header className="border-b border-legacy-border bg-card/80 backdrop-blur-sm">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <img src="/src/assets/logo.png" alt="LegacyText AI" className="h-12 w-auto" />
+            <img src="/src/assets/logo.png" alt="LegacyText AI" className="h-16 w-auto" />
             <AuthButtons />
           </div>
         </header>
