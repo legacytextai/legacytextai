@@ -10,9 +10,10 @@ import { MessageSquare, BookOpen, Smartphone, Heart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
 export default function Homepage() {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
   const [showSignup, setShowSignup] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -20,28 +21,25 @@ export default function Homepage() {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
       setLoading(false);
       return;
     }
-
     const redirectUrl = `${window.location.origin}/dashboard`;
-
-    const { error } = await supabase.auth.signUp({
+    const {
+      error
+    } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl
       }
     });
-
     if (error) {
       if (error.message.includes("already registered")) {
         setError("This email is already registered. Please sign in instead.");
@@ -61,11 +59,9 @@ export default function Homepage() {
       setPhone("");
       setShowSignup(false);
     }
-
     setLoading(false);
   };
-  return (
-    <Layout showSidebar={false}>
+  return <Layout showSidebar={false}>
       <div className="min-h-screen">
         {/* Hero Section */}
         <section className="py-20 px-4">
@@ -80,45 +76,25 @@ export default function Homepage() {
                 Our AI organizes your thoughts into a beautiful legacy journal they'll treasure forever.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                {user ? (
-                  <Button 
-                    variant="hero" 
-                    size="lg" 
-                    className="text-lg px-8 py-6"
-                    onClick={() => navigate('/dashboard')}
-                  >
+                {user ? <Button variant="hero" size="lg" className="text-lg px-8 py-6" onClick={() => navigate('/dashboard')}>
                     <MessageSquare className="w-5 h-5 mr-2" />
                     Go to Dashboard
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="hero" 
-                    size="lg" 
-                    className="text-lg px-8 py-6"
-                    onClick={() => navigate('/auth')}
-                  >
+                  </Button> : <Button variant="hero" size="lg" className="text-lg px-8 py-6" onClick={() => navigate('/auth')}>
                     <MessageSquare className="w-5 h-5 mr-2" />
                     Start Your Free Legacy Journal
-                  </Button>
-                )}
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="text-lg px-8 py-6"
-                  onClick={() => {
-                    document.getElementById('how-it-works')?.scrollIntoView({ 
-                      behavior: 'smooth' 
-                    });
-                  }}
-                >
+                  </Button>}
+                <Button variant="outline" size="lg" className="text-lg px-8 py-6" onClick={() => {
+                document.getElementById('how-it-works')?.scrollIntoView({
+                  behavior: 'smooth'
+                });
+              }}>
                   <BookOpen className="w-5 h-5 mr-2" />
                   See How It Works
                 </Button>
               </div>
 
               {/* Signup Form Modal */}
-              {showSignup && !user && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+              {showSignup && !user && <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                   <Card className="w-full max-w-md border-legacy-border bg-card">
                     <CardContent className="p-6">
                       <div className="mb-4">
@@ -130,49 +106,26 @@ export default function Homepage() {
                         </p>
                       </div>
 
-                      {error && (
-                        <Alert className="mb-4 border-destructive/50">
+                      {error && <Alert className="mb-4 border-destructive/50">
                           <AlertDescription className="text-destructive">
                             {error}
                           </AlertDescription>
-                        </Alert>
-                      )}
+                        </Alert>}
 
                       <form onSubmit={handleSignUp} className="space-y-4">
                         <div className="space-y-2">
                           <Label htmlFor="signup-email">Email</Label>
-                          <Input
-                            id="signup-email"
-                            type="email"
-                            placeholder="Enter your email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                          />
+                          <Input id="signup-email" type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} required />
                         </div>
                         
                         <div className="space-y-2">
                           <Label htmlFor="signup-password">Password</Label>
-                          <Input
-                            id="signup-password"
-                            type="password"
-                            placeholder="Create a password (min 6 characters)"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            minLength={6}
-                          />
+                          <Input id="signup-password" type="password" placeholder="Create a password (min 6 characters)" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
                         </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="signup-phone">Phone Number (Optional)</Label>
-                          <Input
-                            id="signup-phone"
-                            type="tel"
-                            placeholder="+1 (555) 123-4567"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                          />
+                          <Input id="signup-phone" type="tel" placeholder="+1 (555) 123-4567" value={phone} onChange={e => setPhone(e.target.value)} />
                           <p className="text-xs text-legacy-ink/60">
                             You can add this later during setup
                           </p>
@@ -182,12 +135,7 @@ export default function Homepage() {
                           <Button type="submit" disabled={loading} className="flex-1">
                             {loading ? "Creating..." : "Create Account"}
                           </Button>
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            onClick={() => setShowSignup(false)}
-                            disabled={loading}
-                          >
+                          <Button type="button" variant="outline" onClick={() => setShowSignup(false)} disabled={loading}>
                             Cancel
                           </Button>
                         </div>
@@ -195,21 +143,16 @@ export default function Homepage() {
 
                       <p className="text-center text-xs text-legacy-ink/60 mt-4">
                         Already have an account?{" "}
-                        <Button 
-                          variant="link" 
-                          className="p-0 h-auto text-legacy-accent"
-                          onClick={() => {
-                            setShowSignup(false);
-                            navigate('/auth');
-                          }}
-                        >
+                        <Button variant="link" className="p-0 h-auto text-legacy-accent" onClick={() => {
+                      setShowSignup(false);
+                      navigate('/auth');
+                    }}>
                           Sign in here
                         </Button>
                       </p>
                     </CardContent>
                   </Card>
-                </div>
-              )}
+                </div>}
             </div>
           </div>
         </section>
@@ -217,9 +160,7 @@ export default function Homepage() {
         {/* Features Section */}
         <section id="how-it-works" className="py-16 px-4 bg-legacy-warm/50">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="text-3xl font-bold text-center text-legacy-primary mb-12">
-              How LegacyText Works
-            </h2>
+            <h2 className="text-3xl font-bold text-center text-legacy-primary mb-12">How LegacyText AI Works</h2>
             
             <div className="grid md:grid-cols-3 gap-8">
               <Card className="shadow-paper border-legacy-border hover:shadow-warm transition-all duration-300">
@@ -276,30 +217,15 @@ export default function Homepage() {
             <p className="text-xl text-legacy-ink/70 mb-8">
               Join fathers who are already documenting their wisdom for the next generation.
             </p>
-            {user ? (
-              <Button 
-                variant="accent" 
-                size="lg" 
-                className="text-lg px-8 py-6"
-                onClick={() => navigate('/dashboard')}
-              >
+            {user ? <Button variant="accent" size="lg" className="text-lg px-8 py-6" onClick={() => navigate('/dashboard')}>
                 <MessageSquare className="w-5 h-5 mr-2" />
                 Go to Dashboard
-              </Button>
-            ) : (
-              <Button 
-                variant="accent" 
-                size="lg" 
-                className="text-lg px-8 py-6"
-                onClick={() => navigate('/auth')}
-              >
+              </Button> : <Button variant="accent" size="lg" className="text-lg px-8 py-6" onClick={() => navigate('/auth')}>
                 <MessageSquare className="w-5 h-5 mr-2" />
                 Begin Your Legacy Journal
-              </Button>
-            )}
+              </Button>}
           </div>
         </section>
       </div>
-    </Layout>
-  );
+    </Layout>;
 }
