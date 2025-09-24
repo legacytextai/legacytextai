@@ -101,7 +101,16 @@ export default function Homepage() {
                     Start Your Free Legacy Journal
                   </Button>
                 )}
-                <Button variant="outline" size="lg" className="text-lg px-8 py-6">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="text-lg px-8 py-6"
+                  onClick={() => {
+                    document.getElementById('how-it-works')?.scrollIntoView({ 
+                      behavior: 'smooth' 
+                    });
+                  }}
+                >
                   <BookOpen className="w-5 h-5 mr-2" />
                   See How It Works
                 </Button>
@@ -206,7 +215,7 @@ export default function Homepage() {
         </section>
 
         {/* Features Section */}
-        <section className="py-16 px-4 bg-legacy-warm/50">
+        <section id="how-it-works" className="py-16 px-4 bg-legacy-warm/50">
           <div className="container mx-auto max-w-6xl">
             <h2 className="text-3xl font-bold text-center text-legacy-primary mb-12">
               How LegacyText Works
