@@ -2,6 +2,22 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 import jsPDF from 'https://esm.sh/jspdf@2.5.1';
 
+// Helper to detect indented/preformatted lines
+function isIndentedLine(line: string): boolean {
+  return /^ {4,}|^C\s{2,}/.test(line);
+}
+
+function sanitizeEntryText(raw: string): string {
+  if (!raw) return '';
+  
+  return raw
+    .replace(/\r\n/g, '\n')      // normalize Windows line breaks
+    .replace(/\r/g, '\n')        // normalize old Mac line breaks
+    .replace(/\u00A0/g, ' ')     // non-breaking space to space
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ''); // strip control chars
+  // ⚠️ Do NOT collapse spaces or tabs — we want to preserve indentation
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -123,10 +139,27 @@ const handler = async (req: Request): Promise<Response> => {
         });
         pdf.text(entryDate, 20, 30);
         
-        // Entry content
+        // Entry content with indentation support
         pdf.setFontSize(12);
-        const splitText = pdf.splitTextToSize(entry.content, 170);
-        pdf.text(splitText, 20, 50);
+        const sanitizedContent = sanitizeEntryText(entry.content);
+        const lines = sanitizedContent.split('\n');
+        let y = 50;
+        
+        lines.forEach(line => {
+          const isIndented = isIndentedLine(line);
+          if (isIndented) {
+            pdf.setFont('courier', 'normal');
+            pdf.setFontSize(11);
+            pdf.text(line, 25, y, { baseline: 'top' }); // slight left margin
+          } else {
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(12);
+            const splitText = pdf.splitTextToSize(line, 170);
+            pdf.text(splitText, 20, y, { baseline: 'top' });
+            y += (splitText.length - 1) * 6; // adjust for multi-line
+          }
+          y += 8;
+        });
         
         // Add category if available
         if (entry.category) {

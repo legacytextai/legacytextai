@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
-import { PDFDocument, PDFPage, rgb, grayscale } from "https://esm.sh/pdf-lib@1.17.1";
+import { PDFDocument, PDFPage, rgb, grayscale, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
 
 const THEME_KEY = "stillness";
 
@@ -226,12 +226,16 @@ function sanitizeEntryText(raw: string): string {
   if (!raw) return '';
   
   return raw
-    .replace(/\r\n/g, '\n')
-    .replace(/\r/g, '\n')
-    .replace(/\u00A0/g, ' ')
-    .replace(/\t/g, ' ')
-    .replace(/[ ]+/g, ' ')
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+    .replace(/\r\n/g, '\n')      // normalize Windows line breaks
+    .replace(/\r/g, '\n')        // normalize old Mac line breaks
+    .replace(/\u00A0/g, ' ')     // non-breaking space to space
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ''); // strip control chars
+  // ⚠️ Do NOT collapse spaces or tabs — we want to preserve indentation
+}
+
+// Helper to detect indented/preformatted lines
+function isIndentedLine(line: string): boolean {
+  return /^ {4,}|^C\s{2,}/.test(line);
 }
 
 function drawDateFooter(page: any, dateText: string, font: any) {
@@ -348,7 +352,7 @@ const handler = async (req: Request): Promise<Response> => {
     const pdfDoc = await PDFDocument.create();
     
     // Load fonts with proper validation - NO STANDARD FONTS
-    let bodyFont, headerFont, notoFont;
+    let bodyFont, headerFont, notoFont, monospaceFont;
     
     try {
       console.log('📚 Loading fonts...');
@@ -387,6 +391,9 @@ const handler = async (req: Request): Promise<Response> => {
       bodyFont = await pdfDoc.embedFont(interBytes);
       headerFont = await pdfDoc.embedFont(ebGaramondBytes);
       notoFont = await pdfDoc.embedFont(notoBytes);
+      
+      // Embed monospace font for preformatted text
+      monospaceFont = await pdfDoc.embedFont(StandardFonts.Courier);
       
       // Count and verify embedded fonts
       const embeddedFontCount = 3; // We know we embedded 3
@@ -602,15 +609,20 @@ const handler = async (req: Request): Promise<Response> => {
           // Typeset paragraphs
           const result = typesetParagraphs(remainingLines, currentFrame, bodyFont, BODY.fontSize, BODY.leading);
           
-          // Draw the text using safe text drawing
+          // Draw the text using safe text drawing with monospace support
           let y = currentFrame.y;
           result.consumedLines.forEach(line => {
             if (line.trim()) {
+              const isIndented = isIndentedLine(line);
+              const font = isIndented ? monospaceFont : bodyFont;
+              const fontSize = isIndented ? 10.5 : BODY.fontSize;
+              const x = isIndented ? currentFrame.x + 10 : currentFrame.x; // slight left margin for blocks
+              
               safeDrawText(entryPage, line, {
-                x: currentFrame.x,
+                x: x,
                 y: y,
-                size: BODY.fontSize,
-                font: bodyFont,
+                size: fontSize,
+                font: font,
               }, notoFont, export_id);
             }
             y -= BODY.leading;

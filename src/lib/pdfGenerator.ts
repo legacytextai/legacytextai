@@ -1,6 +1,22 @@
 import jsPDF from 'jspdf'
 import { JournalEntry } from '@/hooks/useJournalEntries'
 
+// Helper to detect indented/preformatted lines
+function isIndentedLine(line: string): boolean {
+  return /^ {4,}|^C\s{2,}/.test(line);
+}
+
+function sanitizeEntryText(raw: string): string {
+  if (!raw) return '';
+  
+  return raw
+    .replace(/\r\n/g, '\n')      // normalize Windows line breaks
+    .replace(/\r/g, '\n')        // normalize old Mac line breaks
+    .replace(/\u00A0/g, ' ')     // non-breaking space to space
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ''); // strip control chars
+  // ⚠️ Do NOT collapse spaces or tabs — we want to preserve indentation
+}
+
 export interface PDFGenerationOptions {
   entries: JournalEntry[]
   dedication?: string
@@ -44,10 +60,27 @@ export const generateBasicPDF = async ({ entries, dedication, userTitle, include
     })
     doc.text(entryDate, 20, 30)
     
-    // Entry content
+    // Entry content with indentation support
     doc.setFontSize(12)
-    const splitText = doc.splitTextToSize(entry.content, 170)
-    doc.text(splitText, 20, 50)
+    const sanitizedContent = sanitizeEntryText(entry.content)
+    const lines = sanitizedContent.split('\n')
+    let y = 50
+    
+    lines.forEach(line => {
+      const isIndented = isIndentedLine(line)
+      if (isIndented) {
+        doc.setFont('courier', 'normal')
+        doc.setFontSize(11)
+        doc.text(line, 25, y, { baseline: 'top' }) // slight left margin
+      } else {
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(12)
+        const splitText = doc.splitTextToSize(line, 170)
+        doc.text(splitText, 20, y, { baseline: 'top' })
+        y += (splitText.length - 1) * 6 // adjust for multi-line
+      }
+      y += 8
+    })
     
     // Add category if available
     if (entry.category) {
