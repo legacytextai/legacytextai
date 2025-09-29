@@ -92,7 +92,10 @@ function generateBasicPDF(user: UserData, entries: JournalEntry[], dateEnd: stri
       if (isIndented) {
         doc.setFont('courier', 'normal');
         doc.setFontSize(11);
-        doc.text(line, 25, y, { baseline: 'top' }); // slight left margin
+        // Apply text wrapping for indented lines with reduced width for indentation
+        const splitText = doc.splitTextToSize(line, 145); // 170 - 25 for left margin
+        doc.text(splitText, 25, y, { baseline: 'top' });
+        y += (splitText.length - 1) * 6; // adjust for multi-line
       } else {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(12);

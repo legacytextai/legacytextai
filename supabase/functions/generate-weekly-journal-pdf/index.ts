@@ -150,7 +150,10 @@ const handler = async (req: Request): Promise<Response> => {
           if (isIndented) {
             pdf.setFont('courier', 'normal');
             pdf.setFontSize(11);
-            pdf.text(line, 25, y, { baseline: 'top' }); // slight left margin
+            // Apply text wrapping for indented lines with reduced width for indentation
+            const splitText = pdf.splitTextToSize(line, 145); // 170 - 25 for left margin
+            pdf.text(splitText, 25, y, { baseline: 'top' });
+            y += (splitText.length - 1) * 6; // adjust for multi-line
           } else {
             pdf.setFont('helvetica', 'normal');
             pdf.setFontSize(12);
