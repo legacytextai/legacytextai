@@ -235,7 +235,12 @@ function sanitizeEntryText(raw: string): string {
 
 // Helper to detect indented/preformatted lines
 function isIndentedLine(line: string): boolean {
-  return /^ {4,}|^C\s{2,}/.test(line);
+  // Matches:
+  // - Tab characters
+  // - 4+ spaces
+  // - Bullet point with optional leading tabs/spaces
+  // - C + 2+ spaces
+  return /^\t|^ {4,}|^\s*[⁃•\-\*]\s|^C\s{2,}/.test(line);
 }
 
 function drawDateFooter(page: any, dateText: string, font: any) {

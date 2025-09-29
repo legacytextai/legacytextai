@@ -5,7 +5,12 @@ import jsPDF from "https://esm.sh/jspdf@3.0.3";
 
 // Helper to detect indented/preformatted lines
 function isIndentedLine(line: string): boolean {
-  return /^ {4,}|^C\s{2,}/.test(line);
+  // Matches:
+  // - Tab characters
+  // - 4+ spaces
+  // - Bullet point with optional leading tabs/spaces
+  // - C + 2+ spaces
+  return /^\t|^ {4,}|^\s*[⁃•\-\*]\s|^C\s{2,}/.test(line);
 }
 
 function sanitizeEntryText(raw: string): string {
@@ -89,21 +94,34 @@ function generateBasicPDF(user: UserData, entries: JournalEntry[], dateEnd: stri
     
     lines.forEach(line => {
       const isIndented = isIndentedLine(line);
+      
+      // Check if we need a new page
+      if (y > doc.internal.pageSize.height - 40) {
+        doc.addPage();
+        y = 50;
+      }
+      
       if (isIndented) {
         doc.setFont('courier', 'normal');
         doc.setFontSize(11);
         // Apply text wrapping for indented lines with reduced width for indentation
         const splitText = doc.splitTextToSize(line, 145); // 170 - 25 for left margin
         doc.text(splitText, 25, y, { baseline: 'top' });
-        y += (splitText.length - 1) * 6; // adjust for multi-line
+        const lineHeight = 13;
+        y += splitText.length * lineHeight;
       } else {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(12);
         const splitText = doc.splitTextToSize(line, 170);
         doc.text(splitText, 20, y, { baseline: 'top' });
-        y += (splitText.length - 1) * 6; // adjust for multi-line
+        const lineHeight = 14;
+        y += splitText.length * lineHeight;
       }
-      y += 8;
+      
+      // Add paragraph spacing only for non-empty lines
+      if (line.trim()) {
+        y += 6;
+      }
     });
     
     // Add category if available
