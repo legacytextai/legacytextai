@@ -131,7 +131,7 @@ async function getLeastUsedCategory(userId: string, supabase: any): Promise<stri
     allCategories.forEach(cat => counts[cat] = 0);
     
     // Count actual entries
-    categoryCounts.forEach((entry: any) => {
+    categoryCounts.forEach(entry => {
       if (entry.category && allCategories.includes(entry.category)) {
         counts[entry.category]++;
       }

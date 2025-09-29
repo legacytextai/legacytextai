@@ -1,27 +1,6 @@
 import jsPDF from 'jspdf'
 import { JournalEntry } from '@/hooks/useJournalEntries'
 
-// Helper to detect indented/preformatted lines
-function isIndentedLine(line: string): boolean {
-  // Matches:
-  // - Tab characters
-  // - 4+ spaces
-  // - Bullet point with optional leading tabs/spaces
-  // - C + 2+ spaces
-  return /^\t|^ {4,}|^\s*[⁃•\-\*]\s|^C\s{2,}/.test(line);
-}
-
-function sanitizeEntryText(raw: string): string {
-  if (!raw) return '';
-  
-  return raw
-    .replace(/\r\n/g, '\n')      // normalize Windows line breaks
-    .replace(/\r/g, '\n')        // normalize old Mac line breaks
-    .replace(/\u00A0/g, ' ')     // non-breaking space to space
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ''); // strip control chars
-  // ⚠️ Do NOT collapse spaces or tabs — we want to preserve indentation
-}
-
 export interface PDFGenerationOptions {
   entries: JournalEntry[]
   dedication?: string
@@ -65,43 +44,10 @@ export const generateBasicPDF = async ({ entries, dedication, userTitle, include
     })
     doc.text(entryDate, 20, 30)
     
-    // Entry content with indentation support
+    // Entry content
     doc.setFontSize(12)
-    const sanitizedContent = sanitizeEntryText(entry.content)
-    const lines = sanitizedContent.split('\n')
-    let y = 50
-    
-    lines.forEach(line => {
-      const isIndented = isIndentedLine(line)
-      
-      // Check if we need a new page
-      if (y > doc.internal.pageSize.height - 40) {
-        doc.addPage()
-        y = 50
-      }
-      
-      if (isIndented) {
-        doc.setFont('courier', 'normal')
-        doc.setFontSize(11)
-        // Apply text wrapping for indented lines with reduced width for indentation
-        const splitText = doc.splitTextToSize(line, 145) // 170 - 25 for left margin
-        doc.text(splitText, 25, y, { baseline: 'top' })
-        const lineHeight = 13
-        y += splitText.length * lineHeight
-      } else {
-        doc.setFont('helvetica', 'normal')
-        doc.setFontSize(12)
-        const splitText = doc.splitTextToSize(line, 170)
-        doc.text(splitText, 20, y, { baseline: 'top' })
-        const lineHeight = 14
-        y += splitText.length * lineHeight
-      }
-      
-      // Add paragraph spacing only for non-empty lines
-      if (line.trim()) {
-        y += 6
-      }
-    })
+    const splitText = doc.splitTextToSize(entry.content, 170)
+    doc.text(splitText, 20, 50)
     
     // Add category if available
     if (entry.category) {

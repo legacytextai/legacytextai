@@ -233,7 +233,7 @@ const handler = async (req: Request): Promise<Response> => {
         
         errors.push({
           user_id: user.id,
-          message: error instanceof Error ? error.message : String(error)
+          message: error.message
         });
 
         if (!dryRun) {
@@ -244,7 +244,7 @@ const handler = async (req: Request): Promise<Response> => {
               user_id: user.id,
               week_start_date: weekStartDate,
               email_sent: false,
-              error_message: error instanceof Error ? error.message : String(error)
+              error_message: error.message
             });
         }
 
@@ -252,7 +252,7 @@ const handler = async (req: Request): Promise<Response> => {
           user_id: user.id,
           email: testTo || user.email,
           emailSent: false,
-          error: error instanceof Error ? error.message : String(error),
+          error: error.message,
           status: 'error'
         });
 
@@ -284,7 +284,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error) {
     console.error('Error in weekly-journal-blast function:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+      JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

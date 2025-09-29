@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
-import { PDFDocument, PDFPage, rgb, grayscale, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
+import { PDFDocument, PDFPage, rgb, grayscale } from "https://esm.sh/pdf-lib@1.17.1";
 
 const THEME_KEY = "stillness";
 
@@ -226,21 +226,12 @@ function sanitizeEntryText(raw: string): string {
   if (!raw) return '';
   
   return raw
-    .replace(/\r\n/g, '\n')      // normalize Windows line breaks
-    .replace(/\r/g, '\n')        // normalize old Mac line breaks
-    .replace(/\u00A0/g, ' ')     // non-breaking space to space
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ''); // strip control chars
-  // ⚠️ Do NOT collapse spaces or tabs — we want to preserve indentation
-}
-
-// Helper to detect indented/preformatted lines
-function isIndentedLine(line: string): boolean {
-  // Matches:
-  // - Tab characters
-  // - 4+ spaces
-  // - Bullet point with optional leading tabs/spaces
-  // - C + 2+ spaces
-  return /^\t|^ {4,}|^\s*[⁃•\-\*]\s|^C\s{2,}/.test(line);
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/\u00A0/g, ' ')
+    .replace(/\t/g, ' ')
+    .replace(/[ ]+/g, ' ')
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
 }
 
 function drawDateFooter(page: any, dateText: string, font: any) {
@@ -357,7 +348,7 @@ const handler = async (req: Request): Promise<Response> => {
     const pdfDoc = await PDFDocument.create();
     
     // Load fonts with proper validation - NO STANDARD FONTS
-    let bodyFont, headerFont, notoFont, monospaceFont;
+    let bodyFont, headerFont, notoFont;
     
     try {
       console.log('📚 Loading fonts...');
@@ -396,9 +387,6 @@ const handler = async (req: Request): Promise<Response> => {
       bodyFont = await pdfDoc.embedFont(interBytes);
       headerFont = await pdfDoc.embedFont(ebGaramondBytes);
       notoFont = await pdfDoc.embedFont(notoBytes);
-      
-      // Embed monospace font for preformatted text
-      monospaceFont = await pdfDoc.embedFont(StandardFonts.Courier);
       
       // Count and verify embedded fonts
       const embeddedFontCount = 3; // We know we embedded 3
@@ -548,26 +536,7 @@ const handler = async (req: Request): Promise<Response> => {
         
         const sanitizedText = sanitizeEntryText(entry.content);
         const frame = textFrame(pageNumber % 2 === 0);
-        
-        // Split text into lines and wrap each according to indentation
-        const textLines = sanitizedText.split('\n');
-        const wrappedLines: string[] = [];
-        
-        textLines.forEach(line => {
-          if (line.trim()) {
-            const isIndented = isIndentedLine(line);
-            if (isIndented) {
-              // Use reduced width for indented lines to account for left margin
-              const indentedLines = wrapText(line, frame.width - 20, monospaceFont, 10.5);
-              wrappedLines.push(...indentedLines);
-            } else {
-              const normalLines = wrapText(line, frame.width, bodyFont, BODY.fontSize);
-              wrappedLines.push(...normalLines);
-            }
-          } else {
-            wrappedLines.push(''); // Preserve empty lines
-          }
-        });
+        const wrappedLines = wrapText(sanitizedText, frame.width, bodyFont, BODY.fontSize);
         
         let remainingLines = [...wrappedLines];
         let isFirstPage = true;
@@ -633,20 +602,15 @@ const handler = async (req: Request): Promise<Response> => {
           // Typeset paragraphs
           const result = typesetParagraphs(remainingLines, currentFrame, bodyFont, BODY.fontSize, BODY.leading);
           
-          // Draw the text using safe text drawing with monospace support
+          // Draw the text using safe text drawing
           let y = currentFrame.y;
           result.consumedLines.forEach(line => {
             if (line.trim()) {
-              const isIndented = isIndentedLine(line);
-              const font = isIndented ? monospaceFont : bodyFont;
-              const fontSize = isIndented ? 10.5 : BODY.fontSize;
-              const x = isIndented ? currentFrame.x + 10 : currentFrame.x; // slight left margin for blocks
-              
               safeDrawText(entryPage, line, {
-                x: x,
+                x: currentFrame.x,
                 y: y,
-                size: fontSize,
-                font: font,
+                size: BODY.fontSize,
+                font: bodyFont,
               }, notoFont, export_id);
             }
             y -= BODY.leading;
@@ -665,7 +629,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (preview_only) {
       // Return PDF bytes directly for preview
-      return new Response(new Uint8Array(pdfBytes), {
+      return new Response(pdfBytes, {
         status: 200,
         headers: {
           ...corsHeaders,
