@@ -141,7 +141,7 @@ serve(async (req) => {
           throw createError;
         }
         
-        userId = newUserId;
+        const userId = newUserId;
       }
 
       console.log('User ID resolved:', userId);

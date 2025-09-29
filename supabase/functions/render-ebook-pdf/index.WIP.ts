@@ -478,7 +478,6 @@ const handler = async (req: Request): Promise<Response> => {
               y: PAGE.height - MARGIN.top - 10,
               size: 10,
               font: bodyFont,
-              color: { r: 0.5, g: 0.5, b: 0.5 }
             });
           }
           
@@ -522,7 +521,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (preview_only) {
       // Return PDF bytes directly for preview
-      return new Response(pdfBytes, {
+      return new Response(new Uint8Array(pdfBytes), {
         status: 200,
         headers: {
           ...corsHeaders,

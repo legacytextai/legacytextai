@@ -641,7 +641,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (preview_only) {
       // Return PDF bytes directly for preview
-      return new Response(pdfBytes, {
+      return new Response(new Uint8Array(pdfBytes), {
         status: 200,
         headers: {
           ...corsHeaders,

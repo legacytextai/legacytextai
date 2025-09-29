@@ -133,7 +133,7 @@ serve(async (req) => {
     // 1) Update Supabase Auth user phone (admin API) with confirmation
     const { error: updErr } = await admin.auth.admin.updateUserById(user.id, {
       phone: new_phone_e164.replace('+', ''),
-      phone_confirmed_at: new Date().toISOString(), // CRITICAL: Mark phone as confirmed
+      phone_confirm: true, // CRITICAL: Mark phone as confirmed
       user_metadata: {
         ...user.user_metadata,
         phone_verified: true,
