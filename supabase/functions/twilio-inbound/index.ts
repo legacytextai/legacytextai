@@ -11,6 +11,37 @@ function xml(msg: string) {
 <Response><Message>${msg}</Message></Response>`;
 }
 
+/**
+ * Clean raw user-submitted journal entry content before saving to the database.
+ * This removes invisible or problematic characters (tabs, Unicode bullets, em dashes)
+ * that cause formatting bugs in exported PDFs.
+ */
+function cleanJournalEntry(raw: string): string {
+  if (!raw) return '';
+
+  return raw
+    // Replace Unicode bullet characters and dashes with a regular dash
+    .replace(/[\u2022\u2023\u2043\u2219⁃–—−]/g, '-')
+
+    // Replace tabs with two spaces (to preserve basic indentation)
+    .replace(/\t/g, '  ')
+
+    // Collapse multiple spaces into a single space
+    .replace(/ {2,}/g, ' ')
+
+    // Normalize line breaks (Windows, Mac, etc.)
+    .replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+
+    // Remove invisible/control characters
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+
+    // Trim leading/trailing whitespace from each line
+    .split('\n').map(line => line.trimStart()).join('\n')
+
+    // Trim full text
+    .trim();
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -161,11 +192,12 @@ serve(async (req) => {
       }
 
       // Save journal entry and get the created entry
+      const cleanedContent = cleanJournalEntry(body)
       const { data: newEntry, error: entryError } = await supabase
         .from("journal_entries")
         .insert({
           user_id: userId,
-          content: body,
+          content: cleanedContent,
           message_sid: sid,
           source: "sms",
         })

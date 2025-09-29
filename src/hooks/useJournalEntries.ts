@@ -4,6 +4,7 @@ import { useAuth } from './useAuth'
 import { useUserData } from './useUserData'
 import { toast } from 'sonner'
 import { useEffect } from 'react'
+import { cleanJournalEntry } from '@/lib/utils'
 
 export interface JournalEntry {
   id: number
@@ -153,11 +154,12 @@ export const useCreateJournalEntry = () => {
 
   return useMutation({
     mutationFn: async ({ content }: { content: string }) => {
+      const cleanedContent = cleanJournalEntry(content)
       const { data, error } = await supabase
         .from('journal_entries')
         .insert({
           user_id: userData?.id,
-          content,
+          content: cleanedContent,
           source: 'manual',
         })
         .select()
