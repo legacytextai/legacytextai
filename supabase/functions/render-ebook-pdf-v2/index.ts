@@ -543,7 +543,26 @@ const handler = async (req: Request): Promise<Response> => {
         
         const sanitizedText = sanitizeEntryText(entry.content);
         const frame = textFrame(pageNumber % 2 === 0);
-        const wrappedLines = wrapText(sanitizedText, frame.width, bodyFont, BODY.fontSize);
+        
+        // Split text into lines and wrap each according to indentation
+        const textLines = sanitizedText.split('\n');
+        const wrappedLines: string[] = [];
+        
+        textLines.forEach(line => {
+          if (line.trim()) {
+            const isIndented = isIndentedLine(line);
+            if (isIndented) {
+              // Use reduced width for indented lines to account for left margin
+              const indentedLines = wrapText(line, frame.width - 20, monospaceFont, 10.5);
+              wrappedLines.push(...indentedLines);
+            } else {
+              const normalLines = wrapText(line, frame.width, bodyFont, BODY.fontSize);
+              wrappedLines.push(...normalLines);
+            }
+          } else {
+            wrappedLines.push(''); // Preserve empty lines
+          }
+        });
         
         let remainingLines = [...wrappedLines];
         let isFirstPage = true;
