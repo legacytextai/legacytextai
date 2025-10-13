@@ -88,30 +88,30 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
 
   if (!showSidebar) {
     return (
-      <div className="min-h-screen bg-gradient-warm">
-        <header className="border-b border-legacy-border bg-card/80 backdrop-blur-sm">
+      <div className="min-h-screen">
+        <header className="border-b border-white/10">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <img src={logoImage} alt="LegacyText AI" className="h-16 w-auto" />
+            <img src={logoImage} alt="LegacyText AI" className="h-16 w-auto brightness-0 invert" />
             <AuthButtons />
           </div>
         </header>
         <main className="flex-1">{children}</main>
-        <footer className="border-t border-legacy-border bg-card/80 backdrop-blur-sm py-6">
+        <footer className="border-t border-white/10 py-6">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-sm text-legacy-ink/60">
+              <p className="text-sm text-muted-foreground">
                 © 2025 LegacyText AI. All rights reserved.
               </p>
               <div className="flex items-center gap-6">
                 <Link 
                   to="/privacy" 
-                  className="text-sm text-legacy-ink/60 hover:text-legacy-primary transition-colors"
+                  className="text-sm text-muted-foreground hover:text-white transition-colors"
                 >
                   Privacy Policy
                 </Link>
                 <Link 
                   to="/terms" 
-                  className="text-sm text-legacy-ink/60 hover:text-legacy-primary transition-colors"
+                  className="text-sm text-muted-foreground hover:text-white transition-colors"
                 >
                   Terms of Service
                 </Link>
@@ -204,15 +204,15 @@ function SidebarLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen flex w-full bg-gradient-warm">
+    <div className="min-h-screen flex w-full">
       <AppSidebar />
       <main className="flex-1 flex flex-col">
-        <header className="border-b border-legacy-border bg-card/80 backdrop-blur-sm">
+        <header className="border-b border-white/10">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col">
             <div className="flex items-center justify-between h-10">
             <button 
               onClick={() => navigate("/dashboard")}
-              className="text-2xl font-bold text-legacy-primary hover:text-legacy-accent transition-colors cursor-pointer"
+              className="text-2xl font-bold text-white hover:text-white/80 transition-colors cursor-pointer"
             >
               LegacyText AI
             </button>
@@ -232,25 +232,25 @@ function SidebarLayout({ children }: { children: ReactNode }) {
             )}
           </div>
         </header>
-        <div className="flex-1 py-4 sm:py-6">
+        <div className="flex-1 py-8 sm:py-10">
           {children}
         </div>
-        <footer className="border-t border-legacy-border bg-card/80 backdrop-blur-sm py-6">
+        <footer className="border-t border-white/10 py-6">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-sm text-legacy-ink/60">
+              <p className="text-sm text-muted-foreground">
                 © 2025 LegacyText AI. All rights reserved.
               </p>
               <div className="flex items-center gap-6">
                 <Link 
                   to="/privacy" 
-                  className="text-sm text-legacy-ink/60 hover:text-legacy-primary transition-colors"
+                  className="text-sm text-muted-foreground hover:text-white transition-colors"
                 >
                   Privacy Policy
                 </Link>
                 <Link 
                   to="/terms" 
-                  className="text-sm text-legacy-ink/60 hover:text-legacy-primary transition-colors"
+                  className="text-sm text-muted-foreground hover:text-white transition-colors"
                 >
                   Terms of Service
                 </Link>

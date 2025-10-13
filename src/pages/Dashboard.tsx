@@ -16,16 +16,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 
 
-// Helper function to get category colors
+// Helper function to get category colors - dark theme
 function getCategoryColor(category: string): string {
   const colors: { [key: string]: string } = {
-    "Milestones": "bg-green-100 text-green-800",
-    "Values": "bg-blue-100 text-blue-800", 
-    "Daily Life": "bg-purple-100 text-purple-800",
-    "Memories": "bg-yellow-100 text-yellow-800",
-    "Advice": "bg-red-100 text-red-800"
+    "Milestones": "bg-white/10 text-white border border-white/20",
+    "Values": "bg-white/10 text-white border border-white/20", 
+    "Daily Life": "bg-white/10 text-white border border-white/20",
+    "Memories": "bg-white/10 text-white border border-white/20",
+    "Advice": "bg-white/10 text-white border border-white/20"
   };
-  return colors[category] || "bg-gray-100 text-gray-800";
+  return colors[category] || "bg-white/10 text-white border border-white/20";
 }
 
 function Dashboard() {
@@ -121,10 +121,10 @@ function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 overflow-x-hidden">
         {/* Phone Verification Banner */}
         {userData && userData.status !== 'active' && (
-          <Alert className="mb-6 border-orange-200 bg-orange-50">
+          <Alert className="mb-6 border-white/20 bg-white/5">
             <Shield className="h-4 w-4" />
             <AlertDescription className="flex items-center justify-between">
-              <span>Complete your setup by verifying your phone number to start receiving daily prompts</span>
+              <span className="text-white">Complete your setup by verifying your phone number to start receiving daily prompts</span>
               <Link to="/settings">
                 <Button variant="outline" size="sm" className="ml-4">
                   <Phone className="w-4 h-4 mr-2" />
@@ -136,7 +136,7 @@ function Dashboard() {
         )}
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-legacy-primary">Entry History</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Entry History</h1>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto min-w-0">
             <Button 
               variant="outline" 
@@ -159,13 +159,13 @@ function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Total Entries</CardTitle>
+              <CardTitle className="text-lg text-white">Total Entries</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-legacy-primary">
+              <div className="text-3xl font-bold text-white">
                 {filteredEntries.length}
               </div>
-              <p className="text-sm text-legacy-ink/70 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 {searchTerm ? `filtered from ${entries.length} total` : 'messages saved'}
               </p>
             </CardContent>

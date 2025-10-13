@@ -8,53 +8,54 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 210 54% 20%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 210 54% 20%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 54% 20%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 210 54% 20%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 210 20% 95%;
-    --secondary-foreground: 210 54% 20%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 20% 95%;
-    --muted-foreground: 210 16% 46%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 63%;
 
     --accent: 354 70% 54%;
-    --accent-foreground: 0 0% 98%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 210 20% 90%;
-    --input: 210 20% 90%;
-    --ring: 210 54% 20%;
+    --border: 0 0% 10%;
+    --input: 0 0% 10%;
+    --ring: 0 0% 100%;
 
     --radius: 0.75rem;
 
-    /* Legacy Journal specific colors */
-    --legacy-primary: 210 54% 20%;      /* #1D3557 deep navy */
-    --legacy-accent: 354 70% 54%;       /* #E63946 emotional red */
-    --legacy-warm: 30 50% 96%;          /* warm paper white */
-    --legacy-ink: 210 40% 25%;          /* ink blue-black */
-    --legacy-border: 210 20% 85%;       /* subtle borders */
-    --legacy-shadow: 210 54% 20%;       /* deep shadow */
+    /* Legacy Journal specific colors - Chronicle dark theme */
+    --legacy-primary: 0 0% 100%;        /* white for dark theme */
+    --legacy-accent: 354 70% 54%;       /* keep red accent */
+    --legacy-warm: 0 0% 4%;             /* very dark for cards */
+    --legacy-ink: 0 0% 100%;            /* white text */
+    --legacy-border: 0 0% 10%;          /* ultra dark borders */
+    --legacy-shadow: 0 0% 0%;           /* pure black shadow */
 
-    /* Gradients */
-    --gradient-warm: linear-gradient(135deg, hsl(30 50% 98%) 0%, hsl(30 30% 96%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(var(--legacy-primary)) 0%, hsl(210 45% 15%) 100%);
+    /* Gradients - cinematic radial glow */
+    --gradient-cinematic: radial-gradient(ellipse at 50% 20%, hsl(0 50% 4%) 0%, hsl(0 0% 0%) 60%);
+    --gradient-warm: radial-gradient(circle at center, hsl(0 0% 8%) 0%, hsl(0 0% 0%) 70%);
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(0 0% 80%) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(var(--legacy-accent)) 0%, hsl(354 65% 45%) 100%);
 
-    /* Shadows */
-    --shadow-warm: 0 4px 20px -4px hsl(var(--legacy-primary) / 0.1);
-    --shadow-paper: 0 2px 12px -2px hsl(var(--legacy-primary) / 0.08);
-    --shadow-deep: 0 8px 30px -8px hsl(var(--legacy-primary) / 0.15);
+    /* Shadows - soft and minimal */
+    --shadow-warm: 0 4px 20px -4px hsl(0 0% 100% / 0.03);
+    --shadow-paper: 0 2px 12px -2px hsl(0 0% 100% / 0.05);
+    --shadow-deep: 0 8px 30px -8px hsl(0 0% 0% / 0.5);
 
     --radius: 0.5rem;
 
@@ -121,5 +122,7 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    background-image: var(--gradient-cinematic);
+    background-attachment: fixed;
   }
 }

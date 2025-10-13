@@ -14,21 +14,21 @@ interface EntryCardProps {
   enableInlineEdit?: boolean;
 }
 
-// Helper function to get AI category colors
+// Helper function to get AI category colors - dark theme
 function getCategoryColor(category: string): string {
   const colors: { [key: string]: string } = {
-    "Values": "bg-purple-100 text-purple-800",
-    "Advice": "bg-blue-100 text-blue-800",
-    "Memories": "bg-green-100 text-green-800",
-    "Work Ethics": "bg-orange-100 text-orange-800",
-    "Faith": "bg-yellow-100 text-yellow-800", 
-    "Family": "bg-pink-100 text-pink-800",
-    "Life Lessons": "bg-indigo-100 text-indigo-800",
-    "Encouragement": "bg-emerald-100 text-emerald-800",
-    "Reflection": "bg-slate-100 text-slate-800",
-    "Future Hopes": "bg-sky-100 text-sky-800"
+    "Values": "bg-white/10 text-white border border-white/20",
+    "Advice": "bg-white/10 text-white border border-white/20",
+    "Memories": "bg-white/10 text-white border border-white/20",
+    "Work Ethics": "bg-white/10 text-white border border-white/20",
+    "Faith": "bg-white/10 text-white border border-white/20", 
+    "Family": "bg-white/10 text-white border border-white/20",
+    "Life Lessons": "bg-white/10 text-white border border-white/20",
+    "Encouragement": "bg-white/10 text-white border border-white/20",
+    "Reflection": "bg-white/10 text-white border border-white/20",
+    "Future Hopes": "bg-white/10 text-white border border-white/20"
   };
-  return colors[category] || "bg-gray-100 text-gray-800";
+  return colors[category] || "bg-white/10 text-white border border-white/20";
 }
 
 export const EntryCard: React.FC<EntryCardProps> = ({ 
@@ -87,16 +87,16 @@ export const EntryCard: React.FC<EntryCardProps> = ({
   };
 
   return (
-    <Card className={`shadow-paper hover:shadow-lg transition-shadow ${className}`}>
+    <Card className={`hover:bg-white/[0.04] transition-shadow ${className}`}>
       <CardContent className="p-6">
         <div className="flex justify-between items-start mb-4 gap-2">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-wrap">
-            <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5 text-legacy-ink/50 flex-shrink-0" />
-            <span className="text-xs sm:text-sm font-medium text-legacy-ink/70 whitespace-nowrap">
+            <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
+            <span className="text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">
               {formatDate(entry.received_at)}
             </span>
-            <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-legacy-ink/50 flex-shrink-0" />
-            <span className="text-xs sm:text-sm text-legacy-ink/70 whitespace-nowrap">
+            <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+            <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
               {formatTime(entry.received_at)}
             </span>
           </div>
@@ -168,7 +168,7 @@ export const EntryCard: React.FC<EntryCardProps> = ({
             </div>
           </div>
         ) : (
-          <p className="text-legacy-ink leading-relaxed whitespace-pre-wrap">
+          <p className="text-white leading-relaxed whitespace-pre-wrap">
             {entry.content}
           </p>
         )}

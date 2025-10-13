@@ -64,14 +64,14 @@ export default function Homepage() {
   return <Layout showSidebar={false}>
       <div className="min-h-screen">
         {/* Hero Section */}
-        <section className="py-20 px-4">
+        <section className="py-32 px-4">
           <div className="container mx-auto max-w-4xl text-center">
             <div className="animate-fade-in">
-              <h1 className="text-5xl md:text-6xl font-bold text-legacy-primary mb-6 leading-tight">
+              <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-tight">
                 Text Your Way to a 
                 <span className="text-legacy-accent"> Lasting Legacy</span>
               </h1>
-              <p className="text-xl text-legacy-ink/70 mb-8 max-w-2xl mx-auto">
+              <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
                 Share your values, memories, and life lessons with your children through simple text messages. 
                 Our AI organizes your thoughts into a beautiful legacy journal they'll treasure forever.
               </p>
@@ -158,48 +158,48 @@ export default function Homepage() {
         </section>
 
         {/* Features Section */}
-        <section id="how-it-works" className="py-16 px-4 bg-legacy-warm/50">
+        <section id="how-it-works" className="py-24 px-4">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="text-3xl font-bold text-center text-legacy-primary mb-12">How LegacyText AI Works</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-center text-white mb-16">How LegacyText AI Works</h2>
             
             <div className="grid md:grid-cols-3 gap-8">
-              <Card className="shadow-paper border-legacy-border hover:shadow-warm transition-all duration-300">
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-gradient-accent rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Smartphone className="w-8 h-8 text-white" />
+              <Card className="hover:bg-white/[0.04] transition-all duration-300">
+                <CardContent className="p-10 text-center">
+                  <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Smartphone className="w-10 h-10 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-legacy-primary mb-4">
+                  <h3 className="text-2xl font-semibold text-white mb-4">
                     Just Text
                   </h3>
-                  <p className="text-legacy-ink/70">
+                  <p className="text-muted-foreground leading-relaxed">
                     No app to download. Simply text your thoughts, memories, and advice to our dedicated number.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="shadow-paper border-legacy-border hover:shadow-warm transition-all duration-300">
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-legacy-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                    <BookOpen className="w-8 h-8 text-white" />
+              <Card className="hover:bg-white/[0.04] transition-all duration-300">
+                <CardContent className="p-10 text-center">
+                  <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <BookOpen className="w-10 h-10 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-legacy-primary mb-4">
+                  <h3 className="text-2xl font-semibold text-white mb-4">
                     AI Organization
                   </h3>
-                  <p className="text-legacy-ink/70">
+                  <p className="text-muted-foreground leading-relaxed">
                     Our AI organizes your messages into a beautiful, chronological journal while preserving your voice.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="shadow-paper border-legacy-border hover:shadow-warm transition-all duration-300">
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-gradient-accent rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Heart className="w-8 h-8 text-white" />
+              <Card className="hover:bg-white/[0.04] transition-all duration-300">
+                <CardContent className="p-10 text-center">
+                  <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Heart className="w-10 h-10 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-legacy-primary mb-4">
+                  <h3 className="text-2xl font-semibold text-white mb-4">
                     Lasting Legacy
                   </h3>
-                  <p className="text-legacy-ink/70">
+                  <p className="text-muted-foreground leading-relaxed">
                     Export as a PDF or order a premium bound journal that your children will treasure forever.
                   </p>
                 </CardContent>
@@ -209,12 +209,12 @@ export default function Homepage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 px-4">
+        <section className="py-32 px-4">
           <div className="container mx-auto max-w-3xl text-center">
-            <h2 className="text-4xl font-bold text-legacy-primary mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
               Start Building Your Legacy Today
             </h2>
-            <p className="text-xl text-legacy-ink/70 mb-8">
+            <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
               Join fathers who are already documenting their wisdom for the next generation.
             </p>
             {user ? <Button variant="accent" size="lg" className="text-lg px-8 py-6" onClick={() => navigate('/dashboard')}>
