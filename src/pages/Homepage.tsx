@@ -121,7 +121,7 @@ export default function Homepage() {
               </div>
 
               {/* Right Column - Video Placeholder */}
-              <div className="order-first lg:order-last">
+              <div>
                 <div 
                   className="aspect-video bg-zinc-900 rounded-2xl md:rounded-3xl border border-white/10 flex items-center justify-center"
                 >
