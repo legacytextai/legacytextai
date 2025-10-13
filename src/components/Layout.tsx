@@ -238,15 +238,22 @@ function SidebarLayout({ children }: { children: ReactNode }) {
     }
 
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <Link to="/auth">
-          <Button variant="ghost" size="sm">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-white hover:bg-transparent hover:text-gray-300 font-normal"
+          >
             Login
           </Button>
         </Link>
         <Link to="/auth">
-          <Button variant="default" size="sm">
-            Sign Up
+          <Button 
+            size="sm" 
+            className="bg-white text-black hover:bg-gray-100 font-normal rounded-md px-6"
+          >
+            Try for free
           </Button>
         </Link>
       </div>
