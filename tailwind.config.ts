@@ -78,19 +78,11 @@ export default {
         "gradient-warm": "var(--gradient-warm)",
         "gradient-hero": "var(--gradient-hero)",
         "gradient-accent": "var(--gradient-accent)",
-        "gradient-cinematic": "var(--gradient-cinematic)",
       },
       boxShadow: {
         warm: "var(--shadow-warm)",
         paper: "var(--shadow-paper)",
         deep: "var(--shadow-deep)",
-        soft: "0 2px 20px rgba(255, 255, 255, 0.03)",
-        glow: "0 0 40px rgba(255, 255, 255, 0.05)",
-        card: "0 4px 30px rgba(0, 0, 0, 0.5)",
-      },
-      fontSize: {
-        'display': ['4rem', { lineHeight: '1.1', letterSpacing: '-0.02em' }],
-        'display-sm': ['3rem', { lineHeight: '1.2', letterSpacing: '-0.01em' }],
       },
       keyframes: {
         "accordion-down": {
