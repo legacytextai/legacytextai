@@ -88,30 +88,80 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
 
   if (!showSidebar) {
     return (
-      <div className="min-h-screen bg-gradient-warm">
-        <header className="border-b border-legacy-border bg-card/80 backdrop-blur-sm">
+      <div className="min-h-screen bg-black">
+        <header className="bg-black border-b border-white/10">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <img src={logoImage} alt="LegacyText AI" className="h-16 w-auto" />
-            <AuthButtons />
+            <Link to="/" className="text-white text-xl font-semibold hover:text-gray-300 transition-colors">
+              LegacyText
+            </Link>
+            <div className="flex items-center gap-3">
+              {!authReady || loading ? (
+                <div className="w-20 h-9 bg-white/10 animate-pulse rounded" />
+              ) : user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-9 w-9 rounded-full hover:bg-white/10">
+                      <Avatar className="h-9 w-9">
+                        <AvatarFallback className="bg-white/10 text-white">
+                          {user.email?.charAt(0).toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 bg-zinc-900 border-white/10" align="end" forceMount>
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard" className="flex items-center text-white hover:bg-white/10">
+                        <User className="mr-2 h-4 w-4" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings" className="flex items-center text-white hover:bg-white/10">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuItem onClick={handleSignOut} className="text-white hover:bg-white/10">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <>
+                  <Link to="/auth">
+                    <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link to="/auth">
+                    <Button size="sm" className="bg-white text-black hover:bg-gray-100">
+                      Start Your Legacy Journal
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </header>
         <main className="flex-1">{children}</main>
-        <footer className="border-t border-legacy-border bg-card/80 backdrop-blur-sm py-6">
+        <footer className="border-t border-white/10 bg-black py-6">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-sm text-legacy-ink/60">
+              <p className="text-sm text-gray-500">
                 © 2025 LegacyText AI. All rights reserved.
               </p>
               <div className="flex items-center gap-6">
                 <Link 
                   to="/privacy" 
-                  className="text-sm text-legacy-ink/60 hover:text-legacy-primary transition-colors"
+                  className="text-sm text-gray-400 hover:text-white transition-colors"
                 >
                   Privacy Policy
                 </Link>
                 <Link 
                   to="/terms" 
-                  className="text-sm text-legacy-ink/60 hover:text-legacy-primary transition-colors"
+                  className="text-sm text-gray-400 hover:text-white transition-colors"
                 >
                   Terms of Service
                 </Link>
