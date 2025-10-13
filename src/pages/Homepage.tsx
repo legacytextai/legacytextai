@@ -87,8 +87,9 @@ export default function Homepage() {
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
               {/* Left Column - Text Content */}
               <div className="space-y-6 md:space-y-8">
-                <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-tight animate-fade-in">
-                  A journal for your children — created by texting your thoughts.
+                <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-white leading-tight animate-fade-in">
+                  <span className="font-bold">A journal for your children — </span>
+                  <span className="font-normal">created by texting your thoughts.</span>
                 </h1>
                 
                 <p className="text-xl md:text-2xl text-white font-thin leading-relaxed">
