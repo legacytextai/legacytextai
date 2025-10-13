@@ -75,12 +75,22 @@ export default function Homepage() {
   return (
     <Layout showSidebar={false}>
       {/* Chronicle-Inspired Black Theme Wrapper */}
-      <div 
-        className="min-h-screen bg-black text-white"
-        style={{
-          background: 'radial-gradient(ellipse at center, rgba(26, 14, 7, 0.4) 0%, rgba(0, 0, 0, 1) 70%), #000000'
-        }}
-      >
+      <div className="min-h-screen bg-black text-white relative overflow-hidden">
+        {/* Blurred gradient background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div 
+            className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-purple-600/30 rounded-full blur-[120px]"
+          />
+          <div 
+            className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px]"
+          />
+          <div 
+            className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] bg-indigo-600/25 rounded-full blur-[110px]"
+          />
+        </div>
+        
+        {/* Content wrapper with relative positioning */}
+        <div className="relative z-10">
         {/* Hero Section */}
         <section className="px-4 py-20 md:py-32">
           <div className="container mx-auto max-w-7xl">
@@ -384,6 +394,7 @@ export default function Homepage() {
             </Card>
           </div>
         )}
+        </div>
       </div>
     </Layout>
   );
