@@ -103,19 +103,19 @@ export default function Homepage() {
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Button 
                     size="lg" 
-                    className="bg-white text-black hover:bg-gray-100 text-lg px-8 py-6 rounded-lg"
+                    className="bg-white text-black hover:bg-gray-100 text-lg px-8 py-6"
                     onClick={() => {
                       document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
                     }}
                   >
-                    Get started free
+                    Learn More
                   </Button>
                   <Button 
                     size="lg" 
-                    className="bg-black text-white hover:bg-black/90 text-lg px-8 py-6 rounded-lg"
+                    className="border-2 border-white bg-transparent text-white hover:bg-white/10 text-lg px-8 py-6"
                     onClick={() => navigate('/auth')}
                   >
-                    Login
+                    Start Now
                   </Button>
                 </div>
               </div>
@@ -281,10 +281,10 @@ export default function Homepage() {
             <div className="text-center">
               <Button 
                 size="lg" 
-                className="bg-white text-black hover:bg-gray-100 text-xl px-12 py-6 rounded-lg w-full sm:w-auto"
+                className="bg-white text-black hover:bg-gray-100 text-xl px-12 py-6 rounded-xl w-full sm:w-auto"
                 onClick={() => navigate('/auth')}
               >
-                Get started free
+                Start Your Legacy Journal Now
               </Button>
             </div>
           </div>

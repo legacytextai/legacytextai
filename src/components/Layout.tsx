@@ -131,13 +131,13 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
               ) : (
                 <>
                   <Link to="/auth">
-                    <Button size="sm" className="bg-black text-white hover:bg-black/90 rounded-lg px-6">
+                    <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white">
                       Login
                     </Button>
                   </Link>
                   <Link to="/auth">
-                    <Button size="sm" className="bg-white text-black hover:bg-gray-100 rounded-lg px-6">
-                      Try for free
+                    <Button size="sm" className="bg-white text-black hover:bg-gray-100">
+                      Start Your Legacy Journal
                     </Button>
                   </Link>
                 </>
@@ -240,13 +240,13 @@ function SidebarLayout({ children }: { children: ReactNode }) {
     return (
       <div className="flex items-center gap-2">
         <Link to="/auth">
-          <Button size="sm" className="bg-black text-white hover:bg-black/90 rounded-lg px-6">
+          <Button variant="ghost" size="sm">
             Login
           </Button>
         </Link>
         <Link to="/auth">
-          <Button size="sm" className="bg-white text-black hover:bg-gray-100 rounded-lg px-6">
-            Try for free
+          <Button variant="default" size="sm">
+            Sign Up
           </Button>
         </Link>
       </div>
