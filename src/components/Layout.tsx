@@ -10,6 +10,7 @@ import { User, Settings, LogOut, Menu } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import logoImage from "@/assets/logo.png";
 
 interface LayoutProps {
   children: ReactNode;
@@ -90,7 +91,7 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
       <div className="min-h-screen bg-gradient-warm">
         <header className="border-b border-legacy-border bg-card/80 backdrop-blur-sm">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <img src="/src/assets/logo.png" alt="LegacyText AI" className="h-16 w-auto" />
+            <img src={logoImage} alt="LegacyText AI" className="h-16 w-auto" />
             <AuthButtons />
           </div>
         </header>
