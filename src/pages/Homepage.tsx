@@ -6,14 +6,22 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MessageSquare, BookOpen, Smartphone, Heart } from "lucide-react";
+import { 
+  ChevronDown, 
+  Heart, 
+  MessageCircle, 
+  Star, 
+  MessageSquare, 
+  Edit3, 
+  Sparkles, 
+  User 
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
 export default function Homepage() {
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [showSignup, setShowSignup] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -21,25 +29,27 @@ export default function Homepage() {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
       setLoading(false);
       return;
     }
+
     const redirectUrl = `${window.location.origin}/dashboard`;
-    const {
-      error
-    } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl
-      }
+        emailRedirectTo: redirectUrl,
+      },
     });
+
     if (error) {
       if (error.message.includes("already registered")) {
         setError("This email is already registered. Please sign in instead.");
@@ -61,171 +71,320 @@ export default function Homepage() {
     }
     setLoading(false);
   };
-  return <Layout showSidebar={false}>
-      <div className="min-h-screen">
+
+  return (
+    <Layout showSidebar={false}>
+      {/* Chronicle-Inspired Black Theme Wrapper */}
+      <div 
+        className="min-h-screen bg-black text-white"
+        style={{
+          background: 'radial-gradient(ellipse at center, rgba(26, 14, 7, 0.4) 0%, rgba(0, 0, 0, 1) 70%), #000000'
+        }}
+      >
         {/* Hero Section */}
-        <section className="py-20 px-4">
-          <div className="container mx-auto max-w-4xl text-center">
-            <div className="animate-fade-in">
-              <h1 className="text-5xl md:text-6xl font-bold text-legacy-primary mb-6 leading-tight">
-                Text Your Way to a 
-                <span className="text-legacy-accent"> Lasting Legacy</span>
-              </h1>
-              <p className="text-xl text-legacy-ink/70 mb-8 max-w-2xl mx-auto">
-                Share your values, memories, and life lessons with your children through simple text messages. 
-                Our AI organizes your thoughts into a beautiful legacy journal they'll treasure forever.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                {user ? <Button variant="hero" size="lg" className="text-lg px-8 py-6" onClick={() => navigate('/dashboard')}>
-                    <MessageSquare className="w-5 h-5 mr-2" />
-                    Go to Dashboard
-                  </Button> : <Button variant="hero" size="lg" className="text-lg px-8 py-6" onClick={() => navigate('/auth')}>
-                    <MessageSquare className="w-5 h-5 mr-2" />
-                    Start Your Free Legacy Journal
-                  </Button>}
-                <Button variant="outline" size="lg" className="text-lg px-8 py-6" onClick={() => {
-                document.getElementById('how-it-works')?.scrollIntoView({
-                  behavior: 'smooth'
-                });
-              }}>
-                  <BookOpen className="w-5 h-5 mr-2" />
-                  See How It Works
-                </Button>
+        <section className="px-4 py-20 md:py-32">
+          <div className="container mx-auto max-w-7xl">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+              {/* Left Column - Text Content */}
+              <div className="space-y-6 md:space-y-8">
+                <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-tight animate-fade-in">
+                  A journal for your children — created by texting your thoughts.
+                </h1>
+                
+                <p className="text-xl md:text-2xl text-gray-400 font-normal leading-relaxed">
+                  Pass down your wisdom, values, and memories to your children — with no time, structure, or effort.
+                </p>
+                
+                <p className="text-sm md:text-base text-gray-500">
+                  No app. No download. Just create an account.
+                </p>
+                
+                {/* CTA Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                  <Button 
+                    size="lg" 
+                    className="bg-white text-black hover:bg-gray-100 text-lg px-8 py-6"
+                    onClick={() => {
+                      document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
+                    Learn More
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    className="border-2 border-white bg-transparent text-white hover:bg-white/10 text-lg px-8 py-6"
+                    onClick={() => navigate('/auth')}
+                  >
+                    Start Now
+                  </Button>
+                </div>
               </div>
 
-              {/* Signup Form Modal */}
-              {showSignup && !user && <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                  <Card className="w-full max-w-md border-legacy-border bg-card">
-                    <CardContent className="p-6">
-                      <div className="mb-4">
-                        <h3 className="text-xl font-bold text-legacy-primary mb-2">
-                          Start Your Legacy Journal
-                        </h3>
-                        <p className="text-sm text-legacy-ink/70">
-                          Create your account to begin documenting your legacy
-                        </p>
-                      </div>
+              {/* Right Column - Video Placeholder */}
+              <div className="order-first lg:order-last">
+                <div 
+                  className="aspect-video bg-zinc-900 rounded-2xl md:rounded-3xl border border-white/10 flex items-center justify-center"
+                >
+                  <div className="text-center space-y-2">
+                    <div className="w-16 h-16 mx-auto bg-white/5 rounded-full flex items-center justify-center">
+                      <MessageSquare className="w-8 h-8 text-white/40" />
+                    </div>
+                    <p className="text-gray-500 text-sm">Video Placeholder</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-                      {error && <Alert className="mb-4 border-destructive/50">
-                          <AlertDescription className="text-destructive">
-                            {error}
-                          </AlertDescription>
-                        </Alert>}
+        {/* Scroll Indicator */}
+        <div className="flex flex-col items-center gap-1 pb-12 animate-bounce">
+          <ChevronDown className="w-6 h-6 text-white/30" />
+          <ChevronDown className="w-6 h-6 text-white/30 -mt-3" />
+          <ChevronDown className="w-6 h-6 text-white/30 -mt-3" />
+        </div>
 
-                      <form onSubmit={handleSignUp} className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="signup-email">Email</Label>
-                          <Input id="signup-email" type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} required />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="signup-password">Password</Label>
-                          <Input id="signup-password" type="password" placeholder="Create a password (min 6 characters)" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
-                        </div>
+        {/* Pain Points / Destination Section */}
+        <section 
+          className="px-4 py-24 md:py-32"
+          style={{
+            background: 'linear-gradient(to bottom, #000000, #0a0a14, #000000)'
+          }}
+        >
+          <div className="container mx-auto max-w-7xl">
+            <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">
+              Imagine your kids discovering the father behind the role.
+            </h2>
+            
+            {/* Three Cards */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+              {/* Card 1 */}
+              <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-8 md:p-10 hover:bg-white/[0.04] transition-all">
+                <div className="flex justify-center mb-6">
+                  <Heart className="w-12 h-12 text-white" />
+                </div>
+                <p className="text-gray-300 text-base md:text-lg leading-relaxed text-center">
+                  They open a book filled with your real thoughts — not filtered, not polished — just honest reflections about life, love, work, failure, and purpose.
+                </p>
+              </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="signup-phone">Phone Number (Optional)</Label>
-                          <Input id="signup-phone" type="tel" placeholder="+1 (555) 123-4567" value={phone} onChange={e => setPhone(e.target.value)} />
-                          <p className="text-xs text-legacy-ink/60">
-                            You can add this later during setup
-                          </p>
-                        </div>
+              {/* Card 2 */}
+              <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-8 md:p-10 hover:bg-white/[0.04] transition-all">
+                <div className="flex justify-center mb-6">
+                  <MessageCircle className="w-12 h-12 text-white" />
+                </div>
+                <p className="text-gray-300 text-base md:text-lg leading-relaxed text-center">
+                  They hear your voice in every sentence, guiding them through their first heartbreak, their career choices, their fears.
+                </p>
+              </div>
 
-                        <div className="flex gap-2">
-                          <Button type="submit" disabled={loading} className="flex-1">
-                            {loading ? "Creating..." : "Create Account"}
-                          </Button>
-                          <Button type="button" variant="outline" onClick={() => setShowSignup(false)} disabled={loading}>
-                            Cancel
-                          </Button>
-                        </div>
-                      </form>
+              {/* Card 3 */}
+              <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-8 md:p-10 hover:bg-white/[0.04] transition-all md:col-span-2 lg:col-span-1">
+                <div className="flex justify-center mb-6">
+                  <Star className="w-12 h-12 text-white" />
+                </div>
+                <p className="text-gray-300 text-base md:text-lg leading-relaxed text-center">
+                  They feel like they truly know you, not just as 'Dad,' but as a man who lived, tried, failed, and passed on what mattered most.
+                </p>
+              </div>
+            </div>
 
-                      <p className="text-center text-xs text-legacy-ink/60 mt-4">
-                        Already have an account?{" "}
-                        <Button variant="link" className="p-0 h-auto text-legacy-accent" onClick={() => {
+            {/* Bottom Text */}
+            <p className="text-xl md:text-2xl text-gray-400 text-center max-w-4xl mx-auto mt-16">
+              This isn't just journaling. It's connection, captured — made effortless with AI and delivered through the medium you already use every day: text messaging.
+            </p>
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section id="how-it-works" className="px-4 py-24 md:py-32 bg-black">
+          <div className="container mx-auto max-w-7xl">
+            <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-6">
+              Introducing LegacyText AI
+            </h2>
+            
+            <p className="text-xl md:text-2xl text-gray-400 text-center max-w-3xl mx-auto mb-20">
+              A text-based journaling tool that helps fathers reflect, organize, and preserve their wisdom — one message at a time.
+            </p>
+
+            {/* Three Steps */}
+            <div className="grid md:grid-cols-3 gap-12">
+              {/* Step 1 */}
+              <div className="text-center">
+                <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <MessageSquare className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl md:text-2xl font-semibold text-white mb-3">
+                  Receive a daily prompt by text
+                </h3>
+                <p className="text-base text-gray-400 italic">
+                  gentle questions that spark reflection
+                </p>
+              </div>
+
+              {/* Step 2 */}
+              <div className="text-center">
+                <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Edit3 className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl md:text-2xl font-semibold text-white mb-3">
+                  Reply with your thoughts
+                </h3>
+                <p className="text-base text-gray-400 italic">
+                  in the moment, whenever it works for you
+                </p>
+              </div>
+
+              {/* Step 3 */}
+              <div className="text-center">
+                <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Sparkles className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl md:text-2xl font-semibold text-white mb-3">
+                  AI organizes and saves everything
+                </h3>
+                <p className="text-base text-gray-400 italic">
+                  ready to export as a memoir when you're ready
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Final Empathy / CTA Section */}
+        <section className="px-4 py-24 md:py-32 bg-black">
+          <div className="container mx-auto max-w-7xl">
+            {/* Testimonial Card */}
+            <div 
+              className="bg-white/[0.05] border border-white/20 rounded-3xl p-10 md:p-12 max-w-3xl mx-auto mb-12"
+              style={{
+                boxShadow: '0 0 40px rgba(255, 255, 255, 0.05)'
+              }}
+            >
+              {/* Avatar */}
+              <div className="w-16 h-16 bg-white/10 border border-white/20 rounded-full flex items-center justify-center mx-auto mb-8">
+                <User className="w-8 h-8 text-white" />
+              </div>
+              
+              {/* Quote */}
+              <p className="text-xl md:text-2xl text-gray-200 text-center mb-6 leading-relaxed">
+                "As a father, I was overwhelmed by the fear that one day I wouldn't be around to guide my children through life. LegacyText AI was born out of that fear — and the desire to give fathers a way to show up, long after we're gone."
+              </p>
+              
+              {/* Attribution */}
+              <p className="text-base text-gray-400 text-center italic">
+                — Founder, LegacyText AI
+              </p>
+            </div>
+
+            {/* Final CTA Button */}
+            <div className="text-center">
+              <Button 
+                size="lg" 
+                className="bg-white text-black hover:bg-gray-100 text-xl px-12 py-6 rounded-xl w-full sm:w-auto"
+                onClick={() => navigate('/auth')}
+              >
+                Start Your Legacy Journal Now
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Signup Form Modal - Preserved for Future Use */}
+        {showSignup && !user && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-md border-legacy-border bg-card">
+              <CardContent className="p-6">
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold text-legacy-primary mb-2">
+                    Start Your Legacy Journal
+                  </h3>
+                  <p className="text-sm text-legacy-ink/70">
+                    Create your account to begin documenting your legacy
+                  </p>
+                </div>
+
+                {error && (
+                  <Alert className="mb-4 border-destructive/50">
+                    <AlertDescription className="text-destructive">
+                      {error}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="Create a password (min 6 characters)"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-phone">Phone Number (Optional)</Label>
+                    <Input
+                      id="signup-phone"
+                      type="tel"
+                      placeholder="+1 (555) 123-4567"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                    <p className="text-xs text-legacy-ink/60">
+                      You can add this later during setup
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button type="submit" disabled={loading} className="flex-1">
+                      {loading ? "Creating..." : "Create Account"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowSignup(false)}
+                      disabled={loading}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+
+                <p className="text-center text-xs text-legacy-ink/60 mt-4">
+                  Already have an account?{" "}
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto text-legacy-accent"
+                    onClick={() => {
                       setShowSignup(false);
                       navigate('/auth');
-                    }}>
-                          Sign in here
-                        </Button>
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>}
-            </div>
+                    }}
+                  >
+                    Sign in here
+                  </Button>
+                </p>
+              </CardContent>
+            </Card>
           </div>
-        </section>
-
-        {/* Features Section */}
-        <section id="how-it-works" className="py-16 px-4 bg-legacy-warm/50">
-          <div className="container mx-auto max-w-6xl">
-            <h2 className="text-3xl font-bold text-center text-legacy-primary mb-12">How LegacyText AI Works</h2>
-            
-            <div className="grid md:grid-cols-3 gap-8">
-              <Card className="shadow-paper border-legacy-border hover:shadow-warm transition-all duration-300">
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-gradient-accent rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Smartphone className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-legacy-primary mb-4">
-                    Just Text
-                  </h3>
-                  <p className="text-legacy-ink/70">
-                    No app to download. Simply text your thoughts, memories, and advice to our dedicated number.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-paper border-legacy-border hover:shadow-warm transition-all duration-300">
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-legacy-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                    <BookOpen className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-legacy-primary mb-4">
-                    AI Organization
-                  </h3>
-                  <p className="text-legacy-ink/70">
-                    Our AI organizes your messages into a beautiful, chronological journal while preserving your voice.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-paper border-legacy-border hover:shadow-warm transition-all duration-300">
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-gradient-accent rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Heart className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-legacy-primary mb-4">
-                    Lasting Legacy
-                  </h3>
-                  <p className="text-legacy-ink/70">
-                    Export as a PDF or order a premium bound journal that your children will treasure forever.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-20 px-4">
-          <div className="container mx-auto max-w-3xl text-center">
-            <h2 className="text-4xl font-bold text-legacy-primary mb-6">
-              Start Building Your Legacy Today
-            </h2>
-            <p className="text-xl text-legacy-ink/70 mb-8">
-              Join fathers who are already documenting their wisdom for the next generation.
-            </p>
-            {user ? <Button variant="accent" size="lg" className="text-lg px-8 py-6" onClick={() => navigate('/dashboard')}>
-                <MessageSquare className="w-5 h-5 mr-2" />
-                Go to Dashboard
-              </Button> : <Button variant="accent" size="lg" className="text-lg px-8 py-6" onClick={() => navigate('/auth')}>
-                <MessageSquare className="w-5 h-5 mr-2" />
-                Begin Your Legacy Journal
-              </Button>}
-          </div>
-        </section>
+        )}
       </div>
-    </Layout>;
+    </Layout>
+  );
 }
