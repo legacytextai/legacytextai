@@ -95,7 +95,7 @@ export default function Homepage() {
                   Pass down your wisdom, values, and memories to your children — with no time, structure, or effort.
                 </p>
                 
-                <p className="text-sm md:text-base text-gray-500">
+                <p className="text-sm md:text-base text-white font-thin">
                   No app. No download. Just create an account.
                 </p>
                 
