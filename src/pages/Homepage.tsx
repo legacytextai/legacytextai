@@ -92,66 +92,57 @@ export default function Homepage() {
         {/* Content wrapper with relative positioning */}
         <div className="relative z-10">
         {/* Hero Section */}
-        <section className="px-4 py-20 md:py-32">
-          <div className="container mx-auto max-w-7xl">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-              {/* Left Column - Text Content */}
-              <div className="space-y-6 md:space-y-8">
-                <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-tight animate-fade-in">
-                  A journal for your children — created by texting your thoughts.
-                </h1>
-                
-                <p className="text-xl md:text-2xl text-white font-thin leading-relaxed">
-                  Pass down your wisdom, values, and memories to your children — with no time, structure, or effort.
-                </p>
-                
-                <p className="text-sm md:text-base text-white font-thin">
-                  No app. No download. Just create an account.
-                </p>
-                
-                {/* CTA Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                  <Button 
-                    size="lg" 
-                    className="bg-white text-black hover:bg-gray-100 text-base font-normal px-10 py-6 rounded-md"
-                    onClick={() => navigate('/auth')}
-                  >
-                    Get started free
-                  </Button>
-                  <Button 
-                    size="lg" 
-                    className="bg-transparent text-white hover:bg-white/5 text-base font-normal px-10 py-6 rounded-md border-0"
-                    onClick={() => {
-                      document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                  >
-                    Learn More
-                  </Button>
-                </div>
-              </div>
-
-              {/* Right Column - Video Placeholder */}
-              <div>
-                <div 
-                  className="aspect-video bg-zinc-900 rounded-2xl md:rounded-3xl border border-white/10 flex items-center justify-center"
+        <section className="px-4 pt-16 pb-12 md:pt-20 md:pb-16 min-h-[88vh] flex items-center">
+          <div className="container mx-auto max-w-5xl">
+            <div className="text-center space-y-5 md:space-y-6">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] max-w-4xl mx-auto animate-fade-in">
+                A journal for your children — created by texting your thoughts.
+              </h1>
+              
+              <p className="text-lg md:text-xl text-white font-light leading-relaxed max-w-2xl mx-auto">
+                Pass down your wisdom, values, and memories to your children — with no time, structure, or effort.
+              </p>
+              
+              {/* CTA Buttons */}
+              <div className="flex flex-row gap-3 pt-6 md:pt-8 justify-center">
+                <Button 
+                  className="bg-white text-black hover:bg-gray-100 text-sm md:text-base font-normal px-6 py-3 md:px-8 md:py-4 rounded-lg"
+                  onClick={() => navigate('/auth')}
                 >
-                  <div className="text-center space-y-2">
-                    <div className="w-16 h-16 mx-auto bg-white/5 rounded-full flex items-center justify-center">
-                      <MessageSquare className="w-8 h-8 text-white/40" />
-                    </div>
-                    <p className="text-gray-500 text-sm">Video Placeholder</p>
-                  </div>
+                  Get started free
+                </Button>
+                <Button 
+                  className="bg-transparent text-white hover:bg-white/5 text-sm md:text-base font-normal px-6 py-3 md:px-8 md:py-4 rounded-lg border border-white/20"
+                  onClick={() => {
+                    document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  Learn More
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Video Section - Below Hero */}
+        <section className="px-4 pb-16">
+          <div className="container mx-auto max-w-5xl">
+            <div className="aspect-video bg-zinc-900 rounded-2xl border border-white/10 flex items-center justify-center">
+              <div className="text-center space-y-2">
+                <div className="w-16 h-16 mx-auto bg-white/5 rounded-full flex items-center justify-center">
+                  <MessageSquare className="w-8 h-8 text-white/40" />
                 </div>
+                <p className="text-gray-500 text-sm">Video Placeholder</p>
               </div>
             </div>
           </div>
         </section>
 
         {/* Scroll Indicator */}
-        <div className="flex flex-col items-center gap-1 pb-12 animate-bounce">
-          <ChevronDown className="w-6 h-6 text-white/30" />
-          <ChevronDown className="w-6 h-6 text-white/30 -mt-3" />
-          <ChevronDown className="w-6 h-6 text-white/30 -mt-3" />
+        <div className="flex flex-col items-center gap-1 pb-8 animate-bounce">
+          <ChevronDown className="w-5 h-5 text-white/30" />
+          <ChevronDown className="w-5 h-5 text-white/30 -mt-3" />
+          <ChevronDown className="w-5 h-5 text-white/30 -mt-3" />
         </div>
 
         {/* Pain Points / Destination Section */}
