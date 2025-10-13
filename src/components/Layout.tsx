@@ -11,6 +11,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logoImage from "@/assets/logo.png";
+import legacyTextLogo from "@/assets/legacytext-logo.png";
 
 interface LayoutProps {
   children: ReactNode;
@@ -91,8 +92,8 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
       <div className="min-h-screen bg-black">
         <header className="bg-black border-b border-white/10">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <Link to="/" className="text-white text-xl font-semibold hover:text-gray-300 transition-colors">
-              LegacyText
+            <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
+              <img src={legacyTextLogo} alt="LegacyText" className="h-8" />
             </Link>
             <div className="flex items-center gap-3">
               {!authReady || loading ? (
@@ -269,9 +270,9 @@ function SidebarLayout({ children }: { children: ReactNode }) {
             <div className="flex items-center justify-between h-10">
             <button 
               onClick={() => navigate("/dashboard")}
-              className="text-2xl font-bold text-legacy-primary hover:text-legacy-accent transition-colors cursor-pointer"
+              className="hover:opacity-80 transition-opacity cursor-pointer"
             >
-              LegacyText AI
+              <img src={legacyTextLogo} alt="LegacyText" className="h-8" />
             </button>
               <AuthButtons />
             </div>
