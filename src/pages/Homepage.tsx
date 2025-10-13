@@ -103,19 +103,19 @@ export default function Homepage() {
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Button 
                     size="lg" 
-                    className="bg-white text-black hover:bg-gray-100 text-base font-normal px-10 py-6 rounded-md"
-                    onClick={() => navigate('/auth')}
-                  >
-                    Get started free
-                  </Button>
-                  <Button 
-                    size="lg" 
-                    className="bg-transparent text-white hover:bg-white/5 text-base font-normal px-10 py-6 rounded-md border-0"
+                    className="bg-white text-black hover:bg-gray-100 text-lg px-8 py-6"
                     onClick={() => {
                       document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
                     }}
                   >
                     Learn More
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    className="border-2 border-white bg-transparent text-white hover:bg-white/10 text-lg px-8 py-6"
+                    onClick={() => navigate('/auth')}
+                  >
+                    Start Now
                   </Button>
                 </div>
               </div>
