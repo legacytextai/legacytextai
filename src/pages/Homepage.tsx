@@ -91,7 +91,7 @@ export default function Homepage() {
                   A journal for your children — created by texting your thoughts.
                 </h1>
                 
-                <p className="text-xl md:text-2xl text-gray-400 font-normal leading-relaxed">
+                <p className="text-xl md:text-2xl text-white font-thin leading-relaxed">
                   Pass down your wisdom, values, and memories to your children — with no time, structure, or effort.
                 </p>
                 
