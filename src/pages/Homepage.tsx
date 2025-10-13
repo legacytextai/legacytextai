@@ -92,27 +92,27 @@ export default function Homepage() {
         {/* Content wrapper with relative positioning */}
         <div className="relative z-10">
         {/* Hero Section */}
-        <section className="px-4 pt-16 pb-12 md:pt-20 md:pb-16 min-h-[88vh] flex items-center">
+        <section className="px-4 pt-8 pb-6 md:pt-12 md:pb-10 lg:pt-16 lg:pb-12">
           <div className="container mx-auto max-w-5xl">
-            <div className="text-center space-y-5 md:space-y-6">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] max-w-4xl mx-auto animate-fade-in">
+            <div className="text-center space-y-3 md:space-y-4 lg:space-y-5">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-[1.1] max-w-4xl mx-auto animate-fade-in">
                 A journal for your children — created by texting your thoughts.
               </h1>
               
-              <p className="text-lg md:text-xl text-white font-light leading-relaxed max-w-2xl mx-auto">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white font-light leading-relaxed max-w-2xl mx-auto">
                 Pass down your wisdom, values, and memories to your children — with no time, structure, or effort.
               </p>
               
               {/* CTA Buttons */}
-              <div className="flex flex-row gap-3 pt-6 md:pt-8 justify-center">
+              <div className="flex flex-row gap-2 pt-3 md:pt-4 lg:pt-6 justify-center">
                 <Button 
-                  className="bg-white text-black hover:bg-gray-100 text-sm md:text-base font-normal px-6 py-3 md:px-8 md:py-4 rounded-lg"
+                  className="bg-white text-black hover:bg-gray-100 text-xs sm:text-sm md:text-base font-normal px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 lg:px-8 lg:py-4 rounded-lg"
                   onClick={() => navigate('/auth')}
                 >
                   Get started free
                 </Button>
                 <Button 
-                  className="bg-transparent text-white hover:bg-white/5 text-sm md:text-base font-normal px-6 py-3 md:px-8 md:py-4 rounded-lg border border-white/20"
+                  className="bg-transparent text-white hover:bg-white/5 text-xs sm:text-sm md:text-base font-normal px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 lg:px-8 lg:py-4 rounded-lg border border-white/20"
                   onClick={() => {
                     document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
                   }}
@@ -120,30 +120,19 @@ export default function Homepage() {
                   Learn More
                 </Button>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Video Section - Below Hero */}
-        <section className="px-4 pb-16">
-          <div className="container mx-auto max-w-5xl">
-            <div className="aspect-video bg-zinc-900 rounded-2xl border border-white/10 flex items-center justify-center">
-              <div className="text-center space-y-2">
-                <div className="w-16 h-16 mx-auto bg-white/5 rounded-full flex items-center justify-center">
-                  <MessageSquare className="w-8 h-8 text-white/40" />
+              
+              {/* Video Placeholder - Integrated into Hero */}
+              <div className="aspect-[4/3] md:aspect-video bg-zinc-900 rounded-xl md:rounded-2xl border border-white/10 flex items-center justify-center max-w-sm md:max-w-2xl lg:max-w-4xl mx-auto">
+                <div className="text-center space-y-2">
+                  <div className="w-12 h-12 md:w-16 md:h-16 mx-auto bg-white/5 rounded-full flex items-center justify-center">
+                    <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-white/40" />
+                  </div>
+                  <p className="text-gray-500 text-xs md:text-sm">Video Placeholder</p>
                 </div>
-                <p className="text-gray-500 text-sm">Video Placeholder</p>
               </div>
             </div>
           </div>
         </section>
-
-        {/* Scroll Indicator */}
-        <div className="flex flex-col items-center gap-1 pb-8 animate-bounce">
-          <ChevronDown className="w-5 h-5 text-white/30" />
-          <ChevronDown className="w-5 h-5 text-white/30 -mt-3" />
-          <ChevronDown className="w-5 h-5 text-white/30 -mt-3" />
-        </div>
 
         {/* Pain Points / Destination Section */}
         <section 
