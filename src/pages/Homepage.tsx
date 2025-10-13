@@ -84,10 +84,10 @@ export default function Homepage() {
         {/* Hero Section */}
         <section className="px-4 py-20 md:py-32">
           <div className="container mx-auto max-w-7xl">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
               {/* Left Column - Text Content */}
-              <div className="space-y-6 md:space-y-8">
-                <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-tight animate-fade-in">
+              <div className="space-y-6 md:space-y-8 lg:pr-8">
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight animate-fade-in">
                   A journal for your children — created by texting your thoughts.
                 </h1>
                 
@@ -121,15 +121,12 @@ export default function Homepage() {
               </div>
 
               {/* Right Column - Video Placeholder */}
-              <div>
+              <div className="order-first lg:order-last">
                 <div 
-                  className="aspect-video bg-zinc-900 rounded-2xl md:rounded-3xl border border-white/10 flex items-center justify-center"
+                  className="aspect-video bg-white/5 rounded-3xl border border-white/10 flex items-center justify-center"
                 >
                   <div className="text-center space-y-2">
-                    <div className="w-16 h-16 mx-auto bg-white/5 rounded-full flex items-center justify-center">
-                      <MessageSquare className="w-8 h-8 text-white/40" />
-                    </div>
-                    <p className="text-gray-500 text-sm">Video Placeholder</p>
+                    <p className="text-gray-400 text-base">[Video]</p>
                   </div>
                 </div>
               </div>
