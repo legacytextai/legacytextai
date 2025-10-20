@@ -171,7 +171,7 @@ const Auth = () => {
 
           <Card className="border-legacy-border bg-card/80 backdrop-blur-sm">
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl font-bold text-legacy-ink">
+              <CardTitle className="text-2xl font-bold text-black">
                 Welcome to LegacyText
               </CardTitle>
               <CardDescription className="text-legacy-ink/70">
