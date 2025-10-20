@@ -80,7 +80,7 @@ export default function Journal() {
                     {dedication && (
                       <Card className="shadow-warm">
                         <CardHeader className="pb-3">
-                          <CardTitle className="text-lg text-legacy-primary text-center">
+                          <CardTitle className="text-lg text-black text-center">
                             Dedication
                           </CardTitle>
                         </CardHeader>
@@ -94,7 +94,7 @@ export default function Journal() {
                     
                     {/* Journal Entries */}
                     <div className="space-y-4">
-                      <h2 className="text-lg font-semibold text-legacy-primary text-center border-b border-legacy-border pb-2">
+                      <h2 className="text-lg font-semibold text-black text-center border-b border-legacy-border pb-2">
                         Journal Entries
                       </h2>
                       {sortedEntries.length > 0 ? (
@@ -123,7 +123,7 @@ export default function Journal() {
             
             {/* Dedication Page Section */}
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-legacy-primary">Dedication Page</h2>
+              <h2 className="text-xl font-semibold text-black">Dedication Page</h2>
               
               <Card className="shadow-paper">
                 <CardContent className="p-6 space-y-4">
@@ -132,7 +132,7 @@ export default function Journal() {
                   </p>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="dedication" className="text-sm font-medium text-legacy-primary">
+                    <Label htmlFor="dedication" className="text-sm font-medium text-black">
                       Your Dedication
                     </Label>
                     <Textarea id="dedication" value={dedication} onChange={handleDedicationChange} placeholder="To my loving wife and children..." className="min-h-[120px] resize-none bg-legacy-warm/50 border-legacy-border focus:border-legacy-primary" disabled={isLoading} />
@@ -149,7 +149,7 @@ export default function Journal() {
 
           {/* Export Options */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-legacy-primary">Export Options</h2>
+            <h2 className="text-xl font-semibold text-black">Export Options</h2>
             
             <div className="space-y-4">
               {/* Premium Export */}
@@ -158,7 +158,7 @@ export default function Journal() {
                   Recommended
                 </div>
                  <CardHeader className="pb-3">
-                   <CardTitle className="text-legacy-primary flex items-center gap-2">
+                   <CardTitle className="text-black flex items-center gap-2">
                      <Star className="w-5 h-5 text-legacy-accent" />
                      Premium E-Book Export
                    </CardTitle>
@@ -187,7 +187,7 @@ export default function Journal() {
               {/* Free Export */}
               <Card className="shadow-paper">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-legacy-primary flex items-center gap-2">
+                   <CardTitle className="text-black flex items-center gap-2">
                     <Download className="w-5 h-5" />
                     Free Export
                   </CardTitle>
@@ -211,7 +211,7 @@ export default function Journal() {
               {/* Physical Journal */}
               <Card className="shadow-paper">
                 <CardHeader className="pb-3">
-                   <CardTitle className="text-legacy-primary flex items-center gap-2">
+                   <CardTitle className="text-black flex items-center gap-2">
                      <BookOpen className="w-5 h-5" />
                      Physical Journal
                    </CardTitle>
