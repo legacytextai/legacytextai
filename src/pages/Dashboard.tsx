@@ -176,7 +176,7 @@ function Dashboard() {
               <CardTitle className="text-lg text-black">Phone Status</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-legacy-primary">
+              <div className="text-3xl font-bold text-black">
                 {userData?.status === 'active' ? 'Active' : 'Pending'}
               </div>
               <p className="text-sm text-legacy-ink/70 mt-1">
