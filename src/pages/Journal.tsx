@@ -63,7 +63,7 @@ export default function Journal() {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Journal Preview */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-legacy-primary">Journal Preview</h2>
+            <h2 className="text-xl font-semibold text-black">Journal Preview</h2>
             
             <Card className="shadow-deep max-w-2xl mx-auto">
               <CardContent className="p-0">
