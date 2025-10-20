@@ -265,7 +265,7 @@ function SidebarLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen flex w-full bg-gradient-warm">
       <AppSidebar />
       <main className="flex-1 flex flex-col">
-        <header className="border-b border-legacy-border bg-card/80 backdrop-blur-sm">
+        <header className="border-b border-white/10 bg-black">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col">
             <div className="flex items-center justify-between h-10">
             <button 
