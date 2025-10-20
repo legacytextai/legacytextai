@@ -197,7 +197,7 @@ const Auth = () => {
                       <Label htmlFor="signin-password">Password</Label>
                       <Input id="signin-password" type="password" placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} required />
                     </div>
-                    <Button type="submit" disabled={loading} className="w-full">
+                    <Button type="submit" disabled={loading} className="w-full bg-legacy-ink text-white hover:bg-legacy-ink/90">
                       <Mail className="w-4 h-4 mr-2" />
                       {loading ? "Signing in..." : "Sign In"}
                     </Button>
