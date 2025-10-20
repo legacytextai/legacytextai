@@ -746,7 +746,7 @@ const Settings = () => {
           {/* Journaling Preferences */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-black">
                 <MessageSquare className="w-5 h-5" />
                 Journaling Preferences
               </CardTitle>
