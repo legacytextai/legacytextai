@@ -184,9 +184,7 @@ export default function Homepage() {
                 <h3 className="text-xl md:text-2xl font-semibold text-white mb-3">
                   Receive a daily prompt by text
                 </h3>
-                <p className="text-base text-gray-400 italic">
-                  gentle questions that spark reflection
-                </p>
+                <p className="text-base text-gray-400 italic">Gentle questions that spark reflection</p>
               </div>
 
               {/* Step 2 */}
@@ -197,9 +195,7 @@ export default function Homepage() {
                 <h3 className="text-xl md:text-2xl font-semibold text-white mb-3">
                   Reply with your thoughts
                 </h3>
-                <p className="text-base text-gray-400 italic">
-                  in the moment, whenever it works for you
-                </p>
+                <p className="text-base text-gray-400 italic">In the moment, whenever it works for you</p>
               </div>
 
               {/* Step 3 */}
@@ -210,9 +206,7 @@ export default function Homepage() {
                 <h3 className="text-xl md:text-2xl font-semibold text-white mb-3">
                   AI organizes and saves everything
                 </h3>
-                <p className="text-base text-gray-400 italic">
-                  ready to export as a memoir when you're ready
-                </p>
+                <p className="text-base text-gray-400 italic">Ready to export as a memoir when you're ready</p>
               </div>
             </div>
           </div>
