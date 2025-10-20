@@ -173,7 +173,7 @@ function Dashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Phone Status</CardTitle>
+              <CardTitle className="text-lg text-black">Phone Status</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-legacy-primary">
