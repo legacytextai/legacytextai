@@ -849,7 +849,7 @@ const Settings = () => {
                 type="button"
                 variant="outline"
                 onClick={() => addChild({ name: "", dob: "" })}
-                className="w-full border-dashed"
+                className="w-full border-dashed text-black"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Child
