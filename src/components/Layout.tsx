@@ -217,19 +217,19 @@ function SidebarLayout({ children }: { children: ReactNode }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuItem asChild>
-              <Link to="/dashboard" className="flex items-center">
+              <Link to="/dashboard" className="flex items-center text-black">
                 <User className="mr-2 h-4 w-4" />
                 Dashboard
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/settings" className="flex items-center">
+              <Link to="/settings" className="flex items-center text-black">
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut}>
+            <DropdownMenuItem onClick={handleSignOut} className="text-black">
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out
             </DropdownMenuItem>
