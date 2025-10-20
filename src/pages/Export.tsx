@@ -11,7 +11,7 @@ export default function Export() {
       <div className="space-y-6">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-legacy-primary mb-2">Export Your Legacy Journal</h1>
+          <h1 className="text-3xl font-bold text-black mb-2">Export Your Legacy Journal</h1>
           <p className="text-legacy-ink/70 max-w-2xl mx-auto">
             Transform your text messages into a beautiful, lasting legacy for your children
           </p>
@@ -21,15 +21,15 @@ export default function Export() {
         <Card className="shadow-deep max-w-md mx-auto">
           <CardContent className="p-8">
             <div className="text-center space-y-4">
-              <div className="w-20 h-24 bg-legacy-primary/10 border border-legacy-border rounded-lg mx-auto flex items-center justify-center">
-                <BookOpen className="w-10 h-10 text-legacy-primary" />
+              <div className="w-20 h-24 bg-black/10 border border-legacy-border rounded-lg mx-auto flex items-center justify-center">
+                <BookOpen className="w-10 h-10 text-black" />
               </div>
               <div>
-                <h3 className="font-bold text-legacy-primary">John Doe's</h3>
+                <h3 className="font-bold text-black">John Doe's</h3>
                 <p className="text-sm text-legacy-ink/70">Legacy Journal</p>
               </div>
               <div className="space-y-2 text-left bg-legacy-warm/50 p-4 rounded-lg">
-                <h4 className="font-semibold text-legacy-primary border-b border-legacy-border pb-1">
+                <h4 className="font-semibold text-black border-b border-legacy-border pb-1">
                   Dedication
                 </h4>
                 <p className="text-sm text-legacy-ink/80">
@@ -42,7 +42,7 @@ export default function Export() {
                 </div>
               </div>
               <div className="text-left bg-legacy-warm/50 p-4 rounded-lg">
-                <h4 className="font-semibold text-legacy-primary border-b border-legacy-border pb-1">
+                <h4 className="font-semibold text-black border-b border-legacy-border pb-1">
                   Introduction
                 </h4>
                 <p className="text-xs text-legacy-ink/70">
@@ -61,14 +61,14 @@ export default function Export() {
               <Badge variant="secondary" className="w-fit mx-auto mb-2">
                 Free
               </Badge>
-              <CardTitle className="text-legacy-primary">Basic PDF Export</CardTitle>
+              <CardTitle className="text-black">Basic PDF Export</CardTitle>
               <p className="text-sm text-legacy-ink/70">
                 Simple text-only version of your entries
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
-                <span className="text-3xl font-bold text-legacy-primary">$0</span>
+                <span className="text-3xl font-bold text-black">$0</span>
               </div>
               <ul className="space-y-2 text-sm text-legacy-ink/70">
                 <li>• Chronological entry list</li>
@@ -89,14 +89,14 @@ export default function Export() {
               <Badge variant="default" className="w-fit mx-auto mb-2 bg-legacy-accent">
                 Premium
               </Badge>
-              <CardTitle className="text-legacy-primary">Formatted Legacy Journal</CardTitle>
+              <CardTitle className="text-black">Formatted Legacy Journal</CardTitle>
               <p className="text-sm text-legacy-ink/70">
                 Beautiful, professionally formatted journal
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
-                <div className="text-3xl font-bold text-legacy-primary line-through">$9.99</div>
+                <div className="text-3xl font-bold text-black line-through">$9.99</div>
                 <p className="text-lg font-semibold text-legacy-accent">Free for Early Access Users</p>
               </div>
               <ul className="space-y-2 text-sm text-legacy-ink/70">
@@ -120,14 +120,14 @@ export default function Export() {
               <Badge variant="secondary" className="w-fit mx-auto mb-2 bg-amber-100 text-amber-800">
                 Physical
               </Badge>
-              <CardTitle className="text-legacy-primary">Leatherbound Journal</CardTitle>
+              <CardTitle className="text-black">Leatherbound Journal</CardTitle>
               <p className="text-sm text-legacy-ink/70">
                 Heirloom-quality physical journal
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
-                <span className="text-3xl font-bold text-legacy-primary"></span>
+                <span className="text-3xl font-bold text-black"></span>
               </div>
               <ul className="space-y-2 text-sm text-legacy-ink/70">
                 <li>• Premium leather binding</li>
@@ -148,36 +148,36 @@ export default function Export() {
         {/* Sample Pages */}
         <Card className="shadow-paper">
           <CardHeader>
-            <CardTitle className="text-legacy-primary">What's Included</CardTitle>
+            <CardTitle className="text-black">What's Included</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="text-center space-y-2">
-                <div className="w-12 h-12 bg-legacy-primary/10 rounded-full flex items-center justify-center mx-auto">
-                  <BookOpen className="w-6 h-6 text-legacy-primary" />
+                <div className="w-12 h-12 bg-black/10 rounded-full flex items-center justify-center mx-auto">
+                  <BookOpen className="w-6 h-6 text-black" />
                 </div>
-                <h4 className="font-medium text-legacy-primary">Dedication Page</h4>
+                <h4 className="font-medium text-black">Dedication Page</h4>
                 <p className="text-sm text-legacy-ink/70">Personal message to your children</p>
               </div>
               <div className="text-center space-y-2">
-                <div className="w-12 h-12 bg-legacy-primary/10 rounded-full flex items-center justify-center mx-auto">
-                  <List className="w-6 h-6 text-legacy-primary" />
+                <div className="w-12 h-12 bg-black/10 rounded-full flex items-center justify-center mx-auto">
+                  <List className="w-6 h-6 text-black" />
                 </div>
-                <h4 className="font-medium text-legacy-primary">All Entries</h4>
+                <h4 className="font-medium text-black">All Entries</h4>
                 <p className="text-sm text-legacy-ink/70">Every message organized chronologically</p>
               </div>
               <div className="text-center space-y-2">
-                <div className="w-12 h-12 bg-legacy-primary/10 rounded-full flex items-center justify-center mx-auto">
-                  <Camera className="w-6 h-6 text-legacy-primary" />
+                <div className="w-12 h-12 bg-black/10 rounded-full flex items-center justify-center mx-auto">
+                  <Camera className="w-6 h-6 text-black" />
                 </div>
-                <h4 className="font-medium text-legacy-primary">Photos</h4>
+                <h4 className="font-medium text-black">Photos</h4>
                 <p className="text-sm text-legacy-ink/70">Memories captured in your messages</p>
               </div>
               <div className="text-center space-y-2">
-                <div className="w-12 h-12 bg-legacy-primary/10 rounded-full flex items-center justify-center mx-auto">
-                  <Star className="w-6 h-6 text-legacy-primary" />
+                <div className="w-12 h-12 bg-black/10 rounded-full flex items-center justify-center mx-auto">
+                  <Star className="w-6 h-6 text-black" />
                 </div>
-                <h4 className="font-medium text-legacy-primary">Categories</h4>
+                <h4 className="font-medium text-black">Categories</h4>
                 <p className="text-sm text-legacy-ink/70">Organized by themes and topics</p>
               </div>
             </div>
