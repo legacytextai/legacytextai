@@ -869,7 +869,7 @@ const Settings = () => {
               <p className="text-legacy-ink/70">
                 Send yourself a test prompt to see how the system works with your current settings.
               </p>
-              <Button type="button" onClick={sendTestPrompt} variant="outline" className="w-full">
+              <Button type="button" onClick={sendTestPrompt} variant="outline" className="w-full text-black">
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Send Test Prompt
               </Button>
