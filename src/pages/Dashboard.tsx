@@ -187,7 +187,7 @@ function Dashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Last Entry</CardTitle>
+              <CardTitle className="text-lg text-black">Last Entry</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-legacy-primary">
