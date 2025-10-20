@@ -525,7 +525,7 @@ const Settings = () => {
           {/* Profile */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-black">
                 <User className="w-5 h-5" />
                 Profile
               </CardTitle>
