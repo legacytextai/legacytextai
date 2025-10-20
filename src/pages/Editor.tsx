@@ -289,7 +289,7 @@ export default function Editor() {
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Discard Changes
               </Button>
-              <Button variant="hero">
+              <Button className="bg-black hover:bg-black/90 text-white">
                 <Save className="w-4 h-4 mr-2" />
                 Save All Changes
               </Button>
