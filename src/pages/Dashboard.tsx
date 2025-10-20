@@ -147,7 +147,7 @@ function Dashboard() {
               Add Entry
             </Button>
             <Link to="/export" className="flex-shrink-0">
-              <Button variant="default" size="lg" className="w-full sm:w-auto">
+              <Button variant="default" size="lg" className="w-full sm:w-auto bg-black text-white hover:bg-black/90">
                 <BookOpen className="w-5 h-5 mr-2" />
                 Export Journal
               </Button>
