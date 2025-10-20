@@ -136,7 +136,7 @@ function Dashboard() {
         )}
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-legacy-primary">Entry History</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Entry History</h1>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto min-w-0">
             <Button 
               variant="outline" 
