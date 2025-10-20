@@ -224,7 +224,7 @@ export default function Homepage() {
               
               {/* Quote */}
               <p className="text-xl md:text-2xl text-gray-200 text-center mb-6 leading-relaxed">
-                "As a father, I was overwhelmed by the fear that one day I wouldn't be around to guide my children through life. LegacyText AI was born out of that fear — and the desire to give fathers a way to show up, long after we're gone."
+                "As a father, I was overwhelmed by the fear that one day I wouldn't be around to guide my children through life. LegacyText was born out of that fear — and the desire to give fathers a way to show up, long after we're gone."
               </p>
               
               {/* Attribution */}
