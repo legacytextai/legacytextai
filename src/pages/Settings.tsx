@@ -792,7 +792,7 @@ const Settings = () => {
                     placeholder="Add a topic to avoid..."
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addBannedTopic())}
                   />
-                  <Button type="button" onClick={addBannedTopic} size="sm">
+                  <Button type="button" onClick={addBannedTopic} size="sm" className="bg-black hover:bg-black/90 text-white">
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>
