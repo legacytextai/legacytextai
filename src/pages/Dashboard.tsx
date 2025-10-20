@@ -269,7 +269,7 @@ function Dashboard() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Users className="w-5 h-5" />
-              <span>Your Journal Entries</span>
+              <span className="text-black">Your Journal Entries</span>
               {searchTerm && (
                 <Badge variant="secondary" className="ml-2">
                   {filteredEntries.length} of {entries.length}
