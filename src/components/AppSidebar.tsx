@@ -41,7 +41,8 @@ export function AppSidebar() {
   return <Sidebar variant="sidebar" className={collapsed ? "w-14" : "w-64"} collapsible="icon">
       <SidebarContent className="bg-card border-r border-legacy-border">
         <div className="p-4 border-b border-legacy-border">
-          {!collapsed && <div className="text-center">
+          {!collapsed && <div className="text-center space-y-2">
+              <BookOpen className="w-8 h-8 mx-auto text-black" />
               <h2 className="text-lg font-semibold text-black">{firstName}'s Legacy Journal</h2>
               
             </div>}
