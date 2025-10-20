@@ -6,22 +6,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  ChevronDown, 
-  Heart, 
-  MessageCircle, 
-  Star, 
-  MessageSquare, 
-  Edit3, 
-  Sparkles, 
-  User 
-} from "lucide-react";
+import { ChevronDown, Heart, MessageCircle, Star, MessageSquare, Edit3, Sparkles, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
 export default function Homepage() {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
   const [showSignup, setShowSignup] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,27 +21,25 @@ export default function Homepage() {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
       setLoading(false);
       return;
     }
-
     const redirectUrl = `${window.location.origin}/dashboard`;
-    const { error } = await supabase.auth.signUp({
+    const {
+      error
+    } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl,
-      },
+        emailRedirectTo: redirectUrl
+      }
     });
-
     if (error) {
       if (error.message.includes("already registered")) {
         setError("This email is already registered. Please sign in instead.");
@@ -71,22 +61,14 @@ export default function Homepage() {
     }
     setLoading(false);
   };
-
-  return (
-    <Layout showSidebar={false}>
+  return <Layout showSidebar={false}>
       {/* Chronicle-Inspired Black Theme Wrapper */}
       <div className="min-h-screen bg-black text-white relative overflow-hidden">
         {/* Blurred gradient background */}
         <div className="absolute inset-0 overflow-hidden">
-          <div 
-            className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-white/10 rounded-full blur-[120px]"
-          />
-          <div 
-            className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-white/8 rounded-full blur-[100px]"
-          />
-          <div 
-            className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] bg-white/12 rounded-full blur-[110px]"
-          />
+          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-white/10 rounded-full blur-[120px]" />
+          <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-white/8 rounded-full blur-[100px]" />
+          <div className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] bg-white/12 rounded-full blur-[110px]" />
         </div>
         
         {/* Content wrapper with relative positioning */}
@@ -109,18 +91,14 @@ export default function Homepage() {
               
               {/* CTA Buttons */}
               <div className="flex flex-row gap-2 pt-3 md:pt-4 lg:pt-6 justify-center">
-                <Button 
-                  className="bg-white text-black hover:bg-gray-100 text-xs sm:text-sm md:text-base font-normal px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 lg:px-8 lg:py-4 rounded-lg"
-                  onClick={() => navigate('/auth')}
-                >
+                <Button className="bg-white text-black hover:bg-gray-100 text-xs sm:text-sm md:text-base font-normal px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 lg:px-8 lg:py-4 rounded-lg" onClick={() => navigate('/auth')}>
                   Get started free
                 </Button>
-                <Button 
-                  className="bg-transparent text-white hover:bg-white/5 text-xs sm:text-sm md:text-base font-normal px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 lg:px-8 lg:py-4 rounded-lg border border-white/20"
-                  onClick={() => {
-                    document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
+                <Button className="bg-transparent text-white hover:bg-white/5 text-xs sm:text-sm md:text-base font-normal px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 lg:px-8 lg:py-4 rounded-lg border border-white/20" onClick={() => {
+                  document.getElementById('how-it-works')?.scrollIntoView({
+                    behavior: 'smooth'
+                  });
+                }}>
                   Learn More
                 </Button>
               </div>
@@ -139,12 +117,9 @@ export default function Homepage() {
         </section>
 
         {/* Pain Points / Destination Section */}
-        <section 
-          className="px-4 py-24 md:py-32"
-          style={{
-            background: 'linear-gradient(to bottom, #000000, #0a0a14, #000000)'
-          }}
-        >
+        <section className="px-4 py-24 md:py-32" style={{
+          background: 'linear-gradient(to bottom, #000000, #0a0a14, #000000)'
+        }}>
           <div className="container mx-auto max-w-7xl">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">
               Imagine your kids discovering the father behind the role.
@@ -184,9 +159,7 @@ export default function Homepage() {
             </div>
 
             {/* Bottom Text */}
-            <p className="text-xl md:text-2xl text-white text-center max-w-4xl mx-auto mt-16">
-              This isn't just journaling. It's connection, captured — made effortless with AI and delivered through the medium you already use every day: text messaging.
-            </p>
+            <p className="text-xl md:text-2xl text-white text-center max-w-4xl mx-auto mt-16">This isn't just journaling. It's fatherhood, captured — made effortless with AI and delivered through the medium you already use every day: text messaging.</p>
           </div>
         </section>
 
@@ -249,12 +222,9 @@ export default function Homepage() {
         <section className="px-4 py-24 md:py-32 bg-black">
           <div className="container mx-auto max-w-7xl">
             {/* Testimonial Card */}
-            <div 
-              className="bg-white/[0.05] border border-white/20 rounded-3xl p-10 md:p-12 max-w-3xl mx-auto mb-12"
-              style={{
-                boxShadow: '0 0 40px rgba(255, 255, 255, 0.05)'
-              }}
-            >
+            <div className="bg-white/[0.05] border border-white/20 rounded-3xl p-10 md:p-12 max-w-3xl mx-auto mb-12" style={{
+              boxShadow: '0 0 40px rgba(255, 255, 255, 0.05)'
+            }}>
               {/* Avatar */}
               <div className="w-16 h-16 bg-white/10 border border-white/20 rounded-full flex items-center justify-center mx-auto mb-8">
                 <User className="w-8 h-8 text-white" />
@@ -273,11 +243,7 @@ export default function Homepage() {
 
             {/* Final CTA Button */}
             <div className="text-center">
-              <Button 
-                size="lg" 
-                className="bg-white text-black hover:bg-gray-100 text-xl px-12 py-6 rounded-xl w-full sm:w-auto"
-                onClick={() => navigate('/auth')}
-              >
+              <Button size="lg" className="bg-white text-black hover:bg-gray-100 text-xl px-12 py-6 rounded-xl w-full sm:w-auto" onClick={() => navigate('/auth')}>
                 Start Your Legacy Journal Now
               </Button>
             </div>
@@ -285,8 +251,7 @@ export default function Homepage() {
         </section>
 
         {/* Signup Form Modal - Preserved for Future Use */}
-        {showSignup && !user && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        {showSignup && !user && <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <Card className="w-full max-w-md border-legacy-border bg-card">
               <CardContent className="p-6">
                 <div className="mb-4">
@@ -298,49 +263,26 @@ export default function Homepage() {
                   </p>
                 </div>
 
-                {error && (
-                  <Alert className="mb-4 border-destructive/50">
+                {error && <Alert className="mb-4 border-destructive/50">
                     <AlertDescription className="text-destructive">
                       {error}
                     </AlertDescription>
-                  </Alert>
-                )}
+                  </Alert>}
 
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
+                    <Input id="signup-email" type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} required />
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="Create a password (min 6 characters)"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                    />
+                    <Input id="signup-password" type="password" placeholder="Create a password (min 6 characters)" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="signup-phone">Phone Number (Optional)</Label>
-                    <Input
-                      id="signup-phone"
-                      type="tel"
-                      placeholder="+1 (555) 123-4567"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                    />
+                    <Input id="signup-phone" type="tel" placeholder="+1 (555) 123-4567" value={phone} onChange={e => setPhone(e.target.value)} />
                     <p className="text-xs text-legacy-ink/60">
                       You can add this later during setup
                     </p>
@@ -350,12 +292,7 @@ export default function Homepage() {
                     <Button type="submit" disabled={loading} className="flex-1">
                       {loading ? "Creating..." : "Create Account"}
                     </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowSignup(false)}
-                      disabled={loading}
-                    >
+                    <Button type="button" variant="outline" onClick={() => setShowSignup(false)} disabled={loading}>
                       Cancel
                     </Button>
                   </div>
@@ -363,23 +300,17 @@ export default function Homepage() {
 
                 <p className="text-center text-xs text-legacy-ink/60 mt-4">
                   Already have an account?{" "}
-                  <Button
-                    variant="link"
-                    className="p-0 h-auto text-legacy-accent"
-                    onClick={() => {
-                      setShowSignup(false);
-                      navigate('/auth');
-                    }}
-                  >
+                  <Button variant="link" className="p-0 h-auto text-legacy-accent" onClick={() => {
+                  setShowSignup(false);
+                  navigate('/auth');
+                }}>
                     Sign in here
                   </Button>
                 </p>
               </CardContent>
             </Card>
-          </div>
-        )}
+          </div>}
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 }
