@@ -26,7 +26,7 @@ All colors MUST be HSL.
     --muted: 210 20% 95%;
     --muted-foreground: 210 16% 46%;
 
-    --accent: 354 70% 54%;
+    --accent: 0 0% 0%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84% 60%;
@@ -40,7 +40,7 @@ All colors MUST be HSL.
 
     /* Legacy Journal specific colors */
     --legacy-primary: 210 54% 20%;      /* #1D3557 deep navy */
-    --legacy-accent: 354 70% 54%;       /* #E63946 emotional red */
+    --legacy-accent: 0 0% 0%;          /* black */
     --legacy-warm: 30 50% 96%;          /* warm paper white */
     --legacy-ink: 210 40% 25%;          /* ink blue-black */
     --legacy-border: 210 20% 85%;       /* subtle borders */
@@ -49,7 +49,7 @@ All colors MUST be HSL.
     /* Gradients */
     --gradient-warm: linear-gradient(135deg, hsl(30 50% 98%) 0%, hsl(30 30% 96%) 100%);
     --gradient-hero: linear-gradient(135deg, hsl(var(--legacy-primary)) 0%, hsl(210 45% 15%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(var(--legacy-accent)) 0%, hsl(354 65% 45%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(0 0% 0%) 0%, hsl(0 0% 20%) 100%);
 
     /* Shadows */
     --shadow-warm: 0 4px 20px -4px hsl(var(--legacy-primary) / 0.1);
