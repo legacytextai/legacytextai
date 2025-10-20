@@ -169,7 +169,7 @@ export default function Editor() {
                   <Textarea 
                     value={editingContent[entry.id] ?? entry.content}
                     onChange={(e) => handleContentChange(entry.id, e.target.value)}
-                    className="min-h-24 border-legacy-border focus:border-legacy-primary resize-none"
+                    className="min-h-24 border-legacy-border focus:border-legacy-primary resize-none text-black"
                     placeholder="Edit your journal entry..."
                   />
                   <div className="flex justify-end">
@@ -215,7 +215,7 @@ export default function Editor() {
                         value={newEntryContent}
                         onChange={(e) => setNewEntryContent(e.target.value)}
                         placeholder="Write your journal entry here..."
-                        className="min-h-32"
+                        className="min-h-32 text-black"
                       />
                       <div className="flex justify-end gap-2">
                         <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
@@ -258,7 +258,7 @@ export default function Editor() {
                       value={newEntryContent}
                       onChange={(e) => setNewEntryContent(e.target.value)}
                       placeholder="Write your journal entry here..."
-                      className="min-h-32"
+                      className="min-h-32 text-black"
                     />
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
