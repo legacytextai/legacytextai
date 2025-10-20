@@ -48,7 +48,7 @@ export default function Journal() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-legacy-primary flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-black flex items-center gap-3">
               <BookOpen className="w-8 h-8" />
               View / Export
             </h1>
