@@ -139,7 +139,7 @@ export default function Journal() {
                     {isSaving && <p className="text-xs text-legacy-ink/50">Saving...</p>}
                   </div>
                   
-                  <Button onClick={handleSaveDedication} disabled={isSaving || isLoading} className="w-full">
+                  <Button onClick={handleSaveDedication} disabled={isSaving || isLoading} className="w-full bg-black hover:bg-black/90 text-white">
                     {isSaving ? 'Saving...' : 'Save Dedication'}
                   </Button>
                 </CardContent>
