@@ -42,7 +42,7 @@ export function AppSidebar() {
       <SidebarContent className="bg-card border-r border-legacy-border">
         <div className="p-4 border-b border-legacy-border">
           {!collapsed && <div className="text-center">
-              <h2 className="text-lg font-semibold text-legacy-primary">{firstName}'s Legacy Journal</h2>
+              <h2 className="text-lg font-semibold text-black">{firstName}'s Legacy Journal</h2>
               
             </div>}
         </div>
