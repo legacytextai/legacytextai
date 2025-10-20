@@ -92,7 +92,7 @@ export default function Editor() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-legacy-primary flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-black flex items-center gap-3">
               <Edit3 className="w-8 h-8" />
               Editor
             </h1>
@@ -108,9 +108,9 @@ export default function Editor() {
         <Card className="shadow-paper bg-legacy-warm/30 border-legacy-border">
           <CardContent className="p-6">
             <div className="flex items-start gap-3">
-              <Edit3 className="w-5 h-5 text-legacy-primary mt-0.5" />
+              <Edit3 className="w-5 h-5 text-black mt-0.5" />
               <div>
-                <h3 className="font-medium text-legacy-primary mb-1">Journal Editor</h3>
+                <h3 className="font-medium text-black mb-1">Journal Editor</h3>
                 <p className="text-sm text-legacy-ink/70">
                   Edit entry text, reorder entries by dragging, delete unwanted entries, or change categories. 
                   All changes will be reflected in your exported journal.
@@ -124,7 +124,7 @@ export default function Editor() {
         <div className="space-y-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-legacy-primary"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
             </div>
           ) : entries.length > 0 ? (
             entries.map((entry) => (
@@ -132,13 +132,13 @@ export default function Editor() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <button className="text-legacy-ink/40 hover:text-legacy-primary cursor-grab active:cursor-grabbing">
+                      <button className="text-legacy-ink/40 hover:text-black cursor-grab active:cursor-grabbing">
                         <GripVertical className="w-4 h-4" />
                       </button>
                       <div className="text-sm text-legacy-ink/60">
                         <span className="font-medium">{formatDate(entry.received_at)}</span> • <span>{formatTime(entry.received_at)}</span>
                       </div>
-                      <Badge variant="secondary" className="bg-legacy-primary/10 text-legacy-primary">
+                      <Badge variant="secondary" className="bg-black/10 text-black">
                         Entry
                       </Badge>
                     </div>
@@ -192,8 +192,8 @@ export default function Editor() {
           ) : (
             <Card className="shadow-paper border-legacy-border">
               <CardContent className="p-12 text-center">
-                <Edit3 className="w-16 h-16 text-legacy-primary/40 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-legacy-primary mb-2">
+                <Edit3 className="w-16 h-16 text-black/40 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-black mb-2">
                   No entries yet
                 </h3>
                 <p className="text-legacy-ink/70 mb-6">
@@ -237,8 +237,8 @@ export default function Editor() {
         {entries.length > 0 && (
           <Card className="shadow-paper border-2 border-dashed border-legacy-border">
             <CardContent className="p-8 text-center">
-              <Edit3 className="w-12 h-12 text-legacy-primary/40 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-legacy-primary mb-2">Add New Entry</h3>
+              <Edit3 className="w-12 h-12 text-black/40 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-black mb-2">Add New Entry</h3>
               <p className="text-legacy-ink/70 mb-4">
                 Manually add a new journal entry or continue texting to add more entries automatically.
               </p>
@@ -278,7 +278,7 @@ export default function Editor() {
         {/* Save Changes */}
         <Card className="shadow-paper bg-gradient-warm border-legacy-border">
           <CardContent className="p-6 text-center">
-            <h3 className="text-lg font-semibold text-legacy-primary mb-2">
+            <h3 className="text-lg font-semibold text-black mb-2">
               Save Your Changes
             </h3>
             <p className="text-legacy-ink/70 mb-4">
