@@ -159,7 +159,7 @@ function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Total Entries</CardTitle>
+              <CardTitle className="text-lg text-black">Total Entries</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-legacy-primary">
