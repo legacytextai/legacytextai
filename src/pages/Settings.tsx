@@ -734,6 +734,7 @@ const Settings = () => {
                       type="button"
                       onClick={confirmPhoneChange}
                       disabled={!verificationCode || verificationCode.length !== 6 || isChangingPhone}
+                      className="bg-black hover:bg-black/90 text-white"
                     >
                       {isChangingPhone ? 'Verifying...' : 'Verify'}
                     </Button>
