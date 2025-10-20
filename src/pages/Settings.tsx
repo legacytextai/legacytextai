@@ -769,7 +769,7 @@ const Settings = () => {
                     placeholder="Add an interest..."
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addInterest())}
                   />
-                  <Button type="button" onClick={addInterest} size="sm">
+                  <Button type="button" onClick={addInterest} size="sm" className="bg-black hover:bg-black/90 text-white">
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>
