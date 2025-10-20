@@ -162,7 +162,7 @@ const Auth = () => {
         <div className="w-full max-w-md">
           <div className="mb-6">
             <Link to="/">
-              <Button variant="ghost" size="sm" className="mb-4">
+              <Button variant="ghost" size="sm" className="mb-4 text-white">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Home
               </Button>
