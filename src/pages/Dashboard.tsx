@@ -141,7 +141,7 @@ function Dashboard() {
             <Button 
               variant="outline" 
               onClick={() => setShowAddEntry(!showAddEntry)}
-              className="flex-shrink-0"
+              className="flex-shrink-0 text-black border-black hover:bg-black hover:text-white"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Entry
