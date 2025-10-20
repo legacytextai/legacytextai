@@ -172,7 +172,7 @@ const Auth = () => {
           <Card className="border-legacy-border bg-card/80 backdrop-blur-sm">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl font-bold text-legacy-primary">
-                Welcome to LegacyText AI
+                Welcome to LegacyText
               </CardTitle>
               <CardDescription className="text-legacy-ink/70">
                 Create your account or sign in to start building your legacy journal
