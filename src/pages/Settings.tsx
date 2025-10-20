@@ -480,7 +480,7 @@ const Settings = () => {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h1 className="text-2xl font-bold text-legacy-primary mb-4">Authentication Required</h1>
+          <h1 className="text-2xl font-bold text-black mb-4">Authentication Required</h1>
           <p className="text-legacy-ink/70 mb-6">Please sign in to access your settings.</p>
           <Button onClick={() => navigate('/auth')}>Sign In</Button>
         </div>
@@ -493,7 +493,7 @@ const Settings = () => {
       <Layout>
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-legacy-primary mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto mb-4"></div>
             <p className="text-legacy-ink/70">Loading settings...</p>
           </div>
         </div>
@@ -505,8 +505,8 @@ const Settings = () => {
     <Layout>
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <SettingsIcon className="w-6 h-6 text-legacy-primary" />
-          <h1 className="text-3xl font-bold text-legacy-primary">Settings</h1>
+          <SettingsIcon className="w-6 h-6 text-black" />
+          <h1 className="text-3xl font-bold text-black">Settings</h1>
         </div>
 
         {/* Phone Verification Banner */}
