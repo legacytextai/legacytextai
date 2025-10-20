@@ -98,7 +98,7 @@ export default function Editor() {
             </h1>
             <p className="text-legacy-ink/70 mt-1">Edit, reorder, and refine your legacy journal entries</p>
           </div>
-          <Button variant="hero">
+          <Button className="bg-black hover:bg-black/90 text-white">
             <Save className="w-4 h-4 mr-2" />
             Save Changes
           </Button>
