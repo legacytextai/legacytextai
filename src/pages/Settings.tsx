@@ -683,7 +683,7 @@ const Settings = () => {
           {!showPhoneVerification && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-black">
                   <Phone className="w-5 h-5" />
                   Change Phone Number
                 </CardTitle>
