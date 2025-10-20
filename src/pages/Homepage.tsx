@@ -103,14 +103,18 @@ export default function Homepage() {
                 </Button>
               </div>
               
-              {/* Video Placeholder - Integrated into Hero */}
-              <div className="aspect-[4/3] md:aspect-video bg-zinc-900 rounded-xl md:rounded-2xl border border-white/10 flex items-center justify-center max-w-sm md:max-w-2xl lg:max-w-4xl mx-auto">
-                <div className="text-center space-y-2">
-                  <div className="w-12 h-12 md:w-16 md:h-16 mx-auto bg-white/5 rounded-full flex items-center justify-center">
-                    <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-white/40" />
-                  </div>
-                  <p className="text-gray-500 text-xs md:text-sm">Video Placeholder</p>
-                </div>
+              {/* Hero Video */}
+              <div className="aspect-[4/3] md:aspect-video rounded-xl md:rounded-2xl border border-white/10 overflow-hidden max-w-sm md:max-w-2xl lg:max-w-4xl mx-auto">
+                <video 
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                >
+                  <source src="/assets/videos/automatic.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
               </div>
             </div>
           </div>
