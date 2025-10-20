@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { BookOpen, Edit3, Settings, Home, Download } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
+import { useUserData } from "@/hooks/useUserData";
 const mainItems = [{
   title: "Dashboard",
   url: "/dashboard",
@@ -29,6 +30,8 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
+  const { userData } = useUserData();
+  const firstName = userData?.name?.split(' ')[0] || 'Your';
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({
     isActive
@@ -39,7 +42,7 @@ export function AppSidebar() {
       <SidebarContent className="bg-card border-r border-legacy-border">
         <div className="p-4 border-b border-legacy-border">
           {!collapsed && <div className="text-center">
-              <h2 className="text-lg font-semibold text-legacy-primary">Your Legacy Journal</h2>
+              <h2 className="text-lg font-semibold text-legacy-primary">{firstName}'s Legacy Journal</h2>
               
             </div>}
         </div>
