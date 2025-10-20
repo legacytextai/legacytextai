@@ -932,7 +932,7 @@ const Settings = () => {
 
           {/* Save Settings */}
           <div className="flex justify-end pt-4">
-            <Button type="submit" disabled={saving}>
+            <Button type="submit" disabled={saving} className="bg-black hover:bg-black/90 text-white">
               {saving ? 'Saving...' : 'Save Settings'}
             </Button>
           </div>
