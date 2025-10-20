@@ -244,7 +244,7 @@ export default function Editor() {
               </p>
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline">
+                  <Button variant="outline" className="text-black">
                     <Plus className="w-4 h-4 mr-2" />
                     Add Manual Entry
                   </Button>
