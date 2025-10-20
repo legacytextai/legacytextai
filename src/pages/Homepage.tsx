@@ -184,7 +184,7 @@ export default function Homepage() {
             </div>
 
             {/* Bottom Text */}
-            <p className="text-xl md:text-2xl text-gray-400 text-center max-w-4xl mx-auto mt-16">
+            <p className="text-xl md:text-2xl text-white text-center max-w-4xl mx-auto mt-16">
               This isn't just journaling. It's connection, captured — made effortless with AI and delivered through the medium you already use every day: text messaging.
             </p>
           </div>
