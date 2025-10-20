@@ -40,9 +40,9 @@ export function AppSidebar() {
   }) => isActive ? "bg-legacy-accent/10 text-legacy-accent border-r-2 border-legacy-accent font-medium" : "hover:bg-legacy-primary/5 text-legacy-ink";
   return <Sidebar variant="sidebar" className={collapsed ? "w-14" : "w-64"} collapsible="icon">
       <SidebarContent className="bg-card border-r border-legacy-border">
-        <div className="p-4 border-b border-legacy-border">
+        <div className="p-4 border-b border-legacy-border bg-black">
           {!collapsed && <div className="text-center">
-              <h2 className="text-lg font-semibold text-black">{firstName}'s Legacy Journal</h2>
+              <h2 className="text-lg font-semibold text-white">{firstName}'s Legacy Journal</h2>
               
             </div>}
         </div>
