@@ -49,7 +49,7 @@ export function AppSidebar() {
         <div className="p-4 border-b border-legacy-border">
           {!collapsed && (
             <div className="text-center">
-              <h2 className="text-lg font-semibold text-legacy-primary">Your Legacy</h2>
+              <h2 className="text-lg font-semibold text-black">Your Legacy</h2>
               <p className="text-sm text-muted-foreground">Journal</p>
             </div>
           )}
