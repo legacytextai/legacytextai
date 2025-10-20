@@ -170,7 +170,7 @@ export default function Homepage() {
               Introducing LegacyText AI
             </h2>
             
-            <p className="text-xl md:text-2xl text-gray-400 text-center max-w-3xl mx-auto mb-20">
+            <p className="text-xl md:text-2xl text-white font-light text-center max-w-3xl mx-auto mb-20">
               A text-based journaling tool that helps fathers reflect, organize, and preserve their wisdom — one message at a time.
             </p>
 
