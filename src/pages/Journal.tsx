@@ -71,7 +71,7 @@ export default function Journal() {
                   <div className="space-y-6 p-6">
                     {/* Journal Title */}
                     <div className="text-center border-b border-legacy-border pb-4">
-                      <h1 className="text-2xl font-bold text-legacy-primary">
+                      <h1 className="text-2xl font-bold text-black">
                         {userData?.name || 'My'}'s Legacy Journal
                       </h1>
                     </div>
