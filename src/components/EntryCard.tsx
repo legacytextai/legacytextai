@@ -168,7 +168,7 @@ export const EntryCard: React.FC<EntryCardProps> = ({
             </div>
           </div>
         ) : (
-          <p className="text-legacy-ink leading-relaxed whitespace-pre-wrap">
+          <p className="text-black leading-relaxed whitespace-pre-wrap">
             {entry.content}
           </p>
         )}
