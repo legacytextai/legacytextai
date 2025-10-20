@@ -93,7 +93,7 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
         <header className="bg-black border-b border-white/10">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-              <img src={legacyTextLogo} alt="LegacyText" className="h-10" />
+              <img src={legacyTextLogo} alt="LegacyText" className="h-8 sm:h-10 w-auto object-contain max-w-[180px] sm:max-w-none" />
             </Link>
             <div className="flex items-center gap-3">
               {!authReady || loading ? (
@@ -272,7 +272,7 @@ function SidebarLayout({ children }: { children: ReactNode }) {
               onClick={() => navigate("/dashboard")}
               className="hover:opacity-80 transition-opacity cursor-pointer"
             >
-              <img src={legacyTextLogo} alt="LegacyText" className="h-10" />
+              <img src={legacyTextLogo} alt="LegacyText" className="h-8 sm:h-10 w-auto object-contain max-w-[180px] sm:max-w-none" />
             </button>
               <AuthButtons />
             </div>
