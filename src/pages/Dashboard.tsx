@@ -190,7 +190,7 @@ function Dashboard() {
               <CardTitle className="text-lg text-black">Last Entry</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-legacy-primary">
+              <div className="text-3xl font-bold text-black">
                 {filteredEntries.length > 0 ? 'Recent' : 'None'}
               </div>
               <p className="text-sm text-legacy-ink/70 mt-1">
