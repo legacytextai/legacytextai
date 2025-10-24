@@ -76,12 +76,33 @@ export default function Journal() {
                       </h1>
                     </div>
                     
-                    {/* Dedication */}
+                    {/* Dedication Editor */}
+                    <Card className="shadow-paper">
+                      <CardContent className="p-6 space-y-4">
+                        <p className="text-legacy-ink/70 text-sm">
+                          Write a few sentences about who you'd like to dedicate your Legacy Journal to.
+                        </p>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="dedication" className="text-sm font-medium text-black">
+                            Your Dedication
+                          </Label>
+                          <Textarea id="dedication" value={dedication} onChange={handleDedicationChange} placeholder="To my loving wife and children..." className="min-h-[120px] resize-none bg-legacy-warm/50 border-legacy-border focus:border-legacy-primary" disabled={isLoading} />
+                          {isSaving && <p className="text-xs text-legacy-ink/50">Saving...</p>}
+                        </div>
+                        
+                        <Button onClick={handleSaveDedication} disabled={isSaving || isLoading} className="w-full bg-black hover:bg-black/90 text-white">
+                          {isSaving ? 'Saving...' : 'Save Dedication'}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Dedication Preview */}
                     {dedication && (
                       <Card className="shadow-warm">
                         <CardHeader className="pb-3">
                           <CardTitle className="text-lg text-black text-center">
-                            Dedication
+                            Dedication Preview
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -120,31 +141,6 @@ export default function Journal() {
                 </ScrollArea>
               </CardContent>
             </Card>
-            
-            {/* Dedication Page Section */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-black">Dedication Page</h2>
-              
-              <Card className="shadow-paper">
-                <CardContent className="p-6 space-y-4">
-                  <p className="text-legacy-ink/70 text-sm">
-                    Write a few sentences about who you'd like to dedicate your Legacy Journal to.
-                  </p>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="dedication" className="text-sm font-medium text-black">
-                      Your Dedication
-                    </Label>
-                    <Textarea id="dedication" value={dedication} onChange={handleDedicationChange} placeholder="To my loving wife and children..." className="min-h-[120px] resize-none bg-legacy-warm/50 border-legacy-border focus:border-legacy-primary" disabled={isLoading} />
-                    {isSaving && <p className="text-xs text-legacy-ink/50">Saving...</p>}
-                  </div>
-                  
-                  <Button onClick={handleSaveDedication} disabled={isSaving || isLoading} className="w-full bg-black hover:bg-black/90 text-white">
-                    {isSaving ? 'Saving...' : 'Save Dedication'}
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
           </div>
 
           {/* Export Options */}
