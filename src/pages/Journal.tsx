@@ -97,22 +97,6 @@ export default function Journal() {
                       </CardContent>
                     </Card>
                     
-                    {/* Dedication Preview */}
-                    {dedication && (
-                      <Card className="shadow-warm">
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-lg text-black text-center">
-                            Dedication Preview
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-legacy-ink/80 text-center italic leading-relaxed">
-                            {dedication}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    )}
-                    
                     {/* Journal Entries */}
                     <div className="space-y-4">
                       <h2 className="text-lg font-semibold text-black text-center border-b border-legacy-border pb-2">
