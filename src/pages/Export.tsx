@@ -12,9 +12,7 @@ export default function Export() {
         {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-bold text-black mb-2">Export Your Legacy Journal</h1>
-          <p className="text-legacy-ink/70 max-w-2xl mx-auto">
-            Transform your text messages into a beautiful, lasting legacy for your children
-          </p>
+          <p className="text-legacy-ink/70 max-w-2xl mx-auto">Time to transform your text messages into a beautiful, lasting legacy for your children</p>
         </div>
 
         {/* Export Options */}
