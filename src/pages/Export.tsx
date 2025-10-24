@@ -113,7 +113,7 @@ export default function Export() {
             <CardTitle className="text-black">What's Included</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div className="text-center space-y-2">
                 <div className="w-12 h-12 bg-black/10 rounded-full flex items-center justify-center mx-auto">
                   <BookOpen className="w-6 h-6 text-black" />
@@ -127,20 +127,6 @@ export default function Export() {
                 </div>
                 <h4 className="font-medium text-black">All Entries</h4>
                 <p className="text-sm text-legacy-ink/70">Every message organized chronologically</p>
-              </div>
-              <div className="text-center space-y-2">
-                <div className="w-12 h-12 bg-black/10 rounded-full flex items-center justify-center mx-auto">
-                  <Camera className="w-6 h-6 text-black" />
-                </div>
-                <h4 className="font-medium text-black">Photos</h4>
-                <p className="text-sm text-legacy-ink/70">Memories captured in your messages</p>
-              </div>
-              <div className="text-center space-y-2">
-                <div className="w-12 h-12 bg-black/10 rounded-full flex items-center justify-center mx-auto">
-                  <Star className="w-6 h-6 text-black" />
-                </div>
-                <h4 className="font-medium text-black">Categories</h4>
-                <p className="text-sm text-legacy-ink/70">Organized by themes and topics</p>
               </div>
             </div>
           </CardContent>
