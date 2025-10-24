@@ -17,42 +17,6 @@ export default function Export() {
           </p>
         </div>
 
-        {/* Journal Preview */}
-        <Card className="shadow-deep max-w-md mx-auto">
-          <CardContent className="p-8">
-            <div className="text-center space-y-4">
-              <div className="w-20 h-24 bg-black/10 border border-legacy-border rounded-lg mx-auto flex items-center justify-center">
-                <BookOpen className="w-10 h-10 text-black" />
-              </div>
-              <div>
-                <h3 className="font-bold text-black">John Doe's</h3>
-                <p className="text-sm text-legacy-ink/70">Legacy Journal</p>
-              </div>
-              <div className="space-y-2 text-left bg-legacy-warm/50 p-4 rounded-lg">
-                <h4 className="font-semibold text-black border-b border-legacy-border pb-1">
-                  Dedication
-                </h4>
-                <p className="text-sm text-legacy-ink/80">
-                  This journal is dedicated to my loving wife, Jane Doe, and to amazing children...
-                </p>
-                <div className="border-l-2 border-legacy-accent/30 pl-3 py-2 bg-white/50 rounded">
-                  <p className="text-xs text-legacy-ink/70 font-medium">
-                    "Together, they are my sun, my moon, my entire world."
-                  </p>
-                </div>
-              </div>
-              <div className="text-left bg-legacy-warm/50 p-4 rounded-lg">
-                <h4 className="font-semibold text-black border-b border-legacy-border pb-1">
-                  Introduction
-                </h4>
-                <p className="text-xs text-legacy-ink/70">
-                  As you grow older, I hope these entries will serve as a guide...
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Export Options */}
         <div className="grid md:grid-cols-3 gap-6">
           {/* Free Export */}
