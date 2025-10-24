@@ -239,7 +239,7 @@ export default function Homepage() {
 
             {/* Final CTA Button */}
             <div className="text-center">
-              <Button size="lg" className="bg-white text-black hover:bg-gray-100 text-xl px-12 py-6 rounded-xl w-full sm:w-auto" onClick={() => navigate('/auth')}>
+              <Button size="lg" className="bg-white text-black hover:bg-gray-100 text-base px-16 py-7 rounded-xl w-full sm:w-auto" onClick={() => navigate('/auth')}>
                 Start Your Legacy Journal Now
               </Button>
             </div>
