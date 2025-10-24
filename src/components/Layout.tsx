@@ -281,7 +281,7 @@ function SidebarLayout({ children }: { children: ReactNode }) {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="lg:hidden p-2"
+                  className="lg:hidden p-2 text-white hover:text-white hover:bg-white/10"
                   onClick={toggleSidebar}
                 >
                   <Menu className="h-5 w-5" />
