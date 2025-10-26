@@ -320,6 +320,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       users_app: {
         Row: {
           auth_user_id: string | null
@@ -440,6 +461,12 @@ export type Database = {
           timezone: string | null
           tone: string | null
         }
+        SetofOptions: {
+          from: "*"
+          to: "users_app"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_user_basic_info: {
         Args: { p_auth_user_id: string }
@@ -457,22 +484,17 @@ export type Database = {
         Args: { p_phone_e164: string }
         Returns: string
       }
-      get_user_id_from_phone: {
-        Args: { phone: string }
-        Returns: string
-      }
-      get_user_name_from_id: {
-        Args: { p_user_id: string }
-        Returns: string
-      }
-      is_otp_active: {
-        Args: { expires_at: string }
+      get_user_id_from_phone: { Args: { phone: string }; Returns: string }
+      get_user_name_from_id: { Args: { p_user_id: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
         Returns: boolean
       }
-      link_self_to_phone: {
-        Args: { p_phone: string }
-        Returns: undefined
-      }
+      is_otp_active: { Args: { expires_at: string }; Returns: boolean }
+      link_self_to_phone: { Args: { p_phone: string }; Returns: undefined }
       log_service_access: {
         Args: {
           p_function_name?: string
@@ -486,10 +508,7 @@ export type Database = {
         Args: { p_phone_e164: string }
         Returns: string
       }
-      normalize_phone_e164: {
-        Args: { phone_input: string }
-        Returns: string
-      }
+      normalize_phone_e164: { Args: { phone_input: string }; Returns: string }
       recover_stuck_user_account: {
         Args: { p_auth_user_id: string }
         Returns: Json
@@ -512,7 +531,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -639,6 +658,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

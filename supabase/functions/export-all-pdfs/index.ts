@@ -5,7 +5,7 @@ import jsPDF from "https://esm.sh/jspdf@3.0.3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-admin-key',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 interface JournalEntry {
@@ -89,16 +89,54 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Check admin key
-    const adminKey = req.headers.get('x-admin-key');
-    const expectedKey = Deno.env.get('ADMIN_API_KEY');
-    
-    if (!adminKey || adminKey !== expectedKey) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized: Invalid or missing x-admin-key' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // SECURITY: Admin-only endpoint - verify JWT authentication and admin role
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('❌ Missing authorization header');
+      return new Response(JSON.stringify({ error: 'Authentication required' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
+
+    // Initialize Supabase clients
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Verify user authentication
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    if (authError || !user) {
+      console.error('❌ Invalid authentication:', authError);
+      return new Response(JSON.stringify({ error: 'Invalid authentication' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Verify admin role using security definer function
+    const { data: isAdmin, error: roleError } = await supabase
+      .rpc('has_role', {
+        _user_id: user.id,
+        _role: 'admin'
+      });
+
+    if (roleError || !isAdmin) {
+      console.error('❌ Admin check failed:', roleError);
+      return new Response(JSON.stringify({ error: 'Admin access required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    console.log(`✅ Admin user ${user.email} authenticated for export operation`);
 
     // Parse query parameters
     const url = new URL(req.url);
@@ -115,11 +153,6 @@ const handler = async (req: Request): Promise<Response> => {
       startDate = new Date(endDate);
       startDate.setDate(startDate.getDate() - 7);
     }
-
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Ensure bucket exists
     const bucketName = 'weekly_exports';

@@ -46,4 +46,4 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.export-all-pdfs]
-verify_jwt = false
+verify_jwt = true
