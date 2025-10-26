@@ -229,7 +229,7 @@ export default function Homepage() {
               
               {/* Attribution */}
               <p className="text-base text-gray-400 text-center italic">
-                — Founder, LegacyText AI
+                — Founder, LegacyText
               </p>
             </div>
 
