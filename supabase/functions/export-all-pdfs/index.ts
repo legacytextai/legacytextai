@@ -38,7 +38,7 @@ function formatLongDate(date: Date): string {
   }).format(date);
 }
 
-function generateBasicPDF(user: UserData, entries: JournalEntry[], dateEnd: string): Uint8Array {
+function generateBasicPDF(user: UserData, entries: JournalEntry[], dateEnd: string, range: string): Uint8Array {
   const doc = new jsPDF();
   
   // Title page
@@ -50,10 +50,23 @@ function generateBasicPDF(user: UserData, entries: JournalEntry[], dateEnd: stri
   
   doc.setFontSize(12);
   const endDate = new Date(dateEnd);
-  const startDate = new Date(endDate);
-  startDate.setDate(startDate.getDate() - 7);
   
-  doc.text(`Entries: ${formatLongDate(startDate)} – ${formatLongDate(endDate)}`, 20, 70);
+  let dateRangeText: string;
+  if (range === 'all' && entries.length > 0) {
+    // Calculate actual first and last entry dates
+    const firstEntry = new Date(entries[0].received_at);
+    const lastEntry = new Date(entries[entries.length - 1].received_at);
+    dateRangeText = `Entries: ${formatLongDate(firstEntry)} – ${formatLongDate(lastEntry)}`;
+  } else if (range === 'week') {
+    const startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - 7);
+    dateRangeText = `Entries: ${formatLongDate(startDate)} – ${formatLongDate(endDate)}`;
+  } else {
+    // Fallback for other ranges or empty entries
+    dateRangeText = `Entries: All Time`;
+  }
+  
+  doc.text(dateRangeText, 20, 70);
   doc.text(`Generated on ${formatLongDate(new Date())}`, 20, 90);
   
   // Journal entries
@@ -231,7 +244,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       // Generate PDF
-      const pdfBuffer = generateBasicPDF(user, entries, dateEnd);
+      const pdfBuffer = generateBasicPDF(user, entries, dateEnd, range);
       const sanitizedEmail = sanitizeFilename(user.email);
       const filename = `${sanitizedEmail}_${dateEnd}.pdf`;
       const storagePath = `${folderPath}/${filename}`;
