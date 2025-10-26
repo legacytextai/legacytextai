@@ -23,7 +23,7 @@ export default function AdminExport() {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="w-8 h-8 animate-spin text-legacy-accent" />
+          <Loader2 className="w-8 h-8 animate-spin text-black" />
         </div>
       </Layout>
     );
@@ -34,9 +34,9 @@ export default function AdminExport() {
       <Layout>
         <div className="flex flex-col items-center justify-center min-h-screen p-4">
           <ShieldAlert className="w-16 h-16 text-destructive mb-4" />
-          <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
+          <h1 className="text-2xl font-bold mb-2 text-black">Access Denied</h1>
           <p className="text-muted-foreground mb-4">You don't have permission to access this page.</p>
-          <Button onClick={() => navigate('/dashboard')}>Go to Dashboard</Button>
+          <Button onClick={() => navigate('/dashboard')} className="bg-black hover:bg-black/90 text-white">Go to Dashboard</Button>
         </div>
       </Layout>
     );
@@ -141,7 +141,7 @@ export default function AdminExport() {
             <Button 
               onClick={handleExport} 
               disabled={exporting}
-              className="w-full"
+              className="w-full bg-black hover:bg-black/90 text-white"
               size="lg"
             >
               {exporting ? (
