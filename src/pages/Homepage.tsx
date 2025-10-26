@@ -105,13 +105,7 @@ export default function Homepage() {
               
               {/* Hero Video */}
               <div className="aspect-[4/3] md:aspect-video rounded-xl md:rounded-2xl border border-white/10 overflow-hidden max-w-sm md:max-w-2xl lg:max-w-4xl mx-auto">
-                <video 
-                  className="w-full h-full object-cover"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                >
+                <video className="w-full h-full object-cover" autoPlay muted loop playsInline>
                   <source src="/assets/videos/automatic.mp4" type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
@@ -163,7 +157,7 @@ export default function Homepage() {
             </div>
 
             {/* Bottom Text */}
-            <p className="text-xl md:text-2xl text-white text-center max-w-4xl mx-auto mt-16">This isn't just journaling. It's fatherhood, captured — made effortless with AI and delivered through the medium you already use every day: text messaging.</p>
+            <p className="text-xl md:text-2xl text-white text-center max-w-4xl mx-auto mt-16 font-extralight">This isn't just journaling. It's fatherhood, captured — made effortless with AI and delivered through the medium you already use every day: text messaging.</p>
           </div>
         </section>
 
