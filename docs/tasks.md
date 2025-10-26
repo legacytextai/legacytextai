@@ -1,8 +1,101 @@
-# 📋 LegacyText AI - Implementation Tasks
+# 📋 LegacyText - Implementation Tasks (PRD v2.0)
 
 *Source of truth for development priorities and implementation details*
 
 ## 🚨 Recent Completions
+
+### ✅ Task: LegacyText Rebrand & Documentation Update
+**Status**: COMPLETED ✅  
+**Description**: Comprehensive rebrand from "LegacyTextAI" to "LegacyText" with black-and-white minimalist design system
+
+#### What was updated:
+- **Brand Name**: Changed all references from "LegacyText AI" to "LegacyText" across documentation
+- **Product Positioning**: Repositioned as journaling tool for fathers, not AI product
+- **Design System**: Updated to black-and-white minimalist palette emphasizing timelessness
+- **Logo**: Integrated new LegacyText logo (`src/assets/legacytext-logo.png`)
+- **Documentation**: All PRDs updated to v2.0 with current technical architecture
+- **Tagline**: Updated to "Write your legacy, one text at a time"
+
+#### Technical documentation updates:
+- Documented Role-Based Access Control (RBAC) implementation
+- Documented Admin Export System with `export-all-pdfs` function
+- Documented Storage RLS policies and secure file handling
+- Removed deprecated references (hardcoded admin emails, x-admin-key)
+
+#### Brand voice:
+- Warm, reflective, timeless tone
+- Emphasis on legacy, storytelling, and connection
+- AI mentioned contextually, not as primary positioning
+- Minimalist and distraction-free aesthetic
+
+---
+
+### ✅ Task: Admin Export System & Date Range Fix
+**Status**: COMPLETED ✅  
+**Description**: Built comprehensive PDF export system with proper date range handling
+
+#### What was implemented:
+- **export-all-pdfs edge function**: Bulk PDF generation for multiple users
+- **Date range filtering**: Support for "All Time", "Last Week", and custom ranges
+- **Proper date calculation**: Fixed title page to show actual first/last entry dates for "All Time" exports
+- **User filtering**: Export specific users or all users
+- **Storage integration**: PDFs stored in Supabase Storage with proper RLS
+- **Email delivery**: Automated email distribution of exported PDFs
+
+#### What was fixed:
+- Title page now correctly displays full date range for "All Time" exports
+- Previously showed hardcoded 7-day range regardless of actual entry span
+- Now calculates and displays actual first and last entry dates
+
+---
+
+### ✅ Task: Role-Based Access Control (RBAC) Implementation
+**Status**: COMPLETED ✅  
+**Description**: Implemented secure role-based access control system
+
+#### What was implemented:
+- **user_roles table**: Stores user roles with `app_role` enum ('admin', 'moderator', 'user')
+- **has_role() function**: Security definer function for checking user roles without RLS recursion
+- **Admin dashboard**: Secure admin access using RBAC, not hardcoded emails
+- **RLS policies**: Updated policies across tables to use `has_role()` function
+
+#### Security improvements:
+- Eliminated hardcoded admin email authentication
+- Removed `x-admin-key` API key approach
+- Implemented proper PostgreSQL role-based security
+- Prevents privilege escalation attacks
+
+#### Database schema:
+```sql
+-- App roles enum
+CREATE TYPE public.app_role AS ENUM ('admin', 'moderator', 'user');
+
+-- User roles table
+CREATE TABLE public.user_roles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  role app_role NOT NULL,
+  UNIQUE (user_id, role)
+);
+
+-- Security definer function
+CREATE OR REPLACE FUNCTION public.has_role(_user_id UUID, _role app_role)
+RETURNS BOOLEAN
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.user_roles
+    WHERE user_id = _user_id
+      AND role = _role
+  )
+$$;
+```
+
+---
 
 ### ✅ Task: Phone Verification System Fix & Database Security Hardening
 **Status**: COMPLETED ✅  

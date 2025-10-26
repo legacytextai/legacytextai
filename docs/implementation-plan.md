@@ -1,4 +1,4 @@
-## 🛠️ LegacyText AI — Implementation Plan
+## 🛠️ LegacyText — Implementation Plan (PRD v2.0)
 
 ### 🧱 Step-by-Step Build Sequence
 
@@ -16,7 +16,7 @@
    - Tables: User, JournalEntry, Prompt, Export
 
 4. **Set up SMS Integration**
-   - Choose provider (Twilio or Supabase Edge)
+   - SMS provider: Twilio (primary, confirmed working)
    - Create phone number and webhook endpoint
    - Parse incoming SMS → save raw entry
 
@@ -79,10 +79,12 @@
 | 4    | Dashboard + export UI           | View + download PDF                |
 | 5    | Prompt scheduler + SMS settings | Text prompt loop working           |
 | 6    | MVP polish + tests              | Private beta ready                 |
-| 7    | Premium export + Stripe         | $9.99 tier functional              |
+| 7    | Premium export + RBAC           | Admin role system + exports live   |
 | 8    | Physical journal ordering       | Order → confirmation working       |
 | 9    | Editor + polish                 | Self-editable journals live        |
 | 10   | Usability test + soft launch    | Ready for public release           |
+
+**Note:** RBAC (Role-Based Access Control) completed ahead of schedule with `user_roles` table and `has_role()` function.
 
 ---
 

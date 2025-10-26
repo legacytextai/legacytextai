@@ -1,14 +1,16 @@
-## 🧭 LegacyText AI — Masterplan
+## 🧭 LegacyText — Masterplan (PRD v2.0)
 
 ### 🚀 30-Second Elevator Pitch
-LegacyText AI helps fathers preserve their life stories and values through simple text messages. Dads receive thoughtful prompts, reply via SMS, and watch their words become a living legacy — beautifully organized and exportable as a journal their children will treasure forever.
+LegacyText helps fathers preserve their life stories and values through simple text messages. Dads receive thoughtful prompts, reply via SMS, and watch their words become a living legacy — beautifully organized and exportable as a journal their children will treasure forever.
+
+**Write your legacy, one text at a time.**
 
 ---
 
 ### ❓ Problem & Mission
 Many dads want to pass on wisdom but struggle to find time or the right medium. Voice notes get lost, handwritten journals go unfinished, and most apps are cold or cluttered.
 
-**LegacyText AI makes it easy, emotional, and effortless** — a warm, AI-powered journaling platform that works over text message.
+**LegacyText makes it easy, emotional, and effortless** — a warm journaling platform that works over text message, with intelligent organization helping preserve authentic stories.
 
 ---
 
@@ -44,7 +46,7 @@ Many dads want to pass on wisdom but struggle to find time or the right medium. 
   *Why:* Simple CRUD, auth, and real-time sync with Postgres under the hood  
 - **Auth:** Supabase Email + optional Google OAuth  
   *Why:* Minimal friction with just enough security  
-- **SMS Integration:** Twilio or Supabase Edge Functions + SMS provider  
+- **SMS Integration:** Twilio (primary SMS provider)  
   *Why:* Reliable and scalable SMS support for journaling loop  
 
 ---
@@ -66,10 +68,10 @@ Many dads want to pass on wisdom but struggle to find time or the right medium. 
 
 ### 🎨 UI Design Principles
 
-- **Don’t make me think:** SMS-first UX removes friction  
-- **Emotionally warm:** Deep navy and rich red evoke intimacy and trust  
-- **Minimalist with analog touches:** Feels like a personal keepsake, not a SaaS tool  
-- **Accessible defaults:** Inter font, clear contrast, mobile-first  
+- **Don't make me think:** SMS-first UX removes friction  
+- **Timeless and minimalist:** Black-and-white aesthetic emphasizes clarity and archival quality  
+- **Analog-inspired:** Feels like a personal keepsake, not a SaaS tool  
+- **Accessible defaults:** Inter font, clear contrast, mobile-first, distraction-free
 
 ---
 
@@ -97,7 +99,7 @@ Many dads want to pass on wisdom but struggle to find time or the right medium. 
 - Optional media support  
 
 #### 🚀 V2
-- AI tone presets (“Fatherly,” “Gentle,” “Funny”)  
+- AI tone presets ("Fatherly," "Gentle," "Funny")  
 - Invite co-authors (e.g., co-parent, grandparent)  
 - Audio transcription support  
 - Public memorial pages (opt-in)  
@@ -116,7 +118,7 @@ Many dads want to pass on wisdom but struggle to find time or the right medium. 
 ### 🌱 Future Expansion Ideas
 
 - Mobile app (with same SMS engine under the hood)  
-- “Fatherhood Timeline” view by age or theme  
+- "Fatherhood Timeline" view by age or theme  
 - Community of dads sharing journal tips  
 - AI voice clone for optional audio messages  
 - Partner program with therapists or doulas  

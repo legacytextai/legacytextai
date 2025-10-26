@@ -1,4 +1,12 @@
-# Welcome to your Lovable project
+# LegacyText
+
+![LegacyText Logo](src/assets/legacytext-logo.png)
+
+**Write your legacy, one text at a time.**
+
+A journaling tool for fathers to preserve their stories, wisdom, and values through simple text messages. Dads receive thoughtful prompts, reply via SMS, and watch their words become a living legacy — beautifully organized and exportable as a journal their children will treasure forever.
+
+---
 
 ## Project info
 

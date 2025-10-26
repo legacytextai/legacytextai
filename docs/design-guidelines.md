@@ -1,4 +1,4 @@
-## 🎨 LegacyText AI — Design Guidelines
+## 🎨 LegacyText — Design Guidelines (PRD v2.0)
 
 ### 🗣️ Brand Voice & Tone
 
@@ -19,9 +19,19 @@
 ### 🌈 Color, Typography, Spacing
 
 - **Font:** `Inter` — readable, modern, and trustworthy  
-- **Primary Color:** `#1D3557` (deep navy) — evokes trust + seriousness  
-- **Accent Color:** `#D4AF37` (soft gold) — highlights legacy + love  
-- **Backgrounds:** Cream `#FAF7F2` and light gray `#F1F1F1`  
+
+#### Color System (Black & White Minimalist)
+- **Primary Color:** `#000000` (black) — timeless, classic, authoritative  
+- **Background:** `#FFFFFF` (white) — clean, simple, focused  
+- **Subtle Gray:** `#F5F5F5` (off-white) — for cards and subtle backgrounds  
+- **Border/Divider:** `#E0E0E0` (light gray) — gentle separation  
+- **Text:** `#1A1A1A` (near-black) — optimal readability  
+
+#### Design Philosophy
+- **Timeless:** Black-and-white aesthetic emphasizes archival quality
+- **Minimalist:** Distraction-free interface focused on content
+- **Classic:** Feels like a cherished keepsake, not a tech product
+- **Intentional:** Every element serves a purpose
 
 #### Spacing Rules:
 - Use `1.5rem` vertical rhythm between major blocks  

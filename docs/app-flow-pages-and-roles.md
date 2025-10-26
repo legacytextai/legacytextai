@@ -1,4 +1,4 @@
-## 🗺️ LegacyText AI — App Flow, Pages & Roles
+## 🗺️ LegacyText — App Flow, Pages & Roles (PRD v2.0)
 
 ### 🧭 Site Map (Top-Level Pages)
 
@@ -52,10 +52,19 @@
 
 #### 🛠️ Admin (Internal Use Only)
 
+**Access Control:** Role-Based Access Control (RBAC) using `user_roles` table
+
 - View all user data for support/debug  
 - Manage prompt templates  
-- Monitor export queue + Stripe payments  
-- Access delivery logs and media moderation tools  
+- Monitor export queue and payments  
+- Access delivery logs and media moderation tools
+- Generate bulk PDF exports via Admin Export page
+
+**Technical Implementation:**
+- Admin role stored in `user_roles` table with `app_role` enum
+- Access validated via `has_role()` security definer function
+- No hardcoded emails or API keys for admin authentication
+- Proper RLS policies prevent privilege escalation
 
 ---
 

@@ -1,5 +1,5 @@
 # Bug Prompt Reference Guide
-*Systematic debugging framework for LegacyText AI*
+*Systematic debugging framework for LegacyText*
 
 ## Quick Start
 When you encounter a bug, say **"Create Bug Prompt"** and I'll generate an optimized debugging request using this framework.
