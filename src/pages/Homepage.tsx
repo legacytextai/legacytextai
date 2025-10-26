@@ -166,7 +166,7 @@ export default function Homepage() {
         <section id="how-it-works" className="px-4 py-24 md:py-32 bg-black">
           <div className="container mx-auto max-w-7xl">
             <div className="flex justify-center mb-8">
-              <img src={v2Icon} alt="LegacyText Logo" className="w-24 h-24 md:w-32 md:h-32" />
+              <img src={v2Icon} alt="LegacyText Logo" className="w-24 h-auto md:w-32 object-contain" />
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-6">Introducing LegacyText</h2>
             
