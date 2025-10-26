@@ -1,7 +1,8 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { BookOpen, Edit3, Settings, Home, Download } from "lucide-react";
+import { BookOpen, Edit3, Settings, Home, Download, ShieldCheck } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { useUserData } from "@/hooks/useUserData";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 const mainItems = [{
   title: "Dashboard",
   url: "/dashboard",
@@ -31,6 +32,7 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
   const { userData } = useUserData();
+  const { isAdmin } = useIsAdmin();
   const firstName = userData?.name?.split(' ')[0] || 'Your';
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({
@@ -65,6 +67,26 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-legacy-primary/70">
+              {!collapsed && "Admin"}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/admin/export" className={getNavCls}>
+                      <ShieldCheck className="w-4 h-4" />
+                      {!collapsed && <span>Export All PDFs</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>;
 }
