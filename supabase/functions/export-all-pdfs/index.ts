@@ -138,12 +138,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`✅ Admin user ${user.email} authenticated for export operation`);
 
-    // Parse query parameters
-    const url = new URL(req.url);
-    const range = url.searchParams.get('range') || 'week';
-    const dateEndParam = url.searchParams.get('date_end');
-    const filter = url.searchParams.get('filter');
-    const test = url.searchParams.get('test') === 'true';
+    // Parse request body parameters
+    const requestBody = await req.json().catch(() => ({}));
+    const range = requestBody.range || 'all';  // Default to 'all' not 'week'
+    const dateEndParam = requestBody.date_end;
+    const filter = requestBody.filter;
+    const test = requestBody.test === true;
     
     const dateEnd = dateEndParam || new Date().toISOString().split('T')[0];
     const endDate = new Date(dateEnd);
