@@ -126,7 +126,7 @@ export default function Homepage() {
             {/* Three Cards */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
               {/* Card 1 */}
-              <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-8 md:p-10 hover:bg-white/[0.04] transition-all">
+              <div className="bg-black rounded-2xl p-8 md:p-10 hover:bg-white/[0.02] transition-all">
                 <div className="flex justify-center mb-6">
                   <Heart className="w-12 h-12 text-white" />
                 </div>
@@ -136,7 +136,7 @@ export default function Homepage() {
               </div>
 
               {/* Card 2 */}
-              <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-8 md:p-10 hover:bg-white/[0.04] transition-all">
+              <div className="bg-black rounded-2xl p-8 md:p-10 hover:bg-white/[0.02] transition-all">
                 <div className="flex justify-center mb-6">
                   <MessageCircle className="w-12 h-12 text-white" />
                 </div>
@@ -146,7 +146,7 @@ export default function Homepage() {
               </div>
 
               {/* Card 3 */}
-              <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-8 md:p-10 hover:bg-white/[0.04] transition-all md:col-span-2 lg:col-span-1">
+              <div className="bg-black rounded-2xl p-8 md:p-10 hover:bg-white/[0.02] transition-all md:col-span-2 lg:col-span-1">
                 <div className="flex justify-center mb-6">
                   <Star className="w-12 h-12 text-white" />
                 </div>
