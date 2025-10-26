@@ -49,14 +49,9 @@ export default function AdminExport() {
       const params: Record<string, string> = { range };
       if (dateEnd) params.date_end = dateEnd;
       if (filter) params.filter = filter;
-
-      const queryString = new URLSearchParams(params).toString();
       
       const { data, error } = await supabase.functions.invoke('export-all-pdfs', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        body: params,
       });
 
       if (error) {
@@ -65,11 +60,11 @@ export default function AdminExport() {
         return;
       }
 
-      if (data?.zipUrl) {
-        toast.success(`Export complete! ${data.totalUsers} user PDFs created.`);
+      if (data?.zip_url) {
+        toast.success(`Export complete! ${data.processed_users} user PDFs created.`);
         
         // Download the ZIP file
-        window.open(data.zipUrl, '_blank');
+        window.open(data.zip_url, '_blank');
       } else {
         toast.error('Export completed but no download link received.');
       }
