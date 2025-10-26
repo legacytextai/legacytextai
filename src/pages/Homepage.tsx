@@ -167,7 +167,7 @@ export default function Homepage() {
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-6">Introducing LegacyText</h2>
             
             <p className="text-xl md:text-2xl text-white font-extralight text-center max-w-3xl mx-auto mb-20">
-              A text-based journaling tool that helps fathers reflect, organize, and preserve their wisdom — one message at a time.
+              A text-based journaling tool that helps fathers reflect, organize, and preserve their wisdom — <span className="font-bold">one message at a time.</span>
             </p>
 
             {/* Three Steps */}
