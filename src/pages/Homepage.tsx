@@ -169,7 +169,7 @@ export default function Homepage() {
               <img src={v2Icon} alt="LegacyText Logo" className="w-12 h-auto md:w-16 object-contain" />
             </div>
             <h2 className="text-4xl md:text-5xl text-white text-center mb-6">
-              <span className="font-light">Introducing </span>
+              <span className="font-extralight">Introducing </span>
               <span className="font-bold">LegacyText</span>
             </h2>
             
