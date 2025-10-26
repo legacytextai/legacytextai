@@ -157,7 +157,7 @@ export default function Homepage() {
             </div>
 
             {/* Bottom Text */}
-            <p className="text-xl md:text-2xl text-white text-center max-w-4xl mx-auto mt-16 font-extralight">This isn't just journaling. It's fatherhood, captured — made effortless with AI and delivered through the medium you already use every day: text messaging.</p>
+            <p className="text-xl md:text-2xl text-white text-center max-w-4xl mx-auto mt-16 font-extralight">This isn't just journaling. <span className="font-bold">It's fatherhood, captured</span> — made effortless with AI and delivered through the medium you already use every day: text messaging.</p>
           </div>
         </section>
 
