@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
+import v2Icon from "@/assets/v2-icon.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -164,6 +165,9 @@ export default function Homepage() {
         {/* How It Works Section */}
         <section id="how-it-works" className="px-4 py-24 md:py-32 bg-black">
           <div className="container mx-auto max-w-7xl">
+            <div className="flex justify-center mb-8">
+              <img src={v2Icon} alt="LegacyText Logo" className="w-24 h-24 md:w-32 md:h-32" />
+            </div>
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-6">Introducing LegacyText</h2>
             
             <p className="text-xl md:text-2xl text-white font-extralight text-center max-w-3xl mx-auto mb-20">
