@@ -130,7 +130,7 @@ export default function Homepage() {
                 <div className="flex justify-center mb-6">
                   <Heart className="w-12 h-12 text-white" />
                 </div>
-                <p className="text-gray-300 text-base md:text-lg leading-relaxed text-center">
+                <p className="text-white text-base md:text-lg leading-relaxed text-center font-light">
                   They open a book filled with your real thoughts — not filtered, not polished — just honest reflections about life, love, work, failure, and purpose.
                 </p>
               </div>
@@ -140,7 +140,7 @@ export default function Homepage() {
                 <div className="flex justify-center mb-6">
                   <MessageCircle className="w-12 h-12 text-white" />
                 </div>
-                <p className="text-gray-300 text-base md:text-lg leading-relaxed text-center">
+                <p className="text-white text-base md:text-lg leading-relaxed text-center font-light">
                   They hear your voice in every sentence, guiding them through their first heartbreak, their career choices, their fears.
                 </p>
               </div>
@@ -150,7 +150,7 @@ export default function Homepage() {
                 <div className="flex justify-center mb-6">
                   <Star className="w-12 h-12 text-white" />
                 </div>
-                <p className="text-gray-300 text-base md:text-lg leading-relaxed text-center">
+                <p className="text-white text-base md:text-lg leading-relaxed text-center font-light">
                   They feel like they truly know you, not just as 'Dad,' but as a man who lived, tried, failed, and passed on what mattered most.
                 </p>
               </div>
