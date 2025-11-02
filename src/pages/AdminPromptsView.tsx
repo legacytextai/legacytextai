@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import React, { useState, useEffect } from 'react';
+import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Download, Search } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface Prompt {
@@ -84,17 +85,18 @@ export default function AdminPromptsView() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6 max-w-7xl">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl flex items-center gap-2">
-            🖊️ Handwritten Prompts Viewer
-          </CardTitle>
-          <CardDescription>
-            View and export all handwritten prompts from the Supabase database.
-            This is the source of truth for all curated prompts.
-          </CardDescription>
-        </CardHeader>
+    <Layout>
+      <div className="container mx-auto px-4">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-2xl">✍️</span>
+              <CardTitle>Handwritten Prompts Viewer</CardTitle>
+            </div>
+            <CardDescription>
+              View and export all handwritten prompts from the Supabase database. This is the source of truth for all curated prompts.
+            </CardDescription>
+          </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -162,6 +164,7 @@ export default function AdminPromptsView() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </Layout>
   );
 }
