@@ -9,22 +9,22 @@ All colors MUST be HSL.
 @layer base {
   :root {
     --background: 0 0% 98%;
-    --foreground: 210 54% 20%;
+    --foreground: 0 0% 0%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 54% 20%;
+    --card-foreground: 0 0% 0%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 54% 20%;
+    --popover-foreground: 0 0% 0%;
 
-    --primary: 210 54% 20%;
+    --primary: 0 0% 0%;
     --primary-foreground: 0 0% 98%;
 
     --secondary: 210 20% 95%;
-    --secondary-foreground: 210 54% 20%;
+    --secondary-foreground: 0 0% 0%;
 
     --muted: 210 20% 95%;
-    --muted-foreground: 210 16% 46%;
+    --muted-foreground: 0 0% 40%;
 
     --accent: 0 0% 0%;
     --accent-foreground: 0 0% 98%;
@@ -34,27 +34,27 @@ All colors MUST be HSL.
 
     --border: 210 20% 90%;
     --input: 210 20% 90%;
-    --ring: 210 54% 20%;
+    --ring: 0 0% 0%;
 
     --radius: 0.75rem;
 
     /* Legacy Journal specific colors */
-    --legacy-primary: 210 54% 20%;      /* #1D3557 deep navy */
-    --legacy-accent: 0 0% 0%;          /* black */
+    --legacy-primary: 0 0% 0%;          /* black */
+    --legacy-accent: 0 0% 0%;           /* black */
     --legacy-warm: 30 50% 96%;          /* warm paper white */
-    --legacy-ink: 210 40% 25%;          /* ink blue-black */
+    --legacy-ink: 0 0% 10%;             /* ink black */
     --legacy-border: 210 20% 85%;       /* subtle borders */
-    --legacy-shadow: 210 54% 20%;       /* deep shadow */
+    --legacy-shadow: 0 0% 0%;           /* deep shadow */
 
     /* Gradients */
     --gradient-warm: linear-gradient(135deg, hsl(30 50% 98%) 0%, hsl(30 30% 96%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(var(--legacy-primary)) 0%, hsl(210 45% 15%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 0%) 0%, hsl(0 0% 15%) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(0 0% 0%) 0%, hsl(0 0% 20%) 100%);
 
     /* Shadows */
-    --shadow-warm: 0 4px 20px -4px hsl(var(--legacy-primary) / 0.1);
-    --shadow-paper: 0 2px 12px -2px hsl(var(--legacy-primary) / 0.08);
-    --shadow-deep: 0 8px 30px -8px hsl(var(--legacy-primary) / 0.15);
+    --shadow-warm: 0 4px 20px -4px hsl(0 0% 0% / 0.1);
+    --shadow-paper: 0 2px 12px -2px hsl(0 0% 0% / 0.08);
+    --shadow-deep: 0 8px 30px -8px hsl(0 0% 0% / 0.15);
 
     --radius: 0.5rem;
 
