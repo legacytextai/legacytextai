@@ -1,9 +1,10 @@
-name: Send Daily Prompts (8am PT)
+name: Send Timezone-Aware Prompts (Hourly)
 
 on:
-  # Scheduled 8:00 AM PDT / 7:00 AM PST (15:00 UTC year-round)
+  # Runs hourly to check if any users should receive prompts in their local time
+  # (7 PM weekdays, 8 AM weekends)
   schedule:
-    - cron: "0 15 * * *"   # 15:00 UTC daily (8:00 AM PDT / 7:00 AM PST)
+    - cron: "0 * * * *"   # Every hour on the hour (UTC)
   # Manual runs with optional inputs
   workflow_dispatch:
     inputs:
@@ -27,9 +28,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     concurrency:
-      group: daily-prompts
+      group: timezone-prompts
       cancel-in-progress: false
     steps:
+      - name: Log hourly execution
+        run: echo "Running hourly timezone-aware prompt dispatcher at $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
       - name: Build URL with query params (for manual test mode)
         id: vars
         env:

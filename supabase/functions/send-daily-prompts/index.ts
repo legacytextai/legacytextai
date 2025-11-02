@@ -312,21 +312,76 @@ serve(async (req) => {
     banned_topics: string[] | null;
     children: Array<{ name?: string; age?: number }> | null;
     status?: string;
+    timezone?: string | null;
   };
   let users: U[] = [];
 
   if (toFilter) {
     const { data } = await supabase
       .from("users_app")
-      .select("id, phone_e164, name, preferred_language, tone, interests, banned_topics, children, status")
+      .select("id, phone_e164, name, preferred_language, tone, interests, banned_topics, children, status, timezone")
       .eq("phone_e164", toFilter).limit(1);
     users = ((data ?? []) as U[]).filter(u => (u as any).status === "active");
   } else {
     const { data } = await supabase
       .from("users_app")
-      .select("id, phone_e164, name, preferred_language, tone, interests, banned_topics, children")
+      .select("id, phone_e164, name, preferred_language, tone, interests, banned_topics, children, timezone")
       .eq("status", "active");
     users = (data ?? []) as U[];
+  }
+
+  /**
+   * Determines if the user should receive a prompt at this hour
+   * based on their timezone and day of week.
+   * 
+   * Weekdays (Mon-Fri): 7 PM (19:00)
+   * Weekends (Sat-Sun): 8 AM (08:00)
+   */
+  function shouldSendPromptNow(user: U): { 
+    send: boolean; 
+    reason: string; 
+    localTime: string;
+    localDateStr: string;
+  } {
+    const tz = user.timezone || "America/Los_Angeles";
+    
+    try {
+      // Get current time in user's timezone
+      const localNowStr = new Date().toLocaleString("en-US", { timeZone: tz });
+      const localNow = new Date(localNowStr);
+      
+      const hour = localNow.getHours();
+      const day = localNow.getDay(); // 0=Sunday, 6=Saturday
+      const isWeekend = (day === 0 || day === 6);
+      const targetHour = isWeekend ? 8 : 19;
+      
+      const localTimeStr = localNow.toISOString();
+      const localDateStr = localNow.toISOString().slice(0, 10);
+      
+      if (hour === targetHour) {
+        return { 
+          send: true, 
+          reason: `Target hour (${targetHour}:00 ${isWeekend ? 'weekend' : 'weekday'})`,
+          localTime: localTimeStr,
+          localDateStr
+        };
+      } else {
+        return { 
+          send: false, 
+          reason: `Not target hour (current: ${hour}:00, target: ${targetHour}:00 ${isWeekend ? 'weekend' : 'weekday'})`,
+          localTime: localTimeStr,
+          localDateStr
+        };
+      }
+    } catch (error) {
+      console.error(`[Timezone Error] Invalid timezone for user ${user.id}: ${tz}`, error);
+      return { 
+        send: false, 
+        reason: `Invalid timezone: ${tz}`,
+        localTime: "ERROR",
+        localDateStr: "ERROR"
+      };
+    }
   }
 
   // 2) Curated fallback helper
@@ -341,17 +396,40 @@ serve(async (req) => {
 
   // 3) Loop recipients
   for (const u of users) {
+    // Timezone check: skip if not at target hour
+    const timingCheck = shouldSendPromptNow(u);
+    console.log(
+      `[Timezone Check] User ${u.id} (${u.name || 'unnamed'}) ` +
+      `TZ: ${u.timezone || 'America/Los_Angeles'} | ` +
+      `${timingCheck.reason} | ` +
+      `Local: ${timingCheck.localTime}`
+    );
+    
+    if (!timingCheck.send) {
+      continue; // Skip this user this hour
+    }
+
     try {
-       // One-per-day (unless forced) - check for scheduled prompts only
+       // One-per-day guard: use LOCAL day boundary (not UTC)
        if (!force) {
+         const tz = u.timezone || "America/Los_Angeles";
+         const localNowStr = new Date().toLocaleString("en-US", { timeZone: tz });
+         const localNow = new Date(localNowStr);
+         localNow.setHours(0, 0, 0, 0); // Start of local day
+         const startLocalISO = localNow.toISOString();
+         
          const { data: existing } = await supabase
            .from("daily_prompts")
            .select("id, source")
            .eq("user_id", u.id)
-           .gte("sent_at", startISO)
+           .gte("sent_at", startLocalISO)
            .eq("source", "schedule")
            .limit(1);
-         if (existing && existing.length) continue;
+         
+         if (existing && existing.length) {
+           console.log(`[Guard] User ${u.id} already received prompt today (local day)`);
+           continue;
+         }
        }
 
       // Pick tone: global tones (weighted + stable per user/day). Fallback to legacy tone or 'warm'.
@@ -442,6 +520,10 @@ Reply STOP to unsubscribe.`;
       });
 
       sent++;
+      console.log(
+        `✓ Sent to ${u.phone_e164} (${u.name || 'unnamed'}) ` +
+        `at local ${u.timezone || 'America/Los_Angeles'} time`
+      );
     } catch (_e) {
       errors++;
     }
