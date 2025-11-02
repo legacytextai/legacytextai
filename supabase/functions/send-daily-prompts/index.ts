@@ -188,21 +188,22 @@ function pickArchetypeForToday(userId: string): string {
 }
 
 // Build system message for OpenAI
-function buildSystemMessage(language: string, archetype: string, category: string): string {
-  return `You are generating a thoughtful journaling prompt for a father creating a legacy journal for his children.
+function buildSystemMessage(language: string, archetype: string, category: string, inspirationExamples: string): string {
+  return `You are an empathetic writing assistant helping a father create a legacy journal for his children.
 
-Focus: ${archetype} 
-Target Category: ${category}
-Language: ${language}
+Your role:
+- Write as if *you* were that father reflecting lovingly and authentically.
+- Sound human, conversational, and emotionally grounded.
+- Avoid robotic phrasing like "Describe...", "Write about...", or "Tell me about...".
+- Start naturally with words like "What", "How", or "When" — but vary your approach.
+- Keep within 160 characters for SMS delivery.
+- Encourage honesty, vulnerability, and warmth.
+- Focus: ${archetype} (archetype), ${category} (theme)
+- Language: ${language}
 
-Generate a single SMS-friendly prompt (max 160 characters) that:
-- Encourages ${archetype} 
-- Relates to ${category} themes
-- Is personal and meaningful for fathers
-- Uses warm, conversational tone
-- Is in ${language}
+${inspirationExamples}
 
-Return only the prompt text, nothing else.`;
+Return only the prompt text — no explanations, no quotes, no preamble.`;
 }
 
 // Build user message with context
@@ -249,30 +250,40 @@ async function generateNextPrompt(user: any, supabase: any): Promise<string> {
     
     console.log(`Generating prompt for user ${user.id}: archetype=${archetype}, category=${targetCategory}, context=${rotatedContext.length} entries`);
 
-    // Sample one handwritten prompt for stylistic inspiration
+    // Sample multiple handwritten prompts for stylistic inspiration
     let inspirationSnippet = "";
     try {
-      const { data: ref } = await supabase
+      const { data: refs } = await supabase
         .from("prompts")
         .select("text")
         .eq("source_type", "handwritten")
         .eq("active", true)
         .order("id")
-        .limit(10); // Get small pool
+        .limit(30); // Larger pool for variety
       
-      if (ref && ref.length > 0) {
+      if (refs && refs.length > 0) {
+        // Pick 3 diverse examples using stable randomization
         const seed = `${user.id}-inspiration-${new Date().toISOString().slice(0, 10)}`;
-        const idx = djb2(seed) % ref.length;
-        inspirationSnippet = `\n\nFor tone reference, here's an example prompt:\n"${ref[idx].text}"`;
+        const examples: string[] = [];
+        
+        for (let i = 0; i < Math.min(3, refs.length); i++) {
+          const idx = djb2(`${seed}-${i}`) % refs.length;
+          examples.push(`• "${refs[idx].text}"`);
+        }
+        
+        inspirationSnippet = `\n\nHere are example prompts that capture the warm, human tone you should emulate:\n${examples.join('\n')}`;
       }
     } catch (err) {
-      console.error('[Inspiration] Failed to fetch reference prompt:', err);
+      console.error('[Inspiration] Failed to fetch reference prompts:', err);
     }
 
     const response = await openaiGenerate({
       model: "gpt-4.1-mini-2025-04-14",
       messages: [
-        { role: "system", content: buildSystemMessage(language, archetype, targetCategory) + inspirationSnippet },
+        { 
+          role: "system", 
+          content: buildSystemMessage(language, archetype, targetCategory, inspirationSnippet) 
+        },
         { role: "user", content: buildUserMessage(user, rotatedContext, archetype, targetCategory) }
       ],
       max_tokens: 150
