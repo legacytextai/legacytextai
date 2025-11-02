@@ -82,9 +82,7 @@ export default function Homepage() {
                 A journal for your children — created by texting your thoughts.
               </h1>
               
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-400 font-light leading-relaxed max-w-2xl mx-auto">
-                Pass down your wisdom, values, and memories to your children — with no time, structure, or effort.
-              </p>
+              
               
               <p className="text-sm sm:text-base md:text-lg text-white max-w-2xl mx-auto"><span className="font-bold">No app. No downloads.</span><br /><span className="font-normal">Just create an account, start texting your thoughts, and get a journal your kids can keep forever.</span></p>
               
