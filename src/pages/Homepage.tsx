@@ -86,7 +86,7 @@ export default function Homepage() {
                 Pass down your wisdom, values, and memories to your children — with no time, structure, or effort.
               </p>
               
-              <p className="text-xs sm:text-sm text-gray-400 max-w-2xl mx-auto">No app. No download. Just create an account and start texting your thoughts.</p>
+              <p className="text-xs sm:text-sm text-white max-w-2xl mx-auto">No app. No download.<br />Just create an account and start texting your thoughts.</p>
               
               {/* CTA Buttons */}
               <div className="flex flex-row gap-2 pt-3 md:pt-4 lg:pt-6 justify-center">
