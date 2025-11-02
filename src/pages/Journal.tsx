@@ -157,9 +157,8 @@ export default function Journal() {
                     <li>• Custom dedication page</li>
                     <li>• Category organization</li>
                   </ul>
-                  <Button variant="accent" className="w-full" onClick={handleExportClick}>
-                    <Download className="w-4 h-4 mr-2" />
-                    Export Premium Journal E-Book
+                  <Button variant="accent" className="w-full" disabled>
+                    Coming Soon
                   </Button>
                 </CardContent>
               </Card>
