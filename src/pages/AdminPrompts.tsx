@@ -98,8 +98,8 @@ const AdminPrompts = () => {
     <Layout>
       <div className="container mx-auto py-8 px-4 max-w-4xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">🖊️ Manage Handwritten Prompts</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold mb-2 text-black dark:text-white">🖊️ Manage Handwritten Prompts</h1>
+          <p className="text-gray-600 dark:text-gray-400">
             Paste your iPhone Notes containing journal prompts. The system will parse, deduplicate,
             and sync new prompts to the database.
           </p>
@@ -107,8 +107,8 @@ const AdminPrompts = () => {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Paste iPhone Notes</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-black dark:text-white">Paste iPhone Notes</CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
               Paste the full contents of your Notes. Each blank line separates a new prompt.
             </CardDescription>
           </CardHeader>
@@ -124,7 +124,7 @@ const AdminPrompts = () => {
               <Button 
                 onClick={handleParse} 
                 disabled={!rawText.trim() || parsing}
-                className="flex-1"
+                className="flex-1 bg-black hover:bg-gray-800 text-white"
               >
                 {parsing ? (
                   <>
@@ -146,7 +146,7 @@ const AdminPrompts = () => {
           <>
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Parse Results</CardTitle>
+                <CardTitle className="text-black dark:text-white">Parse Results</CardTitle>
                 <div className="flex gap-2 mt-2">
                   <Badge variant="outline" className="text-base">
                     Total: {parsed.total}
@@ -162,7 +162,7 @@ const AdminPrompts = () => {
               <CardContent className="space-y-4">
                 {parsed.new > 0 && (
                   <Collapsible defaultOpen>
-                    <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
+                    <CollapsibleTrigger className="flex items-center gap-2 w-full text-left text-black dark:text-white">
                       <CheckCircle2 className="w-5 h-5 text-green-600" />
                       <span className="font-semibold">New Prompts ({parsed.new})</span>
                     </CollapsibleTrigger>
@@ -172,7 +172,7 @@ const AdminPrompts = () => {
                           <div className="text-sm font-medium text-green-700 dark:text-green-400 mb-1">
                             {idx + 1}.
                           </div>
-                          <div className="text-sm">{prompt.text}</div>
+                          <div className="text-sm text-black dark:text-white">{prompt.text}</div>
                         </div>
                       ))}
                     </CollapsibleContent>
@@ -183,7 +183,7 @@ const AdminPrompts = () => {
                   <>
                     <Separator />
                     <Collapsible>
-                      <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
+                      <CollapsibleTrigger className="flex items-center gap-2 w-full text-left text-black dark:text-white">
                         <AlertCircle className="w-5 h-5 text-orange-600" />
                         <span className="font-semibold">Duplicates Skipped ({parsed.duplicates})</span>
                       </CollapsibleTrigger>
@@ -193,7 +193,7 @@ const AdminPrompts = () => {
                             <div className="text-sm font-medium text-orange-700 dark:text-orange-400 mb-1">
                               Already exists
                             </div>
-                            <div className="text-sm opacity-70">{prompt.text}</div>
+                            <div className="text-sm opacity-70 text-black dark:text-white">{prompt.text}</div>
                           </div>
                         ))}
                       </CollapsibleContent>
@@ -207,7 +207,7 @@ const AdminPrompts = () => {
                     <Button 
                       onClick={handleSync} 
                       disabled={syncing}
-                      className="w-full"
+                      className="w-full bg-black hover:bg-gray-800 text-white"
                       size="lg"
                     >
                       {syncing ? (
