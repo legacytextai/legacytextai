@@ -79,22 +79,21 @@ export default function Homepage() {
           <div className="container mx-auto max-w-6xl">
             <div className="flex flex-col lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
               {/* Left Column: Text Content */}
-              <div className="text-center lg:text-left space-y-3 md:space-y-4 lg:space-y-5">
+              <div className="text-center lg:text-left space-y-4 md:space-y-5 lg:space-y-6">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-[1.1] animate-fade-in">
                   A journal for your children — created by texting your thoughts.
                 </h1>
                 
-                <p className="text-sm sm:text-base md:text-lg text-white text-center lg:text-left">
-                  <span className="font-bold">No app. No downloads.</span><br />
-                  <span className="font-light text-left block lg:inline">
-                    <span className="font-bold">1.</span> Create an account.<br />
-                    <span className="font-bold">2.</span> Start texting your thoughts.<br />
-                    <span className="font-bold">3.</span> Get a journal your kids keep forever.
-                  </span>
+                <p className="text-base sm:text-lg md:text-xl text-white leading-relaxed">
+                  Pass down your wisdom, values, and memories to your children — with no time, structure, or effort.
+                </p>
+                
+                <p className="text-sm sm:text-base text-white">
+                  No app. No download. Just create an account.
                 </p>
                 
                 {/* CTA Buttons */}
-                <div className="flex flex-row gap-2 pt-3 md:pt-4 lg:pt-6 justify-center lg:justify-start">
+                <div className="flex flex-row gap-3 pt-2 md:pt-3 justify-center lg:justify-start">
                   <Button className="bg-white text-black hover:bg-gray-100 text-xs sm:text-sm md:text-base font-normal px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 lg:px-8 lg:py-4 rounded-lg" onClick={() => navigate('/auth')}>
                     Get started free
                   </Button>
@@ -117,6 +116,13 @@ export default function Homepage() {
                   </video>
                 </div>
               </div>
+            </div>
+            
+            {/* Scroll indicator chevrons */}
+            <div className="flex flex-col items-center gap-1 mt-12 md:mt-16">
+              <ChevronDown className="w-4 h-4 text-white/40" />
+              <ChevronDown className="w-4 h-4 text-white/40" />
+              <ChevronDown className="w-4 h-4 text-white/40" />
             </div>
           </div>
         </section>
