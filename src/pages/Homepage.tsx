@@ -82,7 +82,7 @@ export default function Homepage() {
                 A journal for your children — created by texting your thoughts.
               </h1>
               
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white font-light leading-relaxed max-w-2xl mx-auto">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-400 font-light leading-relaxed max-w-2xl mx-auto">
                 Pass down your wisdom, values, and memories to your children — with no time, structure, or effort.
               </p>
               
