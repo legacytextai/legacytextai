@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { BookOpen, Edit3, Settings, Home, Download, ShieldCheck } from "lucide-react";
+import { BookOpen, Edit3, Settings, Home, Download, ShieldCheck, FileText } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { useUserData } from "@/hooks/useUserData";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -80,6 +80,14 @@ export function AppSidebar() {
                     <NavLink to="/admin/export" className={getNavCls}>
                       <ShieldCheck className="w-4 h-4" />
                       {!collapsed && <span>Export All PDFs</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/admin/prompts" className={getNavCls}>
+                      <FileText className="w-4 h-4" />
+                      {!collapsed && <span>Manage Prompts</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

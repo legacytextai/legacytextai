@@ -251,17 +251,29 @@ export type Database = {
       prompts: {
         Row: {
           active: boolean | null
+          batch_date: string | null
+          created_at: string | null
+          hash: string | null
           id: number
+          source_type: string | null
           text: string
         }
         Insert: {
           active?: boolean | null
+          batch_date?: string | null
+          created_at?: string | null
+          hash?: string | null
           id?: number
+          source_type?: string | null
           text: string
         }
         Update: {
           active?: boolean | null
+          batch_date?: string | null
+          created_at?: string | null
+          hash?: string | null
           id?: number
+          source_type?: string | null
           text?: string
         }
         Relationships: []
