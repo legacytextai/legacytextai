@@ -77,14 +77,28 @@ export default function Homepage() {
         {/* Hero Section */}
         <section className="px-4 pt-8 pb-6 md:pt-12 md:pb-10 lg:pt-16 lg:pb-12">
           <div className="container mx-auto max-w-5xl">
-            <div className="text-center space-y-3 md:space-y-4 lg:space-y-5">
+            <div className="text-center space-y-6 md:space-y-8">
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-[1.1] max-w-4xl mx-auto animate-fade-in">
                 A journal for your children — created by texting your thoughts.
               </h1>
               
+              {/* Separator 1 */}
+              <div className="flex items-center justify-center gap-3 py-2">
+                <div className="w-12 h-[1px] bg-white/30"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-white/50"></div>
+                <div className="w-12 h-[1px] bg-white/30"></div>
+              </div>
+              
               <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white font-light leading-relaxed max-w-2xl mx-auto">
                 Pass down your wisdom, values, and memories to your children — with no time, structure, or effort.
               </p>
+              
+              {/* Separator 2 */}
+              <div className="flex items-center justify-center gap-3 py-2">
+                <div className="w-12 h-[1px] bg-white/30"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-white/50"></div>
+                <div className="w-12 h-[1px] bg-white/30"></div>
+              </div>
               
               <p className="text-sm sm:text-base md:text-lg text-white max-w-2xl mx-auto font-bold">No app. No downloads.<br />Just create an account and start texting your thoughts.</p>
               
