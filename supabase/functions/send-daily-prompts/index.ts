@@ -64,6 +64,18 @@ function pickWeightedStable<T extends { key: string; weight: number }>(rows: T[]
   return rows[rows.length - 1];
 }
 
+/** Determine if today is a handwritten prompt day for this user */
+function isHandwrittenDay(userId: string, timezone: string): boolean {
+  const localDateStr = new Date().toLocaleString("en-US", { timeZone: timezone });
+  const localDate = new Date(localDateStr).toISOString().slice(0, 10);
+  const seed = `${userId}-${localDate}`;
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash * 31 + seed.charCodeAt(i)) % 1000;
+  }
+  return hash % 2 === 0; // even = handwritten, odd = AI
+}
+
 /** OpenAI call */
 async function openaiGenerate(input: any) {
   const apiKey = Deno.env.get("OPENAI_API_KEY");
@@ -237,10 +249,30 @@ async function generateNextPrompt(user: any, supabase: any): Promise<string> {
     
     console.log(`Generating prompt for user ${user.id}: archetype=${archetype}, category=${targetCategory}, context=${rotatedContext.length} entries`);
 
+    // Sample one handwritten prompt for stylistic inspiration
+    let inspirationSnippet = "";
+    try {
+      const { data: ref } = await supabase
+        .from("prompts")
+        .select("text")
+        .eq("source_type", "handwritten")
+        .eq("active", true)
+        .order("id")
+        .limit(10); // Get small pool
+      
+      if (ref && ref.length > 0) {
+        const seed = `${user.id}-inspiration-${new Date().toISOString().slice(0, 10)}`;
+        const idx = djb2(seed) % ref.length;
+        inspirationSnippet = `\n\nFor tone reference, here's an example prompt:\n"${ref[idx].text}"`;
+      }
+    } catch (err) {
+      console.error('[Inspiration] Failed to fetch reference prompt:', err);
+    }
+
     const response = await openaiGenerate({
       model: "gpt-4.1-mini-2025-04-14",
       messages: [
-        { role: "system", content: buildSystemMessage(language, archetype, targetCategory) },
+        { role: "system", content: buildSystemMessage(language, archetype, targetCategory) + inspirationSnippet },
         { role: "user", content: buildUserMessage(user, rotatedContext, archetype, targetCategory) }
       ],
       max_tokens: 150
@@ -446,43 +478,110 @@ serve(async (req) => {
       const banned    = (u.banned_topics || []) as string[];
       const children  = (u.children || []) as Array<{ name?: string; age?: number }>;
 
+      // --- HYBRID PROMPT SELECTION ---
+      const tz = u.timezone || "America/Los_Angeles";
+      const useHandwritten = isHandwrittenDay(u.id, tz);
       let promptText = (override || "").trim();
-      let isAI = false; let model: string | null = null; let promptId: number | null = null;
+      let isAI = false;
+      let model: string | null = null;
+      let promptId: number | null = null;
+
+      console.log(`[Hybrid Mode] User ${u.id}: ${useHandwritten ? 'Handwritten' : 'AI'} day`);
 
       if (!promptText) {
-        // Try AI up to 3 attempts with banned-topic + 90-day de-dupe
-        for (let attempt = 0; attempt < 3 && !promptText; attempt++) {
-          try {
-            const text = await generateNextPrompt(u, supabase);
-
-            // banned-topic guard
-            if (containsBanned(text, banned)) continue;
-
-            // 90-day de-dupe by hash
-            const hash = await hashPrompt(text);
-            const since = new Date(Date.now() - 90*24*3600*1000).toISOString();
-            const { data: dup } = await supabase
-              .from("daily_prompts")
-              .select("id")
-              .eq("user_id", u.id)
-              .eq("prompt_hash", hash)
-              .gte("sent_at", since)
-              .limit(1);
-            if (dup && dup.length) continue;
-
-            promptText = text; isAI = true; model = "gpt-4.1-mini-2025-04-14";
-          } catch { /* try again or fall through to fallback */ }
+        // --- HANDWRITTEN DAY ---
+        if (useHandwritten) {
+          const { data: handwrittenPrompts } = await supabase
+            .from("prompts")
+            .select("id, text")
+            .eq("source_type", "handwritten")
+            .eq("active", true)
+            .order("id")
+            .limit(100); // Get pool of prompts
+          
+          if (handwrittenPrompts && handwrittenPrompts.length > 0) {
+            // Pick one using stable randomization
+            const seed = `${u.id}|${day}|handwritten`;
+            const idx = djb2(seed) % handwrittenPrompts.length;
+            const selected = handwrittenPrompts[idx];
+            
+            promptText = selected.text;
+            promptId = selected.id;
+            model = "handwritten";
+            
+            // Translate if needed
+            if (language !== "en") {
+              promptText = await translateIfNeeded(promptText, language);
+            }
+            
+            // Banned topic guard
+            if (containsBanned(promptText, banned)) {
+              console.log(`[Handwritten] Prompt contained banned topic, falling back to AI`);
+              promptText = ""; // Force AI fallback
+            }
+          } else {
+            console.log(`[Handwritten] No handwritten prompts found, falling back to AI`);
+          }
         }
-
-        // Fallback to curated prompt (translate if needed)
+        
+        // --- AI DAY (or Handwritten Fallback) ---
         if (!promptText) {
-          const p = await getFallbackPrompt();
-          if (!p) continue;
-          promptId = p.id as number;
-          const maybeTranslated = await translateIfNeeded(p.text, language);
-          // extra banned guard on translated text too
-          if (containsBanned(maybeTranslated, banned)) continue;
-          promptText = maybeTranslated;
+          for (let attempt = 0; attempt < 3 && !promptText; attempt++) {
+            try {
+              const text = await generateNextPrompt(u, supabase);
+              
+              // Banned-topic guard
+              if (containsBanned(text, banned)) continue;
+              
+              // 90-day de-dupe by hash
+              const hash = await hashPrompt(text);
+              const since = new Date(Date.now() - 90*24*3600*1000).toISOString();
+              const { data: dup } = await supabase
+                .from("daily_prompts")
+                .select("id")
+                .eq("user_id", u.id)
+                .eq("prompt_hash", hash)
+                .gte("sent_at", since)
+                .limit(1);
+              if (dup && dup.length) continue;
+              
+              promptText = text;
+              isAI = true;
+              model = "gpt-4.1-mini-2025-04-14";
+            } catch (err) {
+              console.error(`[AI Generation] Attempt ${attempt + 1} failed:`, err);
+            }
+          }
+          
+          // --- FINAL FALLBACK: Opposite Type ---
+          if (!promptText) {
+            if (useHandwritten) {
+              // Was handwritten day, AI failed, skip
+              console.log(`[Fallback] Both handwritten and AI failed for user ${u.id}`);
+              continue;
+            } else {
+              // Was AI day, try handwritten as last resort
+              const { data: fallbackPrompt } = await supabase
+                .from("prompts")
+                .select("id, text")
+                .eq("source_type", "handwritten")
+                .eq("active", true)
+                .limit(1)
+                .single();
+              
+              if (fallbackPrompt) {
+                promptText = fallbackPrompt.text;
+                promptId = fallbackPrompt.id;
+                model = "handwritten";
+                if (language !== "en") {
+                  promptText = await translateIfNeeded(promptText, language);
+                }
+              } else {
+                console.log(`[Fallback] No prompts available for user ${u.id}`);
+                continue;
+              }
+            }
+          }
         }
       }
 
@@ -516,7 +615,7 @@ Reply STOP to unsubscribe.`;
         is_ai: isAI || Boolean(override),
         model,
         is_forced: force,
-        source: toFilter ? "manual" : "schedule",
+        source: toFilter ? "manual" : (isAI ? "ai" : "handwritten"),
       });
 
       sent++;
