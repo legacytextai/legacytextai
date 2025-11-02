@@ -208,13 +208,13 @@ export function ExportDialog({
       <Card className="relative">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
+            <FileText className="h-5 w-5 text-black" />
             Basic PDF
           </CardTitle>
           <CardDescription>
             Simple, clean format perfect for sharing
           </CardDescription>
-          <div className="text-2xl font-bold text-primary">Free</div>
+          <div className="text-2xl font-bold text-black">Free</div>
         </CardHeader>
         <CardContent className="space-y-4">
           <ul className="text-sm space-y-1">
@@ -223,7 +223,7 @@ export function ExportDialog({
             <li>• Chronological order</li>
             <li>• Simple formatting</li>
           </ul>
-          <Button onClick={handleFreeExport} className="w-full" disabled={isGenerating || entries.length === 0}>
+          <Button onClick={handleFreeExport} className="w-full bg-black hover:bg-black/90 text-white" disabled={isGenerating || entries.length === 0}>
             <Download className="h-4 w-4 mr-2" />
             {isGenerating ? 'Generating...' : 'Download PDF'}
           </Button>
@@ -231,18 +231,18 @@ export function ExportDialog({
       </Card>
 
       {/* Premium Formatted PDF */}
-      <Card className="relative border-primary">
-        <Badge className="absolute -top-2 left-4 bg-primary text-primary-foreground">
+      <Card className="relative border-black">
+        <Badge className="absolute -top-2 left-4 bg-black text-white">
           Recommended
         </Badge>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
+            <BookOpen className="h-5 w-5 text-black" />
             Premium E-Book PDF
           </CardTitle>
           <CardDescription>Elegant minimal theme with enhanced design</CardDescription>
           <div>
-            <div className="text-2xl font-bold text-primary line-through">$9.99</div>
+            <div className="text-2xl font-bold text-black line-through">$9.99</div>
             <p className="text-lg font-semibold text-accent">Free for Early Access Users</p>
           </div>
         </CardHeader>
@@ -266,7 +266,7 @@ export function ExportDialog({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
+            <BookOpen className="h-5 w-5 text-black" />
             Leatherbound Journal
           </CardTitle>
           <CardDescription>
@@ -295,10 +295,10 @@ export function ExportDialog({
         <p className="text-muted-foreground">Select the design theme for your premium journal</p>
       </div>
       
-      <Card className="border-primary bg-primary/5">
+      <Card className="border-black bg-black/5">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
+            <Sparkles className="h-5 w-5 text-black" />
             Minimal Theme
           </CardTitle>
           <CardDescription>
@@ -361,7 +361,7 @@ export function ExportDialog({
       <Card>
         <CardContent className="pt-6">
           <div className="bg-gray-50 p-6 rounded-lg text-center">
-            <BookOpen className="h-12 w-12 mx-auto mb-4 text-primary" />
+            <BookOpen className="h-12 w-12 mx-auto mb-4 text-black" />
             <h4 className="font-semibold mb-2">
               {userData?.name ? `${userData.name}'s Legacy Journal` : 'My Legacy Journal'}
             </h4>
