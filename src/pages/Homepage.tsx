@@ -108,7 +108,7 @@ export default function Homepage() {
               {/* Right Column: Hero Video */}
               <div className="mt-6 lg:mt-0">
                 <div className="rounded-xl md:rounded-2xl border border-white/10 overflow-hidden w-fit mx-auto">
-                  <video className="h-auto" autoPlay muted loop playsInline>
+                  <video className="max-w-[280px] h-auto" autoPlay muted loop playsInline>
                     <source src="/assets/videos/automatic.mp4" type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
