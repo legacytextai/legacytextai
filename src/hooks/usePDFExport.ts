@@ -13,7 +13,13 @@ export const usePDFExport = () => {
 
     setIsGenerating(true)
     try {
-      const pdfBlob = await generateBasicPDF(options)
+      // Reverse entries to chronological order (oldest → newest) for PDF export
+      const chronologicalEntries = [...options.entries].reverse()
+      
+      const pdfBlob = await generateBasicPDF({
+        ...options,
+        entries: chronologicalEntries
+      })
       const filename = `legacy-journal-${new Date().toISOString().split('T')[0]}.pdf`
       downloadPDF(pdfBlob, filename)
       
