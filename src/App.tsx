@@ -22,6 +22,7 @@ import QuickVerificationTest from "./pages/QuickVerificationTest";
 import FixUser from "./pages/FixUser";
 import AdminExport from "./pages/AdminExport";
 import AdminPrompts from "./pages/AdminPrompts";
+import AdminPromptsView from "./pages/AdminPromptsView";
 import NotFound from "./pages/NotFound";
 import { AuthGuard } from "./components/AuthGuard";
 
@@ -51,6 +52,7 @@ const App = () => (
           <Route path="/fix-user" element={<FixUser />} />
           <Route path="/admin/export" element={<AdminExport />} />
           <Route path="/admin/prompts" element={<AdminPrompts />} />
+          <Route path="/admin/prompts/view" element={<AdminPromptsView />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
