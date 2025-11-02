@@ -166,9 +166,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // Bootstrap after state change (defer to avoid deadlocks)
         if (session && event === 'SIGNED_IN') {
-          // Don't auto-redirect from auth callback page or test pages
+          // Don't auto-redirect from auth callback page, test pages, or admin pages
           const isTestPage = window.location.pathname.startsWith('/test/');
-          if (window.location.pathname !== '/auth/callback' && !isTestPage && !bootstrapInProgress) {
+          const isAdminPage = window.location.pathname.startsWith('/admin/');
+          if (window.location.pathname !== '/auth/callback' && !isTestPage && !isAdminPage && !bootstrapInProgress) {
             setBootstrapInProgress(true);
             setTimeout(() => {
               if (mounted) {
@@ -193,7 +194,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Bootstrap on initial load if session exists
       const isTestPage = window.location.pathname.startsWith('/test/');
-      if (session && window.location.pathname !== '/auth/callback' && !isTestPage && !bootstrapInProgress) {
+      const isAdminPage = window.location.pathname.startsWith('/admin/');
+      if (session && window.location.pathname !== '/auth/callback' && !isTestPage && !isAdminPage && !bootstrapInProgress) {
         setBootstrapInProgress(true);
         setTimeout(() => {
           if (mounted) {
