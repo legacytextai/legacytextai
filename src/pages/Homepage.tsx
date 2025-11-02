@@ -11,6 +11,7 @@ import { ChevronDown, Heart, MessageCircle, Star, MessageSquare, Edit3, Sparkles
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
 export default function Homepage() {
   const {
     user
@@ -62,6 +63,7 @@ export default function Homepage() {
     }
     setLoading(false);
   };
+
   return <Layout showSidebar={false}>
       {/* Chronicle-Inspired Black Theme Wrapper */}
       <div className="min-h-screen bg-black text-white relative overflow-hidden">
@@ -88,7 +90,7 @@ export default function Homepage() {
                   Pass down your wisdom, values, and memories to your children — with no time, structure, or effort.
                 </p>
                 
-                <p className="text-sm sm:text-base text-white">No app. No download. Just create an account. Text your thoughts. Get a journal your kids keep forever. </p>
+                <p className="text-sm sm:text-base text-white"><span className="font-bold">No app. No download.</span> Just create an account. Text your thoughts. Get a journal your kids keep forever. </p>
                 
                 {/* CTA Buttons */}
                 <div className="flex flex-row gap-3 pt-2 md:pt-3 justify-center lg:justify-start">
