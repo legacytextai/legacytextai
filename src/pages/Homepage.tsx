@@ -84,7 +84,7 @@ export default function Homepage() {
               
               
               
-              <p className="text-sm sm:text-base md:text-lg text-white max-w-2xl mx-auto"><span className="font-bold">No app. No downloads.</span><br /><span className="font-normal">1. Create an account.<br />2. Start texting your thoughts.<br />3. Get a journal your kids keep forever.</span></p>
+              <p className="text-sm sm:text-base md:text-lg text-white max-w-2xl mx-auto text-center"><span className="font-bold">No app. No downloads.</span><br /><span className="font-light text-left block">1. Create an account.<br />2. Start texting your thoughts.<br />3. Get a journal your kids keep forever.</span></p>
               
               {/* CTA Buttons */}
               <div className="flex flex-row gap-2 pt-3 md:pt-4 lg:pt-6 justify-center">
