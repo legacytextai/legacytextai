@@ -26,6 +26,9 @@ Many dads want to pass on wisdom but struggle to find time or the right medium. 
 ### 🧩 Core Features
 
 - SMS-based journaling with AI prompt system  
+  - **Timezone-aware scheduling**: Prompts sent at 7 PM on weekdays, 8 AM on weekends (user's local time)
+  - **One prompt per local day**: Prevents duplicate sends across timezones
+  - **Automatic DST handling**: System adapts to daylight saving transitions
 - Real-time log of entries in a clean web dashboard  
 - AI organizes text: cleans tone, tags themes  
 - Live preview of your legacy journal  
@@ -34,7 +37,7 @@ Many dads want to pass on wisdom but struggle to find time or the right medium. 
   - Premium formatted PDF ($9.99)  
   - Leatherbound keepsake ($199)  
 - WYSIWYG editor for refining entries  
-- Messaging preferences: frequency, phone number, etc.  
+- Messaging preferences: phone number, timezone, etc.
 
 ---
 
@@ -88,9 +91,10 @@ Many dads want to pass on wisdom but struggle to find time or the right medium. 
 
 #### ✅ MVP
 - SMS journaling loop (prompts + replies)  
+- Timezone-aware prompt scheduling (7 PM weekdays, 8 AM weekends in user's local time)
 - Dashboard entry log  
 - AI-powered entry cleanup + categorization  
-- Basic PDF export (free)  
+- Basic PDF export (free)
 
 #### 🔜 V1
 - Premium + physical export options  

@@ -523,14 +523,29 @@ export const generateBasicPDF = async (entries: JournalEntry[], dedication: stri
 
 ### ✅ Task 8: Prompt Scheduling System
 **Priority**: MEDIUM | **Estimated**: 3 days
-**Status**: COMPLETED ✅
+**Status**: COMPLETED ✅ (Enhanced with timezone-aware scheduling)
 
 #### Subtasks:
-- [ ] 8.1 Create prompts database table
-- [ ] 8.2 Implement prompt scheduler (cron job)
-- [ ] 8.3 Add user prompt preferences
-- [ ] 8.4 Create variety in prompt questions
-- [ ] 8.5 Track prompt response rates
+- [x] 8.1 Create prompts database table
+- [x] 8.2 Implement prompt scheduler (GitHub Actions + Edge Function)
+- [x] 8.3 Add timezone-aware scheduling (7 PM weekdays, 8 AM weekends local time)
+- [x] 8.4 Implement local-day guard mechanism
+- [x] 8.5 Create variety in prompt questions (AI + curated fallback)
+- [x] 8.6 Track prompt response rates (via daily_prompts table)
+
+#### Implementation Details:
+**Scheduling System**:
+- **GitHub Actions**: Runs hourly (`0 * * * *` cron)
+- **Edge Function**: `supabase/functions/send-daily-prompts/index.ts`
+- **Timing**: 7 PM on weekdays (Mon-Fri), 8 AM on weekends (Sat-Sun) in user's local timezone
+- **Guard**: Prevents duplicate sends using local calendar day boundary (not UTC)
+- **DST**: Automatically handled via JavaScript's timezone support
+
+**Prompt Generation**:
+- **Primary**: AI-generated prompts via OpenAI (gpt-4.1-mini)
+- **Fallback**: Curated prompts from `prompts` table
+- **Quality Control**: Banned topic filtering, 90-day de-duplication
+- **Tone Selection**: Weighted stable selection from `tones` table
 
 #### Database Schema:
 ```sql

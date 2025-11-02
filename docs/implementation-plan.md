@@ -20,9 +20,12 @@
    - Create phone number and webhook endpoint
    - Parse incoming SMS → save raw entry
 
-5. **Create Prompt Scheduler**
-   - Cron job or Edge Function
-   - Sends prompts based on user preference (daily, weekly, random)
+5. **Create Prompt Scheduler** ✅ COMPLETED
+   - **Timezone-aware hourly GitHub Action** (runs every hour at :00 UTC)
+   - Edge Function evaluates each user's local time
+   - **Sends prompts at 7 PM on weekdays, 8 AM on weekends** (user's local timezone)
+   - **One prompt per local calendar day** with guard mechanism
+   - Automatic DST handling via JavaScript's timezone support
 
 6. **AI Journal Processor**
    - Clean raw text (grammar, formatting)
