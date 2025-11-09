@@ -228,9 +228,7 @@ export default function Homepage() {
               boxShadow: '0 0 40px rgba(255, 255, 255, 0.05)'
             }}>
               {/* Avatar */}
-              <div className="w-16 h-16 bg-white/10 border border-white/20 rounded-full flex items-center justify-center mx-auto mb-8">
-                <User className="w-8 h-8 text-white" />
-              </div>
+              
               
               {/* Quote */}
               <p className="text-xl md:text-2xl text-gray-200 text-center mb-6 leading-relaxed">"As a father, I was overwhelmed by the fear that one day I wouldn't be around to guide my children through life. LegacyText was built to give fathers a way to show up, long after we're gone."</p>
