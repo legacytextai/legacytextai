@@ -11,7 +11,6 @@ import { ChevronDown, Heart, MessageCircle, Star, MessageSquare, Edit3, Sparkles
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
 export default function Homepage() {
   const {
     user
@@ -63,7 +62,6 @@ export default function Homepage() {
     }
     setLoading(false);
   };
-
   return <Layout showSidebar={false}>
       {/* Chronicle-Inspired Black Theme Wrapper */}
       <div className="min-h-screen bg-black text-white relative overflow-hidden">
@@ -82,9 +80,7 @@ export default function Homepage() {
             <div className="flex flex-col lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
               {/* Left Column: Text Content */}
               <div className="text-center lg:text-left space-y-4 md:space-y-5 lg:space-y-6">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-[1.1] animate-fade-in">
-                  A journal for your children — created by texting your thoughts.
-                </h1>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-[1.1] animate-fade-in">A book for your children — written by texting your thoughts.</h1>
                 
                 <p className="text-base sm:text-lg md:text-xl text-white leading-relaxed">
                   Pass down your wisdom, values, and memories to your children — with no time, structure, or effort.
