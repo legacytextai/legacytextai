@@ -82,7 +82,7 @@ export default function Homepage() {
               <div className="text-center lg:text-left space-y-4 md:space-y-5 lg:space-y-6">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-[1.1] animate-fade-in">A book for your children — written by texting your thoughts.</h1>
                 
-                <p className="text-base sm:text-lg md:text-xl text-white leading-relaxed font-thin">LegacyText is an app that sends daily prompts by text. 
+                <p className="text-base sm:text-lg md:text-xl text-white leading-relaxed font-thin">LegacyText is an app that sends daily prompts by text.  
 Your replies become a book your kids can keep forever.</p>
                 
                 <p className="text-sm sm:text-base text-white"><span className="font-bold">No app. No download.</span>No download. Just create an account. Text your thoughts. Pass down your legacy, one message at a time.</p>
