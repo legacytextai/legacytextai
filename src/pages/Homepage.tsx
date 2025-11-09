@@ -87,7 +87,7 @@ export default function Homepage() {
                   Your replies become a book your kids can keep forever.
                 </p>
                 
-                <p className="text-sm sm:text-base text-white"><span className="font-bold">No app. No download.</span>No download. Just create an account. Text your thoughts. Pass down your legacy, one message at a time.</p>
+                <p className="text-sm sm:text-base text-white"><span className="font-bold">No download.</span> Just create an account. Text your thoughts. Pass down your legacy, one message at a time.</p>
                 
                 {/* CTA Buttons */}
                 <div className="flex flex-row gap-3 pt-2 md:pt-3 justify-center lg:justify-start">
