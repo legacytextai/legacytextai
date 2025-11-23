@@ -32,6 +32,7 @@ interface UserAppData {
   status: string;
   preferred_language: string;
   timezone: string;
+  prompt_frequency: string;
   interests: string[] | null;
   banned_topics: string[] | null;
   children: any;
@@ -44,6 +45,7 @@ const settingsSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),
   preferred_language: z.string().min(1, "Language is required"),
   timezone: z.string().min(1, "Timezone is required"),
+  prompt_frequency: z.enum(['daily', 'weekdays', 'weekends', '3x', 'paused']).default('daily'),
   interests: z.array(z.string()).default([]),
   banned_topics: z.array(z.string()).default([]),
   children: z.array(z.object({
@@ -87,6 +89,39 @@ const commonTimezones = [
   'Australia/Sydney'
 ];
 
+const promptFrequencyOptions = [
+  {
+    value: 'daily',
+    label: 'Every Day',
+    description: 'Receive a prompt every single day',
+    icon: '📅'
+  },
+  {
+    value: 'weekdays',
+    label: 'Weekdays Only',
+    description: 'Monday through Friday',
+    icon: '💼'
+  },
+  {
+    value: 'weekends',
+    label: 'Weekends Only',
+    description: 'Saturday and Sunday',
+    icon: '🏖️'
+  },
+  {
+    value: '3x',
+    label: '3x Per Week',
+    description: 'Monday, Wednesday, Friday',
+    icon: '📊'
+  },
+  {
+    value: 'paused',
+    label: 'Pause Prompts',
+    description: 'Take a break from prompts',
+    icon: '⏸️'
+  }
+];
+
 const Settings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -112,6 +147,7 @@ const Settings = () => {
       name: '',
       preferred_language: 'en',
       timezone: 'America/Los_Angeles',
+      prompt_frequency: 'daily',
       interests: [],
       banned_topics: [],
       children: []
@@ -249,6 +285,7 @@ const Settings = () => {
           name: data.name || "",
           preferred_language: data.preferred_language || "en",
           timezone: data.timezone || "America/Los_Angeles",
+          prompt_frequency: (data.prompt_frequency || "daily") as 'daily' | 'weekdays' | 'weekends' | '3x' | 'paused',
           interests: data.interests || [],
           banned_topics: data.banned_topics || [],
           children: parsedChildren
@@ -273,6 +310,7 @@ const Settings = () => {
           name: data.name,
           preferred_language: data.preferred_language,
           timezone: data.timezone,
+          prompt_frequency: data.prompt_frequency,
           interests: data.interests,
           banned_topics: data.banned_topics,
           children: data.children
@@ -292,6 +330,34 @@ const Settings = () => {
       toast.error('Failed to save settings');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleFrequencyChange = async (newFrequency: string) => {
+    if (!userData) return;
+
+    try {
+      const { error } = await supabase
+        .from('users_app')
+        .update({ prompt_frequency: newFrequency })
+        .eq('id', userData.id);
+
+      if (error) {
+        console.error('Error updating frequency:', error);
+        toast.error('Failed to update prompt schedule');
+        return;
+      }
+
+      toast.success('✅ Prompt schedule updated', {
+        description: `You'll receive prompts: ${
+          promptFrequencyOptions.find(o => o.value === newFrequency)?.label
+        }`
+      });
+
+      await loadUserData();
+    } catch (error) {
+      console.error('Error updating frequency:', error);
+      toast.error('Failed to update prompt schedule');
     }
   };
 
@@ -678,6 +744,56 @@ const Settings = () => {
               </CardContent>
             </Card>
           )}
+
+          {/* Prompt Frequency */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-black">
+                <Clock className="w-5 h-5" />
+                Prompt Frequency
+              </CardTitle>
+              <CardDescription>
+                Choose how often you want to receive journaling prompts
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                {promptFrequencyOptions.map((option) => (
+                  <label
+                    key={option.value}
+                    className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all hover:scale-[1.02] hover:shadow-sm ${
+                      form.watch('prompt_frequency') === option.value
+                        ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      value={option.value}
+                      {...form.register('prompt_frequency')}
+                      onChange={async (e) => {
+                        const value = e.target.value as 'daily' | 'weekdays' | 'weekends' | '3x' | 'paused';
+                        form.setValue('prompt_frequency', value);
+                        await handleFrequencyChange(value);
+                      }}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{option.icon}</span>
+                        <span className="font-medium text-black" style={{ letterSpacing: '-0.06em' }}>
+                          {option.label}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {option.description}
+                      </p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Change Phone Number (for users with verified phones) */}
           {!showPhoneVerification && (
