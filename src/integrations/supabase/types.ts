@@ -367,6 +367,7 @@ export type Database = {
           name: string | null
           phone_e164: string | null
           preferred_language: string | null
+          prompt_frequency: string | null
           status: string | null
           timezone: string | null
           tone: string | null
@@ -384,6 +385,7 @@ export type Database = {
           name?: string | null
           phone_e164?: string | null
           preferred_language?: string | null
+          prompt_frequency?: string | null
           status?: string | null
           timezone?: string | null
           tone?: string | null
@@ -401,6 +403,7 @@ export type Database = {
           name?: string | null
           phone_e164?: string | null
           preferred_language?: string | null
+          prompt_frequency?: string | null
           status?: string | null
           timezone?: string | null
           tone?: string | null
@@ -469,6 +472,7 @@ export type Database = {
           name: string | null
           phone_e164: string | null
           preferred_language: string | null
+          prompt_frequency: string | null
           status: string | null
           timezone: string | null
           tone: string | null

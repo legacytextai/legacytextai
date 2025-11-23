@@ -356,19 +356,20 @@ serve(async (req) => {
     children: Array<{ name?: string; age?: number }> | null;
     status?: string;
     timezone?: string | null;
+    prompt_frequency?: string;
   };
   let users: U[] = [];
 
   if (toFilter) {
     const { data } = await supabase
       .from("users_app")
-      .select("id, phone_e164, name, preferred_language, tone, interests, banned_topics, children, status, timezone")
+      .select("id, phone_e164, name, preferred_language, tone, interests, banned_topics, children, status, timezone, prompt_frequency")
       .eq("phone_e164", toFilter).limit(1);
     users = ((data ?? []) as U[]).filter(u => (u as any).status === "active");
   } else {
     const { data } = await supabase
       .from("users_app")
-      .select("id, phone_e164, name, preferred_language, tone, interests, banned_topics, children, timezone")
+      .select("id, phone_e164, name, preferred_language, tone, interests, banned_topics, children, timezone, prompt_frequency")
       .eq("status", "active");
     users = (data ?? []) as U[];
   }
@@ -427,6 +428,69 @@ serve(async (req) => {
     }
   }
 
+  /**
+   * Determines if user should receive prompt based on their frequency preference
+   * and the current day of week in their timezone.
+   */
+  function shouldSendBasedOnFrequency(
+    user: U, 
+    localNow: Date
+  ): { allow: boolean; reason: string } {
+    
+    const frequency = user.prompt_frequency || 'daily';
+    const dayOfWeek = localNow.getDay(); // 0=Sunday, 6=Saturday
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const currentDay = dayNames[dayOfWeek];
+
+    switch (frequency) {
+      case 'paused':
+        return { 
+          allow: false, 
+          reason: 'User has paused prompts' 
+        };
+
+      case 'daily':
+        return { 
+          allow: true, 
+          reason: 'Daily frequency - send every day' 
+        };
+
+      case 'weekdays':
+        const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
+        return {
+          allow: isWeekday,
+          reason: isWeekday 
+            ? `Weekday (${currentDay}) - send` 
+            : `Weekend (${currentDay}) - skip`
+        };
+
+      case 'weekends':
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        return {
+          allow: isWeekend,
+          reason: isWeekend 
+            ? `Weekend (${currentDay}) - send` 
+            : `Weekday (${currentDay}) - skip`
+        };
+
+      case '3x':
+        const is3xDay = dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5; // Mon/Wed/Fri
+        return {
+          allow: is3xDay,
+          reason: is3xDay 
+            ? `3x day (${currentDay}) - send` 
+            : `Not a 3x day (${currentDay}) - skip`
+        };
+
+      default:
+        console.warn(`Unknown frequency: ${frequency}, defaulting to daily`);
+        return { 
+          allow: true, 
+          reason: 'Unknown frequency - defaulting to daily' 
+        };
+    }
+  }
+
   // 2) Curated fallback helper
   async function getFallbackPrompt() {
     const { data: p } = await supabase
@@ -448,16 +512,29 @@ serve(async (req) => {
       `Local: ${timingCheck.localTime}`
     );
     
-    if (!timingCheck.send) {
+    if (!force && !timingCheck.send) {
       continue; // Skip this user this hour
+    }
+
+    // Frequency check: skip if user's frequency doesn't match today
+    const tz = u.timezone || "America/Los_Angeles";
+    const localNowStr = new Date().toLocaleString("en-US", { timeZone: tz });
+    const localNow = new Date(localNowStr);
+    
+    const frequencyCheck = shouldSendBasedOnFrequency(u, localNow);
+    console.log(
+      `[Frequency Check] User ${u.id} (${u.name || 'unnamed'}) ` +
+      `Frequency: ${u.prompt_frequency || 'daily'} | ` +
+      `${frequencyCheck.reason}`
+    );
+    
+    if (!force && !frequencyCheck.allow) {
+      continue; // Skip - frequency doesn't match today
     }
 
     try {
        // One-per-day guard: use LOCAL day boundary (not UTC)
        if (!force) {
-         const tz = u.timezone || "America/Los_Angeles";
-         const localNowStr = new Date().toLocaleString("en-US", { timeZone: tz });
-         const localNow = new Date(localNowStr);
          localNow.setHours(0, 0, 0, 0); // Start of local day
          const startLocalISO = localNow.toISOString();
          
