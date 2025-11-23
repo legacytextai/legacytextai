@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { BookOpen, Edit3, Settings, Home, Download, ShieldCheck, FileText, Eye } from "lucide-react";
+import { BookOpen, Edit3, Settings, Home, Download, ShieldCheck, FileText, Eye, MessageSquare } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { useUserData } from "@/hooks/useUserData";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -96,6 +96,14 @@ export function AppSidebar() {
                     <NavLink to="/admin/prompts/view" className={getNavCls}>
                       <Eye className="w-4 h-4" />
                       {!collapsed && <span>View Prompts</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/admin/blast" className={getNavCls}>
+                      <MessageSquare className="w-4 h-4" />
+                      {!collapsed && <span>SMS Blast</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
